@@ -24,15 +24,6 @@ import static com.unison.practicas.desarrollo.library.jooq.Tables.*;
 @Service
 public class UserService {
 
-    private static final Set<String> ALLOWED_SORTS = Set.of(
-            "firstName",
-            "lastName",
-            "email",
-            "phoneNumber",
-            "registrationDate",
-            "role"
-    );
-
     private static final List<SortRequest> DEFAULT_SORTS = List.of(
             new SortRequest("lastName", SortingOrder.ASC),
             new SortRequest("firstName", SortingOrder.ASC)
@@ -58,12 +49,6 @@ public class UserService {
                 )
         ).as("roles_json");
 
-        // Roles names concatenation
-        Field<String> roleNamesConcat = DSL.groupConcat(APP_ROLE.NAME)
-                .orderBy(APP_ROLE.NAME.asc())
-                .separator(",")
-                .as("roles_concat");
-
         // Base query
         var base = dsl.select(
                         APP_USER.ID,
@@ -73,7 +58,7 @@ public class UserService {
                         APP_USER.PHONE_NUMBER,
                         APP_USER.REGISTRATION_DATE,
                         rolesJson,
-                        roleNamesConcat
+                        rolesNamesConcatenation()
                 )
                 .from(APP_USER)
                 .join(USER_ROLE).on(APP_USER.ID.eq(USER_ROLE.USER_ID))
@@ -111,26 +96,16 @@ public class UserService {
         );
 
         // Count query (total items)
-        long totalItems = dsl.selectCount()
+        Long totalItemsNullable = dsl.selectCount()
                 .from(base.asTable("count_sub"))
                 .fetchOne(0, long.class);
 
+        long totalItems = totalItemsNullable == null ? 0 : totalItemsNullable;
+
         // Sorting
-        List<SortRequest> sorts = CollectionUtils.isEmpty(paginationRequest.sorts())
-                ? DEFAULT_SORTS
-                : paginationRequest.sorts();
+        List<SortRequest> sorts = parseSorts(paginationRequest.sort());
 
-        for (SortRequest sortReq : sorts) {
-            if (!ALLOWED_SORTS.contains(sortReq.sort())) continue;
-
-            if ("role".equals(sortReq.sort())) {
-                base.orderBy(SortingOrder.DESC.equals(sortReq.order())
-                        ? roleNamesConcat.desc()
-                        : roleNamesConcat.asc());
-            } else {
-                base.orderBy(orderField(sortReq));
-            }
-        }
+        sorts.forEach(sort -> base.orderBy(orderField(sort)));
 
         // Pagination
         int offset = paginationRequest.page() * paginationRequest.size();
@@ -161,6 +136,15 @@ public class UserService {
                 .build();
     }
 
+    private List<SortRequest> parseSorts(List<String> sorts) {
+        if (CollectionUtils.isEmpty(sorts)) {
+            return new ArrayList<>();
+        }
+        return sorts.stream()
+                .map(SortRequest::parse)
+                .toList();
+    }
+
     private List<RoleResponse> parseRolesJson(String rolesJson) {
         try {
             List<Map<String, Object>> rolesList = objectMapper.readValue(
@@ -186,15 +170,23 @@ public class UserService {
         );
     }
 
-    private org.jooq.SortField<?> orderField(SortRequest sortReq) {
+    private SortField<?> orderField(SortRequest sortReq) {
         Field<?> field = switch (sortReq.sort()) {
             case "firstName" -> APP_USER.FIRST_NAME;
             case "email" -> APP_USER.EMAIL;
             case "phoneNumber" -> APP_USER.PHONE_NUMBER;
             case "registrationDate" -> APP_USER.REGISTRATION_DATE;
+            case "role" -> rolesNamesConcatenation();
             default -> APP_USER.LAST_NAME;
         };
         return SortingOrder.DESC.equals(sortReq.order()) ? field.desc() : field.asc();
+    }
+
+    private Field<String> rolesNamesConcatenation() {
+        return DSL.groupConcat(APP_ROLE.NAME)
+                .orderBy(APP_ROLE.NAME.asc())
+                .separator(",")
+                .as("roles_concat");
     }
 
     private String formatInvertedName(String firstName, String lastName) {
