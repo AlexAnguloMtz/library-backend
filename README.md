@@ -17,6 +17,7 @@ La API permite gestionar usuarios, libros, préstamos y otras funcionalidades t�
 - **JPA (Java Persistence API)** – para casos de uso de escritura y edición con reglas de negocio y entidades.
 - **jOOQ** – para consultas complejas y flexibles, cercanas a SQL nativo.
 - **PostgreSQL**
+- **Lombok**
 
 ---
 
