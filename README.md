@@ -40,5 +40,4 @@ Esto generará las clases JOOQ a partir del esquema de la base de datos.
 SPRING_PROFILES_ACTIVE=dev
 ```
 
-> Esto asegura que la aplicación use la configuración de desarrollo (`application-dev.yml`).
-
+> Esto asegura que la aplicación use la configuración de desarrollo
