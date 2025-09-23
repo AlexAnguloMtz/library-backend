@@ -1,0 +1,461 @@
+[
+  {
+    "author": {
+      "firstName": "Isabel",
+      "lastName": "Allende"
+    },
+    "books": [
+      {
+        "title": "La casa de los espíritus",
+        "publishedYear": 1982,
+        "categories": ["Literatura Contemporánea", "Novela Romántica", "Cultura"]
+      },
+      {
+        "title": "Eva Luna",
+        "publishedYear": 1987,
+        "categories": ["Literatura Contemporánea", "Novela Romántica"]
+      },
+      {
+        "title": "Paula",
+        "publishedYear": 1994,
+        "categories": ["Biografía", "Literatura Contemporánea"]
+      }
+    ]
+  },
+  {
+    "author": {
+      "firstName": "Maya",
+      "lastName": "Angelou"
+    },
+    "books": [
+      {
+        "title": "I Know Why the Caged Bird Sings",
+        "publishedYear": 1969,
+        "categories": ["Biografía", "Cultura", "Literatura Contemporánea"]
+      },
+      {
+        "title": "Gather Together in My Name",
+        "publishedYear": 1974,
+        "categories": ["Biografía", "Cultura"]
+      }
+    ]
+  },
+  {
+    "author": {
+      "firstName": "Jane",
+      "lastName": "Austen"
+    },
+    "books": [
+      {
+        "title": "Pride and Prejudice",
+        "publishedYear": 1813,
+        "categories": ["Literatura Clásica", "Novela Romántica"]
+      },
+      {
+        "title": "Sense and Sensibility",
+        "publishedYear": 1811,
+        "categories": ["Literatura Clásica", "Novela Romántica"]
+      },
+      {
+        "title": "Emma",
+        "publishedYear": 1815,
+        "categories": ["Literatura Clásica", "Novela Romántica"]
+      }
+    ]
+  },
+  {
+    "author": {
+      "firstName": "Margaret",
+      "lastName": "Atwood"
+    },
+    "books": [
+      {
+        "title": "The Handmaid's Tale",
+        "publishedYear": 1985,
+        "categories": ["Ciencia Ficción", "Literatura Contemporánea", "Política"]
+      },
+      {
+        "title": "Oryx and Crake",
+        "publishedYear": 2003,
+        "categories": ["Ciencia Ficción", "Ecología", "Literatura Contemporánea"]
+      },
+      {
+        "title": "The Year of the Flood",
+        "publishedYear": 2009,
+        "categories": ["Ciencia Ficción", "Ecología"]
+      }
+    ]
+  },
+    {
+      "author": {
+        "firstName": "Jorge Luis",
+        "lastName": "Borges"
+      },
+      "books": [
+        {
+          "title": "Ficciones",
+          "publishedYear": 1944,
+          "categories": ["Literatura Contemporánea", "Cuento", "Filosofía"]
+        },
+        {
+          "title": "El Aleph",
+          "publishedYear": 1949,
+          "categories": ["Literatura Contemporánea", "Cuento", "Cultura"]
+        },
+        {
+          "title": "Historia de la eternidad",
+          "publishedYear": 1936,
+          "categories": ["Filosofía", "Cultura"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Charlotte",
+        "lastName": "Bronte"
+      },
+      "books": [
+        {
+          "title": "Jane Eyre",
+          "publishedYear": 1847,
+          "categories": ["Literatura Clásica", "Novela Romántica"]
+        },
+        {
+          "title": "Shirley",
+          "publishedYear": 1849,
+          "categories": ["Literatura Clásica", "Novela Romántica"]
+        },
+        {
+          "title": "Villette",
+          "publishedYear": 1853,
+          "categories": ["Literatura Clásica", "Novela Romántica"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Ray",
+        "lastName": "Bradbury"
+      },
+      "books": [
+        {
+          "title": "Fahrenheit 451",
+          "publishedYear": 1953,
+          "categories": ["Ciencia Ficción", "Literatura Contemporánea", "Política"]
+        },
+        {
+          "title": "The Martian Chronicles",
+          "publishedYear": 1950,
+          "categories": ["Ciencia Ficción", "Astronomía", "Cultura"]
+        },
+        {
+          "title": "Something Wicked This Way Comes",
+          "publishedYear": 1962,
+          "categories": ["Aventura", "Fantasía", "Literatura Contemporánea"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Pearl S.",
+        "lastName": "Buck"
+      },
+      "books": [
+        {
+          "title": "The Good Earth",
+          "publishedYear": 1931,
+          "categories": ["Literatura Contemporánea", "Cultura", "Historia"]
+        },
+        {
+          "title": "Sons",
+          "publishedYear": 1932,
+          "categories": ["Literatura Contemporánea", "Historia"]
+        },
+        {
+          "title": "A House Divided",
+          "publishedYear": 1935,
+          "categories": ["Literatura Contemporánea", "Historia", "Cultura"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Agatha",
+        "lastName": "Christie"
+      },
+      "books": [
+        {
+          "title": "Murder on the Orient Express",
+          "publishedYear": 1934,
+          "categories": ["Novela Negra", "Criminología", "Literatura Contemporánea"]
+        },
+        {
+          "title": "And Then There Were None",
+          "publishedYear": 1939,
+          "categories": ["Novela Negra", "Cultura", "Criminología"]
+        },
+        {
+          "title": "The Murder of Roger Ackroyd",
+          "publishedYear": 1926,
+          "categories": ["Novela Negra", "Literatura Contemporánea"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Miguel de",
+        "lastName": "Cervantes"
+      },
+      "books": [
+        {
+          "title": "Don Quijote de la Mancha (Parte I)",
+          "publishedYear": 1605,
+          "categories": ["Literatura Clásica", "Aventura", "Cultura"]
+        },
+        {
+          "title": "Don Quijote de la Mancha (Parte II)",
+          "publishedYear": 1615,
+          "categories": ["Literatura Clásica", "Aventura"]
+        },
+        {
+          "title": "Novelas ejemplares",
+          "publishedYear": 1613,
+          "categories": ["Literatura Clásica", "Cuento", "Cultura"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Paulo",
+        "lastName": "Coelho"
+      },
+      "books": [
+        {
+          "title": "The Alchemist",
+          "publishedYear": 1988,
+          "categories": ["Aventura", "Filosofía", "Literatura Contemporánea"]
+        },
+        {
+          "title": "Brida",
+          "publishedYear": 1990,
+          "categories": ["Magia", "Filosofía", "Literatura Contemporánea"]
+        },
+        {
+          "title": "Veronika Decides to Die",
+          "publishedYear": 1998,
+          "categories": ["Psicología", "Filosofía", "Literatura Contemporánea"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Michael",
+        "lastName": "Crichton"
+      },
+      "books": [
+        {
+          "title": "Jurassic Park",
+          "publishedYear": 1990,
+          "categories": ["Ciencia Ficción", "Aventura", "Biología"]
+        },
+        {
+          "title": "The Lost World",
+          "publishedYear": 1995,
+          "categories": ["Ciencia Ficción", "Aventura", "Zoología"]
+        },
+        {
+          "title": "Sphere",
+          "publishedYear": 1987,
+          "categories": ["Ciencia Ficción", "Oceanografía", "Psicología"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Charles",
+        "lastName": "Dickens"
+      },
+      "books": [
+        {
+          "title": "A Tale of Two Cities",
+          "publishedYear": 1859,
+          "categories": ["Literatura Clásica", "Historia", "Cultura"]
+        },
+        {
+          "title": "Great Expectations",
+          "publishedYear": 1861,
+          "categories": ["Literatura Clásica", "Literatura Juvenil"]
+        },
+        {
+          "title": "Oliver Twist",
+          "publishedYear": 1838,
+          "categories": ["Literatura Clásica", "Cultura", "Juvenil"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Arthur Conan",
+        "lastName": "Doyle"
+      },
+      "books": [
+        {
+          "title": "A Study in Scarlet",
+          "publishedYear": 1887,
+          "categories": ["Novela Negra", "Criminología", "Literatura Clásica"]
+        },
+        {
+          "title": "The Hound of the Baskervilles",
+          "publishedYear": 1902,
+          "categories": ["Novela Negra", "Aventura", "Criminología"]
+        },
+        {
+          "title": "The Sign of Four",
+          "publishedYear": 1890,
+          "categories": ["Novela Negra", "Criminología"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Umberto",
+        "lastName": "Eco"
+      },
+      "books": [
+        {
+          "title": "The Name of the Rose",
+          "publishedYear": 1980,
+          "categories": ["Historia Medieval", "Novela Negra", "Literatura Contemporánea"]
+        },
+        {
+          "title": "Foucault's Pendulum",
+          "publishedYear": 1988,
+          "categories": ["Filosofía", "Cultura", "Literatura Contemporánea"]
+        },
+        {
+          "title": "Baudolino",
+          "publishedYear": 2000,
+          "categories": ["Historia Medieval", "Aventura"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Philip K.",
+        "lastName": "Dick"
+      },
+      "books": [
+        {
+          "title": "Do Androids Dream of Electric Sheep?",
+          "publishedYear": 1968,
+          "categories": ["Ciencia Ficción", "Tecnología", "Psicología"]
+        },
+        {
+          "title": "Ubik",
+          "publishedYear": 1969,
+          "categories": ["Ciencia Ficción", "Filosofía", "Psicología"]
+        },
+        {
+          "title": "A Scanner Darkly",
+          "publishedYear": 1977,
+          "categories": ["Ciencia Ficción", "Psicología", "Novela Contemporánea"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "George",
+        "lastName": "Eliot"
+      },
+      "books": [
+        {
+          "title": "Middlemarch",
+          "publishedYear": 1871,
+          "categories": ["Literatura Clásica", "Cultura", "Historia"]
+        },
+        {
+          "title": "Silas Marner",
+          "publishedYear": 1861,
+          "categories": ["Literatura Clásica", "Juvenil"]
+        },
+        {
+          "title": "Adam Bede",
+          "publishedYear": 1859,
+          "categories": ["Literatura Clásica", "Cultura"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Bret",
+        "lastName": "Easton Ellis"
+      },
+      "books": [
+        {
+          "title": "American Psycho",
+          "publishedYear": 1991,
+          "categories": ["Novela Negra", "Cultura", "Psicología"]
+        },
+        {
+          "title": "Less Than Zero",
+          "publishedYear": 1985,
+          "categories": ["Literatura Contemporánea", "Cultura Juvenil"]
+        },
+        {
+          "title": "The Rules of Attraction",
+          "publishedYear": 1987,
+          "categories": ["Literatura Contemporánea", "Juvenil"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Umberto",
+        "lastName": "Eco"
+      },
+      "books": [
+        {
+          "title": "The Name of the Rose",
+          "publishedYear": 1980,
+          "categories": ["Historia Medieval", "Novela Negra", "Literatura Contemporánea"]
+        },
+        {
+          "title": "Foucault's Pendulum",
+          "publishedYear": 1988,
+          "categories": ["Filosofía", "Cultura", "Literatura Contemporánea"]
+        },
+        {
+          "title": "Baudolino",
+          "publishedYear": 2000,
+          "categories": ["Historia Medieval", "Aventura"]
+        }
+      ]
+    },
+    {
+      "author": {
+        "firstName": "Jeffrey",
+        "lastName": "Eugenides"
+      },
+      "books": [
+        {
+          "title": "Middlesex",
+          "publishedYear": 2002,
+          "categories": ["Literatura Contemporánea", "Psicología", "Cultura"]
+        },
+        {
+          "title": "The Virgin Suicides",
+          "publishedYear": 1993,
+          "categories": ["Literatura Contemporánea", "Juvenil"]
+        },
+        {
+          "title": "Fresh Complaint",
+          "publishedYear": 2017,
+          "categories": ["Cultura", "Literatura Contemporánea"]
+        }
+      ]
+    }
+]
+
+
+
+

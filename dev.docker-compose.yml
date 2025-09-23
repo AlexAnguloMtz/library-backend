@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:15.13
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: dev_library_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - library_data:/var/lib/postgresql/data
+
+  flyway:
+    image: flyway/flyway:10
+    container_name: flyway
+    depends_on:
+      - db
+    command: -url=jdbc:postgresql://db:5432/dev_library_db -user=dev_user -password=dev_password migrate
+    volumes:
+      - ./migrations:/flyway/sql
+
+volumes:
+  library_data:
