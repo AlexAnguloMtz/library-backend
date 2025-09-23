@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.util;
+package com.unison.practicas.desarrollo.library.util.pagination;
 
 import lombok.Builder;
 import java.util.List;

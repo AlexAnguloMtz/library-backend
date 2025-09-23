@@ -5,9 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unison.practicas.desarrollo.library.dto.RoleResponse;
 import com.unison.practicas.desarrollo.library.dto.UserPreview;
 import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
-import com.unison.practicas.desarrollo.library.util.PaginationRequest;
-import com.unison.practicas.desarrollo.library.util.PaginationResponse;
-import com.unison.practicas.desarrollo.library.util.SortRequest;
+import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
+import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
+import com.unison.practicas.desarrollo.library.util.pagination.SortRequest;
+import com.unison.practicas.desarrollo.library.util.pagination.SortingOrder;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
@@ -33,8 +34,8 @@ public class UserService {
     );
 
     private static final List<SortRequest> DEFAULT_SORTS = List.of(
-            new SortRequest("lastName", "asc"),
-            new SortRequest("firstName", "asc")
+            new SortRequest("lastName", SortingOrder.ASC),
+            new SortRequest("firstName", SortingOrder.ASC)
     );
 
     private final DSLContext dsl;
@@ -123,7 +124,7 @@ public class UserService {
             if (!ALLOWED_SORTS.contains(sortReq.sort())) continue;
 
             if ("role".equals(sortReq.sort())) {
-                base.orderBy("desc".equalsIgnoreCase(sortReq.order())
+                base.orderBy(SortingOrder.DESC.equals(sortReq.order())
                         ? roleNamesConcat.desc()
                         : roleNamesConcat.asc());
             } else {
@@ -193,7 +194,7 @@ public class UserService {
             case "registrationDate" -> APP_USER.REGISTRATION_DATE;
             default -> APP_USER.LAST_NAME;
         };
-        return "desc".equalsIgnoreCase(sortReq.order()) ? field.desc() : field.asc();
+        return SortingOrder.DESC.equals(sortReq.order()) ? field.desc() : field.asc();
     }
 
     private String formatInvertedName(String firstName, String lastName) {
