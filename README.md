@@ -23,5 +23,5 @@ La API permite gestionar usuarios, libros, préstamos y otras funcionalidades t�
 ## Características principales
 
 - API RESTful con endpoints para CRUD
-- Manejo de préstamos y estado de libros.
+- Manejo de préstamos y estado de usuarios, libros y préstamos.
 - Paginación, filtrado y ordenamiento de resultados.
