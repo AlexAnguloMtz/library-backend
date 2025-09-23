@@ -1,6 +1,6 @@
 # Instrucciones para levantar el proyecto
 
-Este proyecto utiliza Spring Boot y JOOQ. A continuación se indican los pasos para levantarlo en un entorno de desarrollo.
+Este proyecto utiliza Spring Boot con dos librerias para el acceso a la base de datos: JPA y jOOQ. A continuación se indican los pasos para levantarlo en un entorno de desarrollo.
 
 ## Requisitos
 
@@ -41,3 +41,15 @@ SPRING_PROFILES_ACTIVE=dev
 ```
 
 > Esto asegura que la aplicación use la configuración de desarrollo, con lo cual se insertarán en la base de datos algunas filas de ejemplo en las tablas para utilizar la aplicación 
+
+### ¿Por qué usamos **JPA** y **jOOQ** en el mismo proyecto?
+
+En este proyecto combinamos **JPA** y **jOOQ**, cada uno enfocado en lo que hace mejor:
+
+- **JPA**: lo usamos principalmente para casos de uso donde se necesita **crear, actualizar o eliminar** datos. Nos permite trabajar con entidades de manera sencilla y mantener un código más limpio en operaciones estándar de escritura.
+
+- **jOOQ**: lo usamos en escenarios de **lecturas complejas**. Nos da mayor **flexibilidad** y un control más cercano al SQL, lo que facilita consultas avanzadas, joins complicados y optimizaciones específicas de la base de datos.
+
+De esta forma, aprovechamos lo mejor de ambos mundos:
+- **Simplicidad y productividad** con JPA en operaciones de escritura.
+- **Poder y precisión** con jOOQ en consultas de lectura más sofisticadas.  

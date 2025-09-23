@@ -1,7 +1,7 @@
 package com.unison.practicas.desarrollo.library.repository;
 
-import com.unison.practicas.desarrollo.library.model.Role;
-import com.unison.practicas.desarrollo.library.model.User;
+import com.unison.practicas.desarrollo.library.entity.Role;
+import com.unison.practicas.desarrollo.library.entity.User;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;

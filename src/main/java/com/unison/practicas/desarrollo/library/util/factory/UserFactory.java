@@ -1,8 +1,8 @@
 package com.unison.practicas.desarrollo.library.util.factory;
 
 import com.github.javafaker.Faker;
-import com.unison.practicas.desarrollo.library.model.Role;
-import com.unison.practicas.desarrollo.library.model.User;
+import com.unison.practicas.desarrollo.library.entity.Role;
+import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
 import com.unison.practicas.desarrollo.library.util.TimeUtils;

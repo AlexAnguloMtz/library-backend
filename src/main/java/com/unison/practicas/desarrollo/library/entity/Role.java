@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.model;
+package com.unison.practicas.desarrollo.library.entity;
 
 import jakarta.persistence.*;
 import java.util.Objects;
