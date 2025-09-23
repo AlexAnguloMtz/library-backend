@@ -4,8 +4,8 @@ import com.unison.practicas.desarrollo.library.dto.UserPreview;
 import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
 import com.unison.practicas.desarrollo.library.service.UserService;
 import com.unison.practicas.desarrollo.library.util.PaginationRequest;
+import com.unison.practicas.desarrollo.library.util.PaginationResponse;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +20,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Iterable<UserPreview> getUsersPreviews(
+    public PaginationResponse<UserPreview> getUsersPreviews(
             UserPreviewsQuery query,
             PaginationRequest paginationRequest
     ) {

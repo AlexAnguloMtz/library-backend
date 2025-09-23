@@ -6,6 +6,7 @@ import com.unison.practicas.desarrollo.library.dto.RoleResponse;
 import com.unison.practicas.desarrollo.library.dto.UserPreview;
 import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
 import com.unison.practicas.desarrollo.library.util.PaginationRequest;
+import com.unison.practicas.desarrollo.library.util.PaginationResponse;
 import com.unison.practicas.desarrollo.library.util.SortRequest;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -27,8 +28,7 @@ public class UserService {
             "lastName",
             "email",
             "phoneNumber",
-            "createdAt",
-            "updatedAt",
+            "registrationDate",
             "role"
     );
 
@@ -47,7 +47,7 @@ public class UserService {
         this.dateTimeFormatter = createDateTimeFormatter();
     }
 
-    public List<UserPreview> getUsersPreviews(UserPreviewsQuery query, PaginationRequest paginationRequest) {
+    public PaginationResponse<UserPreview> getUsersPreviews(UserPreviewsQuery query, PaginationRequest paginationRequest) {
         // Aggregate user roles as a json
         Field<JSON> rolesJson = DSL.jsonArrayAgg(
                 DSL.jsonObject(
@@ -57,13 +57,13 @@ public class UserService {
                 )
         ).as("roles_json");
 
-        // ---- Roles names concatenation (sorted) ----
+        // Roles names concatenation
         Field<String> roleNamesConcat = DSL.groupConcat(APP_ROLE.NAME)
                 .orderBy(APP_ROLE.NAME.asc())
                 .separator(",")
                 .as("roles_concat");
 
-        // ---- Base query ----
+        // Base query
         var base = dsl.select(
                         APP_USER.ID,
                         APP_USER.FIRST_NAME,
@@ -78,7 +78,7 @@ public class UserService {
                 .join(USER_ROLE).on(APP_USER.ID.eq(USER_ROLE.USER_ID))
                 .join(APP_ROLE).on(APP_ROLE.ID.eq(USER_ROLE.ROLE_ID));
 
-        // ---- Filters ----
+        // Filters
         if (query.search() != null && !query.search().isBlank()) {
             String pattern = "%" + query.search().toLowerCase() + "%";
             base.where(DSL.lower(APP_USER.FIRST_NAME).like(pattern)
@@ -99,7 +99,7 @@ public class UserService {
             base.where(APP_USER.REGISTRATION_DATE.le(OffsetDateTime.from(query.registrationDateMax().atTime(23, 59, 59))));
         }
 
-        // ---- Group by user for JSON aggregation ----
+        // Group by user
         base.groupBy(
                 APP_USER.ID,
                 APP_USER.FIRST_NAME,
@@ -109,7 +109,12 @@ public class UserService {
                 APP_USER.REGISTRATION_DATE
         );
 
-        // ---- Sorting ----
+        // Count query (total items)
+        long totalItems = dsl.selectCount()
+                .from(base.asTable("count_sub"))
+                .fetchOne(0, long.class);
+
+        // Sorting
         List<SortRequest> sorts = CollectionUtils.isEmpty(paginationRequest.sorts())
                 ? DEFAULT_SORTS
                 : paginationRequest.sorts();
@@ -126,15 +131,15 @@ public class UserService {
             }
         }
 
-        // ---- Pagination ----
+        // Pagination
         int offset = paginationRequest.page() * paginationRequest.size();
         base.offset(offset).limit(paginationRequest.size());
 
-        // ---- Execute ----
+        // Execute
         var result = base.fetch();
 
-        // ---- Map results ----
-        return result.stream().map(r -> new UserPreview(
+        // Map results
+        List<UserPreview> items = result.stream().map(r -> new UserPreview(
                 r.get(APP_USER.ID).toString(),
                 formatInvertedName(r.get(APP_USER.FIRST_NAME), r.get(APP_USER.LAST_NAME)),
                 r.get(APP_USER.EMAIL),
@@ -143,6 +148,16 @@ public class UserService {
                 dateTimeFormatter.format(r.get(APP_USER.REGISTRATION_DATE)),
                 "5"
         )).toList();
+
+        long totalPages = (long) Math.ceil((double) totalItems / paginationRequest.size());
+
+        return PaginationResponse.<UserPreview>builder()
+                .items(items)
+                .page(paginationRequest.page())
+                .size(paginationRequest.size())
+                .totalItems(totalItems)
+                .totalPages((int) totalPages)
+                .build();
     }
 
     private List<RoleResponse> parseRolesJson(String rolesJson) {
@@ -187,11 +202,11 @@ public class UserService {
 
     private DateTimeFormatter createDateTimeFormatter() {
         return DateTimeFormatter.ofPattern(
-            "dd/MMM/yyyy",
-            new Locale.Builder()
-                .setLanguage("es")
-                .setRegion("MX")
-                .build()
+                "dd/MMM/yyyy",
+                new Locale.Builder()
+                        .setLanguage("es")
+                        .setRegion("MX")
+                        .build()
         );
     }
 }
