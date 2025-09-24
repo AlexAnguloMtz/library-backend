@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -82,11 +83,15 @@ public class GetUsersPreviews {
         }
 
         if (query.registrationDateMin() != null) {
-            base.where(APP_USER.REGISTRATION_DATE.ge(OffsetDateTime.from(query.registrationDateMin().atStartOfDay())));
+            base.where(APP_USER.REGISTRATION_DATE.ge(
+                    query.registrationDateMin().atStartOfDay().atOffset(ZoneOffset.UTC)
+            ));
         }
 
         if (query.registrationDateMax() != null) {
-            base.where(APP_USER.REGISTRATION_DATE.le(OffsetDateTime.from(query.registrationDateMax().atTime(23, 59, 59))));
+            base.where(APP_USER.REGISTRATION_DATE.le(
+                    query.registrationDateMax().atTime(23, 59, 59).atOffset(ZoneOffset.UTC)
+            ));
         }
 
         // Group by user
