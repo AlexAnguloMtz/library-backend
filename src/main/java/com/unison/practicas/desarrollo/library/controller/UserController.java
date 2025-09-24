@@ -21,7 +21,6 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('LIBRARIAN')")
     public PaginationResponse<UserPreview> getUsersPreviews(
             UserPreviewsQuery query,
             PaginationRequest pagination

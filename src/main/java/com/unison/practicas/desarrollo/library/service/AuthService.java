@@ -2,6 +2,7 @@ package com.unison.practicas.desarrollo.library.service;
 
 import com.unison.practicas.desarrollo.library.dto.LoginForm;
 import com.unison.practicas.desarrollo.library.dto.LoginResponse;
+import com.unison.practicas.desarrollo.library.entity.Permission;
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.entity.Role;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
@@ -50,7 +51,7 @@ public class AuthService {
                 .userId(user.getId().toString())
                 .email(user.getEmail())
                 .roles(user.getRoles().stream().map(Role::getSlug).collect(Collectors.toSet()))
-                .permissions(Set.of())
+                .permissions(user.getPermissions().stream().map(Permission::getName).collect(Collectors.toSet()))
                 .accessToken(accessToken)
                 .build();
     }

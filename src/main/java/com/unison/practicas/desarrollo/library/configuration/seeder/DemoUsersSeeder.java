@@ -27,10 +27,10 @@ public class DemoUsersSeeder {
 
     public void seed() {
         var librarianEmail = "bibliotecario@email.com";
-        var librarianPassword = "bibliotecario99##";
+        var librarianPassword = "Bibliotecario99##";
 
         var userEmail = "usuario@email.com";
-        var userPassword = "usuario99##";
+        var userPassword = "Usuario99##";
 
         if (userRepository.findByEmailIgnoreCase(librarianEmail).isEmpty()) {
             Role librarianRole = roleRepository.findBySlug("LIBRARIAN").get();

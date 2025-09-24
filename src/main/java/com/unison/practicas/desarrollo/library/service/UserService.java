@@ -4,6 +4,7 @@ import com.unison.practicas.desarrollo.library.dto.UserPreview;
 import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +16,7 @@ public class UserService {
         this.getUsersPreviews = getUsersPreviews;
     }
 
+    @PreAuthorize("hasAuthority('users:read')")
     public PaginationResponse<UserPreview> getUsersPreviews(UserPreviewsQuery query, PaginationRequest pagination) {
         return getUsersPreviews.handle(query, pagination);
     }

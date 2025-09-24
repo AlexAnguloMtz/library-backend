@@ -1,5 +1,6 @@
 package com.unison.practicas.desarrollo.library.configuration.seeder;
 
+import jakarta.transaction.Transactional;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ public class DevelopmentSeeder implements CommandLineRunner {
     }
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         userSeeder.seed();
         demoUsersSeeder.seed();
