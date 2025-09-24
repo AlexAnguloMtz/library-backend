@@ -2,9 +2,10 @@ package com.unison.practicas.desarrollo.library.configuration.seeder;
 
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.entity.Role;
+import com.unison.practicas.desarrollo.library.entity.UserAddress;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
-import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
+import com.unison.practicas.desarrollo.library.util.factory.UserAddressFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -19,11 +20,13 @@ public class DemoUsersSeeder {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserAddressFactory userAddressFactory;
 
-    public DemoUsersSeeder(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public DemoUsersSeeder(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, UserAddressFactory userAddressFactory) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userAddressFactory = userAddressFactory;
     }
 
     public void seed() {
@@ -49,26 +52,38 @@ public class DemoUsersSeeder {
 
             librarianUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_1.jpg");
 
+            UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
+
+            librarianUser.setAddress(userAddress);
+
+            userAddress.setUser(librarianUser);
+
             userRepository.save(librarianUser);
         }
 
         if (userRepository.findByEmailIgnoreCase(userEmail).isEmpty()) {
             Role userRole = roleRepository.findBySlug("USER").get();
 
-            var librarianUser = new User();
-            librarianUser.setFirstName("Usuario");
-            librarianUser.setLastName("Demo");
-            librarianUser.setEmail(userEmail);
-            librarianUser.setPasswordHash(passwordEncoder.encode(userPassword));
-            librarianUser.setPhoneNumber("7755449933");
-            librarianUser.setRegistrationDate(Instant.now());
-            librarianUser.setRoles(new HashSet<>());
+            var regularUser = new User();
+            regularUser.setFirstName("Usuario");
+            regularUser.setLastName("Demo");
+            regularUser.setEmail(userEmail);
+            regularUser.setPasswordHash(passwordEncoder.encode(userPassword));
+            regularUser.setPhoneNumber("7755449933");
+            regularUser.setRegistrationDate(Instant.now());
+            regularUser.setRoles(new HashSet<>());
 
-            librarianUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_4.jpg");
+            regularUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_4.jpg");
 
-            librarianUser.getRoles().add(userRole);
+            regularUser.getRoles().add(userRole);
 
-            userRepository.save(librarianUser);
+            UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
+
+            regularUser.setAddress(userAddress);
+
+            userAddress.setUser(regularUser);
+
+            userRepository.save(regularUser);
         }
     }
 

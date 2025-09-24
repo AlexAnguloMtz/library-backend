@@ -38,4 +38,12 @@ public class User {
                 .collect(Collectors.toSet());
     }
 
+    @OneToOne(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.EAGER
+    )
+    private UserAddress address;
+
 }

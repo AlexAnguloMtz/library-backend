@@ -1,0 +1,5 @@
+CREATE TABLE state (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    code CHAR(2) NOT NULL UNIQUE
+);

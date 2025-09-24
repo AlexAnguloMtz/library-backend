@@ -1,5 +1,6 @@
 package com.unison.practicas.desarrollo.library.controller;
 
+import com.unison.practicas.desarrollo.library.dto.FullUser;
 import com.unison.practicas.desarrollo.library.dto.UserFiltersResponse;
 import com.unison.practicas.desarrollo.library.dto.UserPreview;
 import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
@@ -30,6 +31,11 @@ public class UserController {
     @GetMapping("/filters")
     public UserFiltersResponse getUserFilters() {
         return userService.getUserFilters();
+    }
+
+    @GetMapping("/{id}")
+    public FullUser getFullUserById(@PathVariable String id) {
+        return userService.getFullUserById(id);
     }
 
     @DeleteMapping("/{id}")

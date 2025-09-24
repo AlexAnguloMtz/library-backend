@@ -3,6 +3,7 @@ package com.unison.practicas.desarrollo.library.util.factory;
 import com.github.javafaker.Faker;
 import com.unison.practicas.desarrollo.library.entity.Role;
 import com.unison.practicas.desarrollo.library.entity.User;
+import com.unison.practicas.desarrollo.library.entity.UserAddress;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
 import com.unison.practicas.desarrollo.library.util.TimeUtils;
@@ -21,10 +22,12 @@ public class UserFactory {
 
     private final Faker faker;
     private final RoleRepository roleRepository;
+    private final UserAddressFactory userAddressFactory;
 
-    public UserFactory(Faker faker, RoleRepository roleRepository) {
+    public UserFactory(Faker faker, RoleRepository roleRepository, UserAddressFactory userAddressFactory) {
         this.faker = faker;
         this.roleRepository = roleRepository;
+        this.userAddressFactory = userAddressFactory;
     }
 
     public Collection<User> createUsers(int count) {
@@ -49,6 +52,12 @@ public class UserFactory {
         user.setRoles(Set.of(role));
         user.setRegistrationDate(TimeUtils.randomInstantBetween(Instant.parse("2020-01-24T00:00:00Z"), Instant.parse("2025-09-24T00:00:00Z")));
         user.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/%s".formatted(CollectionHelpers.randomItem(profilePictures())));
+
+        UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
+
+        userAddress.setUser(user);
+
+        user.setAddress(userAddress);
 
         return user;
     }
