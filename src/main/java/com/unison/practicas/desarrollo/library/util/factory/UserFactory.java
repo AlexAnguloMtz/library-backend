@@ -44,13 +44,19 @@ public class UserFactory {
         user.setFirstName(faker.name().firstName());
         user.setLastName(faker.name().lastName());
         user.setPhoneNumber(faker.phoneNumber().cellPhone());
-        user.setEmail(seed + "_" + faker.internet().emailAddress());
+        user.setEmail(generateUniqueEmail(seed));
         user.setPasswordHash(faker.internet().password(8, 16));
         user.setRoles(Set.of(role));
         user.setRegistrationDate(TimeUtils.randomInstantBetween(Instant.parse("2020-01-24T00:00:00Z"), Instant.parse("2025-09-24T00:00:00Z")));
         user.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/%s".formatted(CollectionHelpers.randomItem(profilePictures())));
 
         return user;
+    }
+
+    private String generateUniqueEmail(int seed) {
+        String email = faker.internet().emailAddress();
+        String[] parts = email.split("@");
+        return parts[0] + "_" + seed + "@" + parts[1];
     }
 
     private List<String> profilePictures() {

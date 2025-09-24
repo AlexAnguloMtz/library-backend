@@ -6,6 +6,7 @@ import com.unison.practicas.desarrollo.library.dto.UserFiltersResponse;
 import com.unison.practicas.desarrollo.library.dto.UserPreview;
 import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
+import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,10 +16,12 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final GetUsersPreviews getUsersPreviews;
+    private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
-    public UserService(GetUsersPreviews getUsersPreviews, RoleRepository roleRepository) {
+    public UserService(GetUsersPreviews getUsersPreviews, UserRepository userRepository, RoleRepository roleRepository) {
         this.getUsersPreviews = getUsersPreviews;
+        this.userRepository = userRepository;
         this.roleRepository = roleRepository;
     }
 
@@ -37,6 +40,11 @@ public class UserService {
         return UserFiltersResponse.builder()
                 .roles(roles)
                 .build();
+    }
+
+    @PreAuthorize("hasAuthority('users:delete')")
+    public void deleteUserById(String id) {
+        userRepository.deleteById(Integer.parseInt(id));
     }
 
     private OptionResponse toOption(Role role) {

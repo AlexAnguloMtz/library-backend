@@ -6,9 +6,8 @@ import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
 import com.unison.practicas.desarrollo.library.service.UserService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -31,6 +30,12 @@ public class UserController {
     @GetMapping("/filters")
     public UserFiltersResponse getUserFilters() {
         return userService.getUserFilters();
+    }
+
+    @DeleteMapping("/{id}")
+    public Void deleteUserById(@PathVariable String id) {
+        userService.deleteUserById(id);
+        return null;
     }
 
 }
