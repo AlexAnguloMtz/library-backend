@@ -9,14 +9,17 @@ import org.springframework.stereotype.Component;
 public class DevelopmentSeeder implements CommandLineRunner {
 
     private final UserSeeder userSeeder;
+    private final DemoUsersSeeder demoUsersSeeder;
 
-    protected DevelopmentSeeder(UserSeeder userSeeder) {
+    protected DevelopmentSeeder(UserSeeder userSeeder, DemoUsersSeeder demoUsersSeeder) {
         this.userSeeder = userSeeder;
+        this.demoUsersSeeder = demoUsersSeeder;
     }
 
     @Override
     public void run(String... args) throws Exception {
         userSeeder.seed();
+        demoUsersSeeder.seed();
     }
 
 }
