@@ -21,6 +21,7 @@ public class User {
     private String email;
     private String passwordHash;
     private String phoneNumber;
+    private String profilePictureUrl;
     private Instant registrationDate;
 
     @ManyToMany(fetch = FetchType.EAGER)

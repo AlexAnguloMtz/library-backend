@@ -9,6 +9,7 @@ public record UserPreview(
      String phone,
      List<RoleResponse> roles,
      String registrationDate,
-     String activeLoans
+     String activeLoans,
+     String profilePictureUrl
 ) {
 }

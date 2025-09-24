@@ -4,6 +4,7 @@ import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.entity.Role;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
+import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -46,6 +47,8 @@ public class DemoUsersSeeder {
 
             librarianUser.getRoles().add(librarianRole);
 
+            librarianUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_1.jpg");
+
             userRepository.save(librarianUser);
         }
 
@@ -60,6 +63,8 @@ public class DemoUsersSeeder {
             librarianUser.setPhoneNumber("7755449933");
             librarianUser.setRegistrationDate(Instant.now());
             librarianUser.setRoles(new HashSet<>());
+
+            librarianUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_4.jpg");
 
             librarianUser.getRoles().add(userRole);
 

@@ -61,6 +61,7 @@ public class GetUsersPreviews {
                         APP_USER.LAST_NAME,
                         APP_USER.EMAIL,
                         APP_USER.PHONE_NUMBER,
+                        APP_USER.PROFILE_PICTURE_URL,
                         APP_USER.REGISTRATION_DATE,
                         rolesJson,
                         rolesNamesConcatenation()
@@ -101,6 +102,7 @@ public class GetUsersPreviews {
                 APP_USER.LAST_NAME,
                 APP_USER.EMAIL,
                 APP_USER.PHONE_NUMBER,
+                APP_USER.PROFILE_PICTURE_URL,
                 APP_USER.REGISTRATION_DATE
         );
 
@@ -131,7 +133,8 @@ public class GetUsersPreviews {
                 r.get(APP_USER.PHONE_NUMBER),
                 parseRolesJson(r.get("roles_json", String.class)),
                 dateTimeFormatter.format(r.get(APP_USER.REGISTRATION_DATE)),
-                "5"
+                "5",
+                r.get(APP_USER.PROFILE_PICTURE_URL)
         )).toList();
 
         long totalPages = (long) Math.ceil((double) totalItems / paginationRequest.size());
