@@ -137,6 +137,8 @@ public class GetUsersPreviews {
                 .size(paginationRequest.size())
                 .totalItems(totalItems)
                 .totalPages((int) totalPages)
+                .hasPrevious(paginationRequest.page() > 0)
+                .hasNext(paginationRequest.page() < totalPages - 1)
                 .build();
     }
 

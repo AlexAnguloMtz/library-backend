@@ -9,5 +9,7 @@ public record PaginationResponse<T>(
         int page,
         int size,
         long totalItems,
-        int totalPages
+        int totalPages,
+        boolean hasPrevious,
+        boolean hasNext
 ) {}
