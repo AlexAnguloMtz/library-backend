@@ -1,11 +1,11 @@
 package com.unison.practicas.desarrollo.library.controller;
 
+import com.unison.practicas.desarrollo.library.dto.UserFiltersResponse;
 import com.unison.practicas.desarrollo.library.dto.UserPreview;
 import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
 import com.unison.practicas.desarrollo.library.service.UserService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +26,11 @@ public class UserController {
             PaginationRequest pagination
     ) {
         return userService.getUsersPreviews(query, pagination);
+    }
+    
+    @GetMapping("/filters")
+    public UserFiltersResponse getUserFilters() {
+        return userService.getUserFilters();
     }
 
 }
