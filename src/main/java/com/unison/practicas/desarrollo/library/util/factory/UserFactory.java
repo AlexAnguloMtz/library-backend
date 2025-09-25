@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 @Component
@@ -54,7 +53,7 @@ public class UserFactory {
         user.setPhoneNumber(faker.phoneNumber().cellPhone());
         user.setEmail(generateUniqueEmail(seed));
         user.setPasswordHash(faker.internet().password(8, 16));
-        user.setRoles(Set.of(role));
+        user.setRole(role);
         user.setRegistrationDate(TimeUtils.randomInstantBetween(Instant.parse("2020-01-24T00:00:00Z"), Instant.parse("2025-09-24T00:00:00Z")));
         user.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/%s".formatted(CollectionHelpers.randomItem(profilePictures())));
         user.setGender(gender);

@@ -4,7 +4,6 @@ import com.unison.practicas.desarrollo.library.dto.LoginForm;
 import com.unison.practicas.desarrollo.library.dto.LoginResponse;
 import com.unison.practicas.desarrollo.library.entity.Permission;
 import com.unison.practicas.desarrollo.library.entity.User;
-import com.unison.practicas.desarrollo.library.entity.Role;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.util.JwtUtils;
 import org.springframework.http.HttpStatus;
@@ -49,7 +48,7 @@ public class AuthService {
         return LoginResponse.builder()
                 .userId(user.getId().toString())
                 .email(user.getEmail())
-                .roles(user.getRoles().stream().map(Role::getSlug).collect(Collectors.toSet()))
+                .role(user.getRole().getSlug())
                 .permissions(user.getPermissions().stream().map(Permission::getName).collect(Collectors.toSet()))
                 .accessToken(accessToken)
                 .build();

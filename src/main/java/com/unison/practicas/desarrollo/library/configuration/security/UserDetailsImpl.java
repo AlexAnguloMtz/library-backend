@@ -20,8 +20,8 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Stream<GrantedAuthority> roleAuthorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getSlug()));
+        Stream<GrantedAuthority> roleAuthorities =
+                Stream.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
 
         Stream<GrantedAuthority> permissionAuthorities = user.getPermissions().stream()
                 .map(Permission::getName)

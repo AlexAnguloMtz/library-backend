@@ -4,7 +4,6 @@ import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.unison.practicas.desarrollo.library.dto.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.ExportResponse;
 import com.unison.practicas.desarrollo.library.entity.User;
-import com.unison.practicas.desarrollo.library.entity.Role;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import lombok.Builder;
 import org.springframework.http.MediaType;
@@ -82,7 +81,7 @@ public class ExportUsers {
                 .email(user.getEmail())
                 .phoneNumber(user.getPhoneNumber())
                 .registrationDate(dateFormatter.format(Instant.now().atOffset(ZoneOffset.UTC)))
-                .roles(user.getRoles().stream().map(Role::getName).sorted((a, b) -> a.compareToIgnoreCase(b)).toList())
+                .role(user.getRole().getName())
                 .gender(user.getGender().getName())
                 .build();
     }
@@ -96,7 +95,7 @@ public class ExportUsers {
             String phoneNumber,
             String registrationDate,
             String gender,
-            List<String> roles
+            String role
     ) {}
 
     private DateTimeFormatter createDateFormatter() {

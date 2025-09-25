@@ -18,7 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -108,7 +107,8 @@ public class UserService {
         }
 
         if (StringUtils.hasText(request.gender())) {
-            // TODO add gender...
+            Gender gender = findGenderById(request.gender());
+            user.setGender(gender);
         }
 
         User savedUser = userRepository.save(user);
@@ -166,9 +166,8 @@ public class UserService {
         }
 
         if (StringUtils.hasText(request.role())) {
-            Role role = findRoleBySlug(request.role());
-            userById.getRoles().clear();
-            userById.getRoles().add(role);
+            Role role = findRoleById(request.role());
+            userById.setRole(role);
         }
 
         if (StringUtils.hasText(request.password())) {
@@ -191,10 +190,10 @@ public class UserService {
         return null;
     }
 
-    private Role findRoleBySlug(String slug) {
-        Optional<Role> roleOptional = roleRepository.findBySlug(slug);
+    private Role findRoleById(String id) {
+        Optional<Role> roleOptional = roleRepository.findById(Integer.parseInt(id));
         if (roleOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find role: %s".formatted(slug));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find role: %s".formatted(id));
         }
         return roleOptional.get();
     }
@@ -264,13 +263,13 @@ public class UserService {
     private UserAccountResponse toUserAccountResponse(User user) {
         return UserAccountResponse.builder()
                 .email(user.getEmail())
-                .role(new ArrayList<Role>(user.getRoles()).getFirst().getName())
+                .role(user.getRole().getName())
                 .build();
     }
 
     private OptionResponse toOption(Role role) {
         return OptionResponse.builder()
-                .value(role.getSlug())
+                .value(role.getId().toString())
                 .label(role.getName())
                 .build();
     }
@@ -290,7 +289,7 @@ public class UserService {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .phone(user.getPhoneNumber())
-                .roles(user.getRoles().stream().map(this::toRoleResponse).toList())
+                .role(toRoleResponse(user.getRole()))
                 .registrationDate(dateTimeFormatter.format(user.getRegistrationDate().atOffset(ZoneOffset.UTC)))
                 .profilePictureUrl(user.getProfilePictureUrl())
                 .address(toUserAddressResponse(user.getAddress()))
@@ -311,6 +310,14 @@ public class UserService {
                 .value(gender.getId().toString())
                 .label(gender.getName())
                 .build();
+    }
+
+    private Gender findGenderById(String id) {
+        Optional<Gender> genderOptional = genderRepository.findById(Integer.parseInt(id));
+        if (genderOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find gender with id: %s".formatted(id));
+        }
+        return genderOptional.get();
     }
 
 }

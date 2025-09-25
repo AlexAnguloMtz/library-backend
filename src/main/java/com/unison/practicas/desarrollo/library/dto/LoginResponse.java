@@ -8,7 +8,7 @@ import java.util.Set;
 public record LoginResponse(
         String userId,
         String email,
-        Set<String> roles,
+        String role,
         Set<String> permissions,
         String accessToken
 ) {

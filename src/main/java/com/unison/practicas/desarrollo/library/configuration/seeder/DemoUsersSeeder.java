@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
 
 @Component
@@ -54,10 +53,8 @@ public class DemoUsersSeeder {
             librarianUser.setPasswordHash(passwordEncoder.encode(librarianPassword));
             librarianUser.setPhoneNumber("6622118899");
             librarianUser.setRegistrationDate(Instant.now());
-            librarianUser.setRoles(new HashSet<>());
+            librarianUser.setRole(librarianRole);
             librarianUser.setGender(CollectionHelpers.randomItem(genders));
-
-            librarianUser.getRoles().add(librarianRole);
 
             librarianUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_1.jpg");
 
@@ -80,12 +77,10 @@ public class DemoUsersSeeder {
             regularUser.setPasswordHash(passwordEncoder.encode(userPassword));
             regularUser.setPhoneNumber("7755449933");
             regularUser.setRegistrationDate(Instant.now());
-            regularUser.setRoles(new HashSet<>());
+            regularUser.setRole(userRole);
             regularUser.setGender(CollectionHelpers.randomItem(genders));
 
             regularUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_4.jpg");
-
-            regularUser.getRoles().add(userRole);
 
             UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
 

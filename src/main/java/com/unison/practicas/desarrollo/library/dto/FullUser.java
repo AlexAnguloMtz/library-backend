@@ -2,8 +2,6 @@ package com.unison.practicas.desarrollo.library.dto;
 
 import lombok.Builder;
 
-import java.util.List;
-
 @Builder
 public record FullUser(
         String id,
@@ -12,7 +10,7 @@ public record FullUser(
         String fullName,
         String email,
         String phone,
-        List<RoleResponse> roles,
+        RoleResponse role,
         String registrationDate,
         String profilePictureUrl,
         UserAddressResponse address,

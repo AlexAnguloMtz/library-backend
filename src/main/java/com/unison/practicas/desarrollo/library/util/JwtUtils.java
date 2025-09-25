@@ -5,14 +5,12 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.unison.practicas.desarrollo.library.entity.Role;
+import com.unison.practicas.desarrollo.library.entity.Permission;
 import com.unison.practicas.desarrollo.library.entity.User;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtUtils {
@@ -23,12 +21,13 @@ public class JwtUtils {
 
     public String accessTokenForUser(User user) {
         try {
+            Instant now = Instant.now();
             JWTClaimsSet claims = new JWTClaimsSet.Builder()
                     .subject(user.getEmail())
-                    .claim("roles", user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
-                    .claim("permissions", Set.of())
-                    .issueTime(Date.from(Instant.now()))
-                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                    .claim("role", user.getRole().getSlug())
+                    .claim("permissions", user.getRole().getPermissions().stream().map(Permission::getName).toList())
+                    .issueTime(Date.from(now))
+                    .expirationTime(Date.from(now.plusSeconds(3600)))
                     .build();
 
             JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256)

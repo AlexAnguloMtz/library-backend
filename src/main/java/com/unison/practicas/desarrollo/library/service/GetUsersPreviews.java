@@ -1,7 +1,5 @@
 package com.unison.practicas.desarrollo.library.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unison.practicas.desarrollo.library.dto.RoleResponse;
 import com.unison.practicas.desarrollo.library.dto.UserPreview;
 import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
@@ -11,20 +9,20 @@ import com.unison.practicas.desarrollo.library.util.pagination.SortRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.SortingOrder;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.JSON;
 import org.jooq.SortField;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.unison.practicas.desarrollo.library.jooq.Tables.APP_ROLE;
 import static com.unison.practicas.desarrollo.library.jooq.Tables.APP_USER;
-import static com.unison.practicas.desarrollo.library.jooq.Tables.USER_ROLE;
+
+// TODO
+// Some users show 'Invalid Date' on the UI. Check why and fix.
 
 @Component
 public class GetUsersPreviews {
@@ -36,25 +34,15 @@ public class GetUsersPreviews {
 
     private final DSLContext dsl;
     private final DateTimeFormatter dateTimeFormatter;
-    private final ObjectMapper objectMapper;
 
-    public GetUsersPreviews(DSLContext dsl, ObjectMapper objectMapper) {
+    public GetUsersPreviews(DSLContext dsl) {
         this.dsl = dsl;
-        this.objectMapper = objectMapper;
         this.dateTimeFormatter = createDateTimeFormatter();
     }
 
     public PaginationResponse<UserPreview> handle(UserPreviewsQuery query, PaginationRequest paginationRequest) {
-        // Aggregate user roles as a json
-        Field<JSON> rolesJson = DSL.jsonArrayAgg(
-                DSL.jsonObject(
-                        DSL.jsonEntry("id", APP_ROLE.ID),
-                        DSL.jsonEntry("name", APP_ROLE.NAME),
-                        DSL.jsonEntry("slug", APP_ROLE.SLUG)
-                )
-        ).as("roles_json");
 
-        // Base query
+        // Base query: join directo a role
         var base = dsl.select(
                         APP_USER.ID,
                         APP_USER.FIRST_NAME,
@@ -63,24 +51,29 @@ public class GetUsersPreviews {
                         APP_USER.PHONE_NUMBER,
                         APP_USER.PROFILE_PICTURE_URL,
                         APP_USER.REGISTRATION_DATE,
-                        rolesJson,
-                        rolesNamesConcatenation()
+                        APP_ROLE.ID.as("role_id"),
+                        APP_ROLE.NAME.as("role_name"),
+                        APP_ROLE.SLUG.as("role_slug")
                 )
                 .from(APP_USER)
-                .join(USER_ROLE).on(APP_USER.ID.eq(USER_ROLE.USER_ID))
-                .join(APP_ROLE).on(APP_ROLE.ID.eq(USER_ROLE.ROLE_ID));
+                .join(APP_ROLE).on(APP_USER.ROLE_ID.eq(APP_ROLE.ID));
 
         // Filters
         if (query.search() != null && !query.search().isBlank()) {
             String pattern = "%" + query.search().toLowerCase() + "%";
-            base.where(DSL.lower(APP_USER.FIRST_NAME).like(pattern)
+            base.where(
+                DSL.cast(APP_USER.ID, String.class).like(pattern)
+                    .or(DSL.lower(APP_USER.FIRST_NAME).like(pattern))
                     .or(DSL.lower(APP_USER.LAST_NAME).like(pattern))
                     .or(DSL.lower(APP_USER.EMAIL).like(pattern))
-                    .or(DSL.lower(APP_USER.PHONE_NUMBER).like(pattern)));
+                    .or(DSL.lower(APP_USER.PHONE_NUMBER).like(pattern))
+            );
         }
 
         if (!CollectionUtils.isEmpty(query.role())) {
-            base.where(APP_ROLE.SLUG.in(query.role()));
+            base.where(
+                DSL.cast(APP_USER.ROLE_ID, String.class).in(query.role())
+            );
         }
 
         if (query.registrationDateMin() != null) {
@@ -95,18 +88,7 @@ public class GetUsersPreviews {
             ));
         }
 
-        // Group by user
-        base.groupBy(
-                APP_USER.ID,
-                APP_USER.FIRST_NAME,
-                APP_USER.LAST_NAME,
-                APP_USER.EMAIL,
-                APP_USER.PHONE_NUMBER,
-                APP_USER.PROFILE_PICTURE_URL,
-                APP_USER.REGISTRATION_DATE
-        );
-
-        // Count query (total items)
+        // Count total items
         Long totalItemsNullable = dsl.selectCount()
                 .from(base.asTable("count_sub"))
                 .fetchOne(0, long.class);
@@ -115,23 +97,26 @@ public class GetUsersPreviews {
 
         // Sorting
         List<SortRequest> sorts = parseSorts(paginationRequest.sort());
-
         sorts.forEach(sort -> base.orderBy(orderField(sort)));
 
         // Pagination
         int offset = paginationRequest.page() * paginationRequest.size();
         base.offset(offset).limit(paginationRequest.size());
 
-        // Execute
+        // Ejecutar
         var result = base.fetch();
 
-        // Map results
+        // Mapear resultados
         List<UserPreview> items = result.stream().map(r -> new UserPreview(
                 r.get(APP_USER.ID).toString(),
                 formatInvertedName(r.get(APP_USER.FIRST_NAME), r.get(APP_USER.LAST_NAME)),
                 r.get(APP_USER.EMAIL),
                 r.get(APP_USER.PHONE_NUMBER),
-                parseRolesJson(r.get("roles_json", String.class)),
+                new RoleResponse(
+                        r.get("role_id").toString(),
+                        r.get("role_name", String.class),
+                        r.get("role_slug", String.class)
+                ),
                 dateTimeFormatter.format(r.get(APP_USER.REGISTRATION_DATE)),
                 "5",
                 r.get(APP_USER.PROFILE_PICTURE_URL)
@@ -163,31 +148,6 @@ public class GetUsersPreviews {
         return DEFAULT_SORTS;
     }
 
-    private List<RoleResponse> parseRolesJson(String rolesJson) {
-        try {
-            List<Map<String, Object>> rolesList = objectMapper.readValue(
-                    rolesJson,
-                    new TypeReference<>() {}
-            );
-
-            return rolesList.stream()
-                    .map(this::toRoleResponse)
-                    .sorted(Comparator.comparing(RoleResponse::name))
-                    .toList();
-
-        } catch (Exception e) {
-            throw new RuntimeException("Could not read user roles correctly");
-        }
-    }
-
-    private RoleResponse toRoleResponse(Map<String, Object> map) {
-        return new RoleResponse(
-                map.get("id").toString(),
-                map.get("name").toString(),
-                map.get("slug").toString()
-        );
-    }
-
     private SortField<?> orderField(SortRequest sortRequest) {
         Field<?> field = switch (sortRequest.sort()) {
             case "firstName" -> APP_USER.FIRST_NAME;
@@ -195,18 +155,11 @@ public class GetUsersPreviews {
             case "email" -> APP_USER.EMAIL;
             case "phoneNumber" -> APP_USER.PHONE_NUMBER;
             case "registrationDate" -> APP_USER.REGISTRATION_DATE;
-            case "role" -> rolesNamesConcatenation();
-            case "activeLoans" -> APP_USER.LAST_NAME; // TODO add a true implementation for this
+            case "role" -> APP_ROLE.NAME;
+            case "activeLoans" -> APP_USER.LAST_NAME; // TODO add real logic
             default -> throw new IllegalArgumentException("Invalid sort: %s".formatted(sortRequest.sort()));
         };
         return SortingOrder.DESC.equals(sortRequest.order()) ? field.desc() : field.asc();
-    }
-
-    private Field<String> rolesNamesConcatenation() {
-        return DSL.groupConcat(APP_ROLE.NAME)
-                .orderBy(APP_ROLE.NAME.asc())
-                .separator(",")
-                .as("roles_concat");
     }
 
     private String formatInvertedName(String firstName, String lastName) {
@@ -216,10 +169,7 @@ public class GetUsersPreviews {
     private DateTimeFormatter createDateTimeFormatter() {
         return DateTimeFormatter.ofPattern(
                 "dd/MMM/yyyy",
-                new Locale.Builder()
-                        .setLanguage("es")
-                        .setRegion("MX")
-                        .build()
+                new Locale.Builder().setLanguage("es").setRegion("MX").build()
         );
     }
 

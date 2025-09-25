@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "app_user")
@@ -28,18 +26,12 @@ public class User {
     @JoinColumn(name = "gender_id", nullable = false)
     private Gender gender;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     public Set<Permission> getPermissions() {
-        return roles.stream()
-                .flatMap(role -> role.getPermissions().stream())
-                .collect(Collectors.toSet());
+        return role.getPermissions();
     }
 
     @OneToOne(

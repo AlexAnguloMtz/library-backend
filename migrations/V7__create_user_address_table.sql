@@ -5,5 +5,6 @@ CREATE TABLE user_address (
     district VARCHAR(255) NOT NULL,
     city VARCHAR(100) NOT NULL,
     zip_code VARCHAR(100) NOT NULL,
-    state_id INT NOT NULL REFERENCES state(id)
+    state_id INT NOT NULL REFERENCES state(id),
+    CONSTRAINT one_address_per_user UNIQUE (user_id)  -- For now, each user can have only one address
 );
