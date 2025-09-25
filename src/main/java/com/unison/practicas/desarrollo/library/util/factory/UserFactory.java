@@ -1,9 +1,11 @@
 package com.unison.practicas.desarrollo.library.util.factory;
 
 import com.github.javafaker.Faker;
+import com.unison.practicas.desarrollo.library.entity.Gender;
 import com.unison.practicas.desarrollo.library.entity.Role;
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.entity.UserAddress;
+import com.unison.practicas.desarrollo.library.repository.GenderRepository;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
 import com.unison.practicas.desarrollo.library.util.TimeUtils;
@@ -22,11 +24,13 @@ public class UserFactory {
 
     private final Faker faker;
     private final RoleRepository roleRepository;
+    private final GenderRepository genderRepository;
     private final UserAddressFactory userAddressFactory;
 
-    public UserFactory(Faker faker, RoleRepository roleRepository, UserAddressFactory userAddressFactory) {
+    public UserFactory(Faker faker, RoleRepository roleRepository, GenderRepository genderRepository, UserAddressFactory userAddressFactory) {
         this.faker = faker;
         this.roleRepository = roleRepository;
+        this.genderRepository = genderRepository;
         this.userAddressFactory = userAddressFactory;
     }
 
@@ -36,13 +40,14 @@ public class UserFactory {
         }
 
         List<Role> roles = roleRepository.findAll();
+        List<Gender> genders = genderRepository.findAll();
 
         return IntStream.range(1, count + 1)
-                .mapToObj(i -> createUser(i, CollectionHelpers.randomItem(roles)))
+                .mapToObj(i -> createUser(i, CollectionHelpers.randomItem(roles), CollectionHelpers.randomItem(genders)))
                 .toList();
     }
 
-    private User createUser(int seed, Role role) {
+    private User createUser(int seed, Role role, Gender gender) {
         var user = new User();
         user.setFirstName(faker.name().firstName());
         user.setLastName(faker.name().lastName());
@@ -52,6 +57,7 @@ public class UserFactory {
         user.setRoles(Set.of(role));
         user.setRegistrationDate(TimeUtils.randomInstantBetween(Instant.parse("2020-01-24T00:00:00Z"), Instant.parse("2025-09-24T00:00:00Z")));
         user.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/%s".formatted(CollectionHelpers.randomItem(profilePictures())));
+        user.setGender(gender);
 
         UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
 

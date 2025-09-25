@@ -15,6 +15,7 @@ public record FullUser(
         List<RoleResponse> roles,
         String registrationDate,
         String profilePictureUrl,
-        UserAddressResponse address
+        UserAddressResponse address,
+        GenderResponse gender
 ) {
 }

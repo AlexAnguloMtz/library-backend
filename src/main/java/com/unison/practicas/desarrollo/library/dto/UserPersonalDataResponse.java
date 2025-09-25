@@ -3,7 +3,7 @@ package com.unison.practicas.desarrollo.library.dto;
 import lombok.Builder;
 
 @Builder
-public record UserPersonalDataUpdateResponse(
+public record UserPersonalDataResponse(
         String firstName,
         String lastName,
         String phone,

@@ -24,6 +24,10 @@ public class User {
     private String profilePictureUrl;
     private Instant registrationDate;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "gender_id", nullable = false)
+    private Gender gender;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
@@ -45,5 +49,9 @@ public class User {
             fetch = FetchType.EAGER
     )
     private UserAddress address;
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 
 }

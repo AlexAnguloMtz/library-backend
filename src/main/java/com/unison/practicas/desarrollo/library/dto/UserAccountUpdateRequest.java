@@ -1,4 +1,11 @@
 package com.unison.practicas.desarrollo.library.dto;
 
-public class UserAccountUpdateRequest {
+import lombok.Builder;
+
+@Builder
+public record UserAccountUpdateRequest(
+        String email,
+        String role,
+        String password
+) {
 }

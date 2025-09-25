@@ -6,5 +6,7 @@ CREATE TABLE app_user (
     password_hash VARCHAR(255) NOT NULL,
     phone_number VARCHAR(15) NOT NULL,
     profile_picture_url TEXT NOT NULL,
-    registration_date TIMESTAMPTZ NOT NULL
+    registration_date TIMESTAMPTZ NOT NULL,
+    gender_id INT NOT NULL,
+    FOREIGN KEY (gender_id) REFERENCES gender(id)
 );

@@ -1,10 +1,13 @@
 package com.unison.practicas.desarrollo.library.configuration.seeder;
 
+import com.unison.practicas.desarrollo.library.entity.Gender;
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.entity.Role;
 import com.unison.practicas.desarrollo.library.entity.UserAddress;
+import com.unison.practicas.desarrollo.library.repository.GenderRepository;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
+import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
 import com.unison.practicas.desarrollo.library.util.factory.UserAddressFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 
 @Component
 @Profile({"dev", "test"})
@@ -21,12 +25,14 @@ public class DemoUsersSeeder {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserAddressFactory userAddressFactory;
+    private final GenderRepository genderRepository;
 
-    public DemoUsersSeeder(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, UserAddressFactory userAddressFactory) {
+    public DemoUsersSeeder(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, UserAddressFactory userAddressFactory, GenderRepository genderRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.userAddressFactory = userAddressFactory;
+        this.genderRepository = genderRepository;
     }
 
     public void seed() {
@@ -35,6 +41,8 @@ public class DemoUsersSeeder {
 
         var userEmail = "usuario@email.com";
         var userPassword = "Usuario99##";
+
+        List<Gender> genders = genderRepository.findAll();
 
         if (userRepository.findByEmailIgnoreCase(librarianEmail).isEmpty()) {
             Role librarianRole = roleRepository.findBySlug("LIBRARIAN").get();
@@ -47,6 +55,7 @@ public class DemoUsersSeeder {
             librarianUser.setPhoneNumber("6622118899");
             librarianUser.setRegistrationDate(Instant.now());
             librarianUser.setRoles(new HashSet<>());
+            librarianUser.setGender(CollectionHelpers.randomItem(genders));
 
             librarianUser.getRoles().add(librarianRole);
 
@@ -72,6 +81,7 @@ public class DemoUsersSeeder {
             regularUser.setPhoneNumber("7755449933");
             regularUser.setRegistrationDate(Instant.now());
             regularUser.setRoles(new HashSet<>());
+            regularUser.setGender(CollectionHelpers.randomItem(genders));
 
             regularUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_4.jpg");
 

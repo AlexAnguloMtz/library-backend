@@ -1,4 +1,12 @@
 package com.unison.practicas.desarrollo.library.dto;
 
-public class ExportResponse {
+import lombok.Builder;
+import org.springframework.http.MediaType;
+
+@Builder
+public record ExportResponse(
+        MediaType mediaType,
+        String fileName,
+        byte[] fileBytes
+) {
 }

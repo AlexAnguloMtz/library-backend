@@ -5,7 +5,7 @@ import lombok.Builder;
 @Builder
 public record UserAddressResponse(
         String address,
-        String state,
+        StateResponse state,
         String city,
         String district,
         String zipCode

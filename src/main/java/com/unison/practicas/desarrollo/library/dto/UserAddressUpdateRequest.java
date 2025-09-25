@@ -1,4 +1,13 @@
 package com.unison.practicas.desarrollo.library.dto;
 
-public class UserAddressUpdateRequest {
+import lombok.Builder;
+
+@Builder
+public record UserAddressUpdateRequest(
+        String address,
+        String state,
+        String city,
+        String district,
+        String zipCode
+) {
 }

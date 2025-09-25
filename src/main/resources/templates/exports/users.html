@@ -1,24 +1,33 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8"/>
     <style>
+        @page { size: landscape; margin: 20px; }
+
         body { font-family: Arial, sans-serif; margin: 20px; }
-        .card { border: 1px solid #ccc; padding: 15px; border-radius: 5px; background: #f5f5f5; margin-bottom: 20px; }
+
+        .page-title { margin: 0 0 20px 0; }
+
+        .card { border: 1px solid #ccc; padding: 15px; border-radius: 5px;
+                background: #f5f5f5; margin-bottom: 20px; }
+
         .card h3 { margin-top: 0; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; word-wrap: break-word; }
         th { background-color: #eee; }
         tbody tr:nth-child(odd) { background-color: #f9f9f9; }
     </style>
 </head>
 <body>
+<h2 class="page-title">Usuarios</h2>
 <div class="card">
-    <h3>Exportación realizada por:</h3>
-    <p><strong>Nombre:</strong> <span th:text="${currentUser.fullName}"></span></p>
-    <p><strong>Email:</strong> <span th:text="${currentUser.email}"></span></p>
-    <p><strong>Registrado desde:</strong> <span th:text="${currentUser.registrationDate}"></span></p>
-    <p><strong>Fecha/Hora de exportación:</strong> <span th:text="${exportDate}"></span></p>
+    <h3>Detalles de exportación de datos:</h3>
+    <p><strong>ID del responsable:</strong> <span th:text="${currentUser.id}"></span></p>
+    <p><strong>Nombre del responsable:</strong> <span th:text="${currentUser.fullName}"></span></p>
+    <p><strong>Email del responsable:</strong> <span th:text="${currentUser.email}"></span></p>
+    <p><strong>Fecha y hora:</strong> <span th:text="${exportDate}"></span></p>
 </div>
 
 <table>
@@ -26,17 +35,26 @@
     <tr>
         <th>ID</th>
         <th>Nombre</th>
+        <th>Apellido</th>
         <th>Email</th>
+        <th>Teléfono</th>
+        <th>Género</th>
+        <th>Roles</th>
+        <th>Miembro desde</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="user : ${users}">
         <td th:text="${user.id}"></td>
-        <td th:text="${user.fullName}"></td>
+        <td th:text="${user.firstName}"></td>
+        <td th:text="${user.lastName}"></td>
         <td th:text="${user.email}"></td>
+        <td th:text="${user.phoneNumber}"></td>
+        <td th:text="${user.gender}"></td>
+        <td th:text="${user.roles}"></td>
+        <td th:text="${user.registrationDate}"></td>
     </tr>
     </tbody>
 </table>
-
 </body>
 </html>
