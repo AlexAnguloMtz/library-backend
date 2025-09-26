@@ -3,7 +3,6 @@ package com.unison.practicas.desarrollo.library.service.user;
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
-import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
 import com.unison.practicas.desarrollo.library.dto.common.StateResponse;
 import com.unison.practicas.desarrollo.library.dto.user.request.*;
 import com.unison.practicas.desarrollo.library.dto.user.response.*;
@@ -36,6 +35,7 @@ public class UserService {
     private final ExportUsers exportUsers;
     private final ProfilePictureService profilePictureService;
     private final UserAuthorization userAuthorization;
+    private final GetUserOptions getUserOptions;
 
     // Repositories
     private final UserRepository userRepository;
@@ -47,12 +47,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final DateTimeFormatter dateTimeFormatter;
 
-    public UserService(PasswordEncoder passwordEncoder, GetUsersPreviews getUsersPreviews, ExportUsers exportUsers, ProfilePictureService profilePictureService, UserAuthorization userAuthorization, UserRepository userRepository, RoleRepository roleRepository, StateRepository stateRepository, GenderRepository genderRepository) {
+    public UserService(PasswordEncoder passwordEncoder, GetUsersPreviews getUsersPreviews, ExportUsers exportUsers, ProfilePictureService profilePictureService, UserAuthorization userAuthorization, GetUserOptions getUserOptions, UserRepository userRepository, RoleRepository roleRepository, StateRepository stateRepository, GenderRepository genderRepository) {
         this.passwordEncoder = passwordEncoder;
         this.getUsersPreviews = getUsersPreviews;
         this.exportUsers = exportUsers;
         this.profilePictureService = profilePictureService;
         this.userAuthorization = userAuthorization;
+        this.getUserOptions = getUserOptions;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.stateRepository = stateRepository;
@@ -71,26 +72,7 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('users:read')")
     public UserOptionsResponse getUserOptions() {
-        Iterable<OptionResponse> roles = roleRepository.findAll().stream()
-                .map(this::toOption)
-                .sorted((a, b) -> a.label().compareToIgnoreCase(b.label()))
-                .toList();
-
-        Iterable<OptionResponse> states = stateRepository.findAll().stream()
-                .map(this::toOption)
-                .sorted((a, b) -> a.label().compareToIgnoreCase(b.label()))
-                .toList();
-
-        Iterable<OptionResponse> genders = genderRepository.findAll().stream()
-                .map(this::toOption)
-                .sorted((a, b) -> a.label().compareToIgnoreCase(b.label()))
-                .toList();
-
-        return UserOptionsResponse.builder()
-                .roles(roles)
-                .states(states)
-                .genders(genders)
-                .build();
+        return getUserOptions.get();
     }
 
     @PreAuthorize("hasAuthority('users:read') || (hasAuthority('users:read:self') && #id == principal.id)")
@@ -99,16 +81,24 @@ public class UserService {
             CustomUserDetails currentUser
     ) {
         User user = findUserById(id);
+
+        if (!userAuthorization.canReadUser(currentUser, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to read this user");
+        }
+
         Set<String> permissions = permissionsForUser(currentUser, user);
+
         return toFullUser(user, permissions);
     }
 
     @PreAuthorize("hasAuthority('users:delete')")
     public void deleteUserById(String id, CustomUserDetails currentUser) {
         User user = findUserById(id);
+
         if (!userAuthorization.canDeleteUser(currentUser, user)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to delete this user");
         }
+
         userRepository.delete(user);
     }
 
@@ -175,9 +165,16 @@ public class UserService {
             CustomUserDetails currentUser
     ) {
         User userById = findUserById(id);
-
         if (!userAuthorization.canEditUser(currentUser, userById)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to edit this user");
+        }
+
+        Role role = findRoleById(request.roleId());
+        if (!userAuthorization.canAssignRole(currentUser, role.getSlug())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tienes permisos para asignar el rol '%s'".formatted(role.getName())
+            );
         }
 
         Optional<User> userByEmail = userRepository.findByEmailIgnoreCase(request.email());
@@ -190,7 +187,6 @@ public class UserService {
 
         userById.setEmail(request.email().trim());
 
-        Role role = findRoleById(request.roleId());
         userById.setRole(role);
 
         User savedUser = userRepository.save(userById);
@@ -199,19 +195,26 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('users:read')")
-    public ExportResponse export(User currentUser, ExportRequest request) {
+    public ExportResponse export(CustomUserDetails currentUser, ExportRequest request) {
         return exportUsers.handle(currentUser, request);
     }
 
     @PreAuthorize("hasAuthority('users:create')")
     @Transactional
-    public CreateUserResponse createUser(CreateUserRequest request) {
+    public CreateUserResponse createUser(CreateUserRequest request, CustomUserDetails currentUser) {
         if (userRepository.existsByEmailIgnoreCase(request.account().email())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email '%s' is already taken".formatted(request.account().email()));
         }
 
-        Gender gender = findGenderById(request.personalData().genderId());
         Role role = findRoleById(request.account().roleId());
+        if (!userAuthorization.canAssignRole(currentUser, role.getSlug())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "No tienes permisos para asignar el rol '%s'".formatted(role.getName())
+            );
+        }
+
+        Gender gender = findGenderById(request.personalData().genderId());
 
         String profilePictureKey = profilePictureService.saveProfilePicture(request.account().profilePicture());
 
@@ -384,20 +387,6 @@ public class UserService {
                 .build();
     }
 
-    private OptionResponse toOption(Role role) {
-        return OptionResponse.builder()
-                .value(role.getId().toString())
-                .label(role.getName())
-                .build();
-    }
-
-    private OptionResponse toOption(State state) {
-        return OptionResponse.builder()
-                .value(state.getId().toString())
-                .label(state.getName())
-                .build();
-    }
-
     private FullUserResponse toFullUser(User user, Set<String> permissions) {
         return FullUserResponse.builder()
                 .id(user.getId().toString())
@@ -420,13 +409,6 @@ public class UserService {
                 .id(gender.getId().toString())
                 .name(gender.getName())
                 .slug(gender.getSlug())
-                .build();
-    }
-
-    private OptionResponse toOption(Gender gender) {
-        return OptionResponse.builder()
-                .value(gender.getId().toString())
-                .label(gender.getName())
                 .build();
     }
 

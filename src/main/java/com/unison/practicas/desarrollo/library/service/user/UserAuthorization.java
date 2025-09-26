@@ -5,48 +5,105 @@ import com.unison.practicas.desarrollo.library.entity.RoleName;
 import com.unison.practicas.desarrollo.library.entity.User;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class UserAuthorization {
 
-    public boolean canEditUser(CustomUserDetails currentUser, User user) {
-        return permissionsForUser(currentUser, user).contains("edit");
+    private static final Map<RoleName, Map<RoleName, Set<String>>> TARGET_USER_PERMISSIONS = Map.of(
+            RoleName.ADMIN, Map.of(
+                    RoleName.ADMIN, Set.of("read"),
+                    RoleName.LIBRARIAN, Set.of("read", "edit", "delete"),
+                    RoleName.USER, Set.of("read", "edit", "delete")
+            ),
+            RoleName.LIBRARIAN, Map.of(
+                    RoleName.USER, Set.of("read", "edit", "delete")
+            ),
+            RoleName.USER, Map.of()
+    );
+
+    private static final Map<RoleName, Set<String>> SELF_PERMISSIONS = Map.of(
+            RoleName.ADMIN, Set.of("read", "edit"),
+            RoleName.LIBRARIAN, Set.of("read"),
+            RoleName.USER, Set.of("read")
+    );
+
+    private static final Map<RoleName, Set<RoleName>> ROLES_ASSIGNABLE_BY_ROLE = Map.of(
+            RoleName.ADMIN, Set.of(RoleName.ADMIN, RoleName.LIBRARIAN, RoleName.USER),
+            RoleName.LIBRARIAN, Set.of(RoleName.USER),
+            RoleName.USER, Set.of()
+    );
+
+    public boolean canReadUser(CustomUserDetails currentUser, User targetUser) {
+        return permissionsForUser(currentUser, targetUser).contains("read");
     }
 
-    public boolean canDeleteUser(CustomUserDetails currentUser, User user) {
-        return permissionsForUser(currentUser, user).contains("delete");
+    public boolean canEditUser(CustomUserDetails currentUser, User targetUser) {
+        return permissionsForUser(currentUser, targetUser).contains("edit");
     }
 
-    public Set<String> permissionsForUser(CustomUserDetails currentUser, User someUser) {
-        Optional<RoleName> roleNameOptional = RoleName.parse(someUser.getRole().getSlug());
+    public boolean canDeleteUser(CustomUserDetails currentUser, User targetUser) {
+        return permissionsForUser(currentUser, targetUser).contains("delete");
+    }
+
+    public Set<String> permissionsForUser(CustomUserDetails currentUser, User targetUser) {
+        Optional<RoleName> roleNameOptional = RoleName.parse(targetUser.getRole().getSlug());
         if (roleNameOptional.isEmpty()) {
             return Set.of();
         }
         RoleName roleName = roleNameOptional.get();
-        return permissionsFor(currentUser, someUser.getId().toString(), roleName);
+        return permissionsFor(currentUser, targetUser.getId().toString(), roleName);
     }
 
-    public Set<String> permissionsFor(CustomUserDetails currentUser, String otherUserId, RoleName roleName) {
-        if (currentUser.hasRole(RoleName.ADMIN) && RoleName.ADMIN.equals(roleName)) {
-            return Set.of("read");
+    public Set<String> permissionsFor(CustomUserDetails currentUser, String targetUserId, RoleName targetRole) {
+        Optional<RoleName> roleNameOptional = RoleName.parse(currentUser.getRole().getSlug());
+        if (roleNameOptional.isEmpty()) {
+            return Set.of();
         }
-        if (currentUser.hasRole(RoleName.ADMIN)) {
-            return Set.of("read", "edit", "delete");
+        if (currentUser.getId().equals(targetUserId)) {
+            return selfPermissions(roleNameOptional.get());
         }
-        if (currentUser.hasRole(RoleName.LIBRARIAN) && RoleName.ADMIN.equals(roleName)) {
-            return Set.of("read");
+        return TARGET_USER_PERMISSIONS
+                .getOrDefault(roleNameOptional.get(), Map.of())
+                .getOrDefault(targetRole, Set.of());
+    }
+
+    public Set<RoleName> listableRoles(CustomUserDetails user) {
+        return rolesWithPermission(user, "read");
+    }
+
+    public boolean canAssignRole(CustomUserDetails currentUser, String targetRole) {
+        Optional<RoleName> currentUserRoleNameOpt = RoleName.parse(currentUser.getRole().getSlug());
+        if (currentUserRoleNameOpt.isEmpty()) {
+            return false;
         }
-        if (currentUser.hasRole(RoleName.LIBRARIAN) && RoleName.LIBRARIAN.equals(roleName)) {
-            return Set.of("read");
+        Optional<RoleName> targetRoleOpt = RoleName.parse(targetRole);
+        if (targetRoleOpt.isEmpty()) {
+            return false;
         }
-        if (currentUser.hasRole(RoleName.LIBRARIAN) && RoleName.USER.equals(roleName)) {
-            return Set.of("read", "edit", "delete");
+        return ROLES_ASSIGNABLE_BY_ROLE
+                .getOrDefault(currentUserRoleNameOpt.get(), Set.of())
+                .contains(targetRoleOpt.get());
+    }
+
+    private Set<RoleName> rolesWithPermission(CustomUserDetails user, String permission) {
+        Optional<RoleName> roleNameOptional = RoleName.parse(user.getRole().getSlug());
+        if (roleNameOptional.isEmpty()) {
+            return Set.of();
         }
-        if (currentUser.hasRole(RoleName.USER) && currentUser.getId().equals(otherUserId)) {
-            return Set.of("read");
-        }
-        return Set.of();
+        return TARGET_USER_PERMISSIONS
+                .getOrDefault(roleNameOptional.get(), Map.of())
+                .entrySet().stream()
+                .filter(e -> e.getValue().contains(permission))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> selfPermissions(RoleName roleName) {
+        return SELF_PERMISSIONS.getOrDefault(roleName, Set.of());
     }
 
 }

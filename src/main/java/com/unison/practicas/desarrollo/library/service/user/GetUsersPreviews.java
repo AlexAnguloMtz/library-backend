@@ -19,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.unison.practicas.desarrollo.library.jooq.Tables.APP_ROLE;
 import static com.unison.practicas.desarrollo.library.jooq.Tables.APP_USER;
@@ -97,6 +98,15 @@ public class GetUsersPreviews {
                     query.registrationDateMax().atTime(23, 59, 59).atOffset(ZoneOffset.UTC)
             ));
         }
+
+        // Filter by listing permissions for current user role
+        Set<RoleName> allowedRoles = userAuthorization.listableRoles(currentUser);
+
+        Set<String> allowedRoleSlugs = allowedRoles.stream()
+                .map(Enum::name)
+                .collect(Collectors.toSet());
+
+        base.where(APP_ROLE.SLUG.in(allowedRoleSlugs));
 
         // Count total items
         Long totalItemsNullable = dsl.selectCount()

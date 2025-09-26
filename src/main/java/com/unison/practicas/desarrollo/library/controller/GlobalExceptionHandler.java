@@ -18,8 +18,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ProblemDetail handle(ResponseStatusException ex) {
         ProblemDetail problem = ProblemDetail.forStatus(ex.getStatusCode());
-        problem.setTitle(ex.getReason() != null ? ex.getReason() : "Error");
-        problem.setDetail(ex.getMessage());
+        problem.setTitle("Error");
+        problem.setDetail(ex.getReason());
         return problem;
     }
 

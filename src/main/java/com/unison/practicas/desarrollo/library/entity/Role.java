@@ -27,8 +27,4 @@ public class Role {
     )
     private Set<Permission> permissions = new HashSet<>();
 
-    public boolean hasCanonicalName(RoleName name) {
-        return slug.equals(name.name());
-    }
-
 }

@@ -88,7 +88,7 @@ public class UserController {
             @Valid @RequestBody ExportRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        ExportResponse response = userService.export(userDetails.getUser(), request);
+        ExportResponse response = userService.export(userDetails, request);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + response.fileName())
@@ -97,8 +97,11 @@ public class UserController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public CreateUserResponse createUser(@Valid @ModelAttribute CreateUserRequest request) {
-        return userService.createUser(request);
+    public CreateUserResponse createUser(
+            @Valid @ModelAttribute CreateUserRequest request,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        return userService.createUser(request, currentUser);
     }
 
     @PutMapping(
