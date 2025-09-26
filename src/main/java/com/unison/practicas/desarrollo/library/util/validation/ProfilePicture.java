@@ -22,5 +22,5 @@ public @interface ProfilePicture {
 
     Class<? extends Payload>[] payload() default {};
 
-    long maxSize() default 2_000_000; // 2MB por defecto
+    long maxSize() default 3_000_000;
 }

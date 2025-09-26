@@ -6,6 +6,8 @@ public interface ProfilePictureService {
 
     String saveProfilePicture(MultipartFile imageFile);
 
+    void deleteProfilePicture(String key);
+
     String profilePictureUrl(String key);
 
 }

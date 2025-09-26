@@ -28,4 +28,10 @@ public class FileSystemProfilePictureService implements ProfilePictureService {
         String publicUrlPrefix = "http://localhost:8080/api/v1/users/profile-pictures/";
         return publicUrlPrefix + key;
     }
+
+    @Override
+    public void deleteProfilePicture(String key) {
+        imageService.deleteImage(key, rootFolder);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.unison.practicas.desarrollo.library.controller;
 
 import com.unison.practicas.desarrollo.library.configuration.security.UserDetailsImpl;
+import com.unison.practicas.desarrollo.library.dto.user.request.UpdateProfilePictureRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.dto.user.request.*;
@@ -45,7 +46,7 @@ public class UserController {
     @PutMapping("/{id}/personal-data")
     public PersonalDataResponse updateUserPersonalData(
             String id,
-            PersonalDataRequest request
+           @Valid PersonalDataRequest request
     ) {
         return userService.updateUserPersonalData(id, request);
     }
@@ -53,7 +54,7 @@ public class UserController {
     @PutMapping("/{id}/address")
     public UserAddressResponse updateUserAddress(
             String id,
-            UserAddressRequest request
+            @Valid UserAddressRequest request
     ) {
         return userService.updateUserAddress(id, request);
     }
@@ -61,7 +62,7 @@ public class UserController {
     @PutMapping("/{id}/account")
     public AccountResponse updateUserAccount(
             String id,
-            AccountRequest request
+            @Valid AccountRequest request
     ) {
         return userService.updateUserAccount(id, request);
     }
@@ -88,6 +89,17 @@ public class UserController {
     @PostMapping(consumes = "multipart/form-data")
     public CreateUserResponse createUser(@Valid @ModelAttribute CreateUserRequest request) {
         return userService.createUser(request);
+    }
+
+    @PutMapping(
+            path = "/{id}/profile-picture",
+            consumes = "multipart/form-data"
+    )
+    public UpdateProfilePictureResponse updateProfilePicture(
+            @PathVariable String id,
+            @Valid @ModelAttribute UpdateProfilePictureRequest request
+    ) {
+        return userService.updateProfilePicture(id, request);
     }
 
 }

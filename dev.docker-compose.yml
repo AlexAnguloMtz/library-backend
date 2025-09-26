@@ -11,12 +11,19 @@ services:
       - "5432:5432"
     volumes:
       - library_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev_user -d dev_library_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   flyway:
     image: flyway/flyway:10
     container_name: flyway
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: -url=jdbc:postgresql://db:5432/dev_library_db -user=dev_user -password=dev_password migrate
     volumes:
       - ./migrations:/flyway/sql

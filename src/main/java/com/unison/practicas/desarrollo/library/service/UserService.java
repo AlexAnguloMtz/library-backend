@@ -14,6 +14,7 @@ import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -219,6 +220,33 @@ public class UserService {
         var savedUser = userRepository.save(user);
 
         return toCreationResponse(savedUser);
+    }
+
+    @PreAuthorize("hasAuthority('users:update')")
+    @Transactional
+    public UpdateProfilePictureResponse updateProfilePicture(String userId, UpdateProfilePictureRequest request) {
+        User user = findUserById(userId);
+
+        String oldPictureKey = user.getProfilePictureUrl();
+
+        String newPictureKey = profilePictureService.saveProfilePicture(request.profilePicture());
+
+        user.setProfilePictureUrl(newPictureKey);
+
+        User savedUser = userRepository.save(user);
+
+        if (StringUtils.hasText(oldPictureKey)) {
+            try {
+                profilePictureService.deleteProfilePicture(oldPictureKey);
+            } catch (Exception e) {
+                // Don't stop the execution flow, we can delete
+                // the orphan picture later with some worker thread
+            }
+        }
+
+        return UpdateProfilePictureResponse.builder()
+                .profilePictureUrl(profilePictureService.profilePictureUrl(savedUser.getProfilePictureUrl()))
+                .build();
     }
 
     private CreateUserResponse toCreationResponse(User user) {

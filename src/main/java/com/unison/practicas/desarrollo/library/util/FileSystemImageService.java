@@ -28,6 +28,15 @@ public class FileSystemImageService {
         }
     }
 
+    public void deleteImage(String key, Path rootFolder) {
+        try {
+            Path file = rootFolder.resolve(key);
+            Files.deleteIfExists(file);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not delete image", e);
+        }
+    }
+
     private String getFileExtension(String filename) {
         if (filename == null) return "";
         int dotIndex = filename.lastIndexOf('.');
