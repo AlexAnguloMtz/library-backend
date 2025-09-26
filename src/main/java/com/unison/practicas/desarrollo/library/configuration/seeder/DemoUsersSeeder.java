@@ -1,5 +1,6 @@
 package com.unison.practicas.desarrollo.library.configuration.seeder;
 
+import com.github.javafaker.Faker;
 import com.unison.practicas.desarrollo.library.entity.Gender;
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.entity.Role;
@@ -15,18 +16,22 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Component
 @Profile({"dev", "test"})
 public class DemoUsersSeeder {
 
+    private final Faker faker;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserAddressFactory userAddressFactory;
     private final GenderRepository genderRepository;
 
-    public DemoUsersSeeder(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, UserAddressFactory userAddressFactory, GenderRepository genderRepository) {
+    public DemoUsersSeeder(Faker faker, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, UserAddressFactory userAddressFactory, GenderRepository genderRepository) {
+        this.faker = faker;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -51,7 +56,7 @@ public class DemoUsersSeeder {
             librarianUser.setLastName("Demo");
             librarianUser.setEmail(librarianEmail);
             librarianUser.setPasswordHash(passwordEncoder.encode(librarianPassword));
-            librarianUser.setPhoneNumber("6622118899");
+            librarianUser.setPhoneNumber(makePhoneNumber());
             librarianUser.setRegistrationDate(Instant.now());
             librarianUser.setRole(librarianRole);
             librarianUser.setGender(CollectionHelpers.randomItem(genders));
@@ -75,7 +80,7 @@ public class DemoUsersSeeder {
             regularUser.setLastName("Demo");
             regularUser.setEmail(userEmail);
             regularUser.setPasswordHash(passwordEncoder.encode(userPassword));
-            regularUser.setPhoneNumber("7755449933");
+            regularUser.setPhoneNumber(makePhoneNumber());
             regularUser.setRegistrationDate(Instant.now());
             regularUser.setRole(userRole);
             regularUser.setGender(CollectionHelpers.randomItem(genders));
@@ -90,6 +95,13 @@ public class DemoUsersSeeder {
 
             userRepository.save(regularUser);
         }
+    }
+
+    private String makePhoneNumber() {
+        return IntStream.range(0, 10)
+                .map(i -> faker.number().numberBetween(1, 10))
+                .mapToObj(String::valueOf)
+                .collect(Collectors.joining());
     }
 
 }

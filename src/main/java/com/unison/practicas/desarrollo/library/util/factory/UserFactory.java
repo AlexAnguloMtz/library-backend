@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Component
@@ -50,7 +51,7 @@ public class UserFactory {
         var user = new User();
         user.setFirstName(faker.name().firstName());
         user.setLastName(faker.name().lastName());
-        user.setPhoneNumber(faker.phoneNumber().cellPhone());
+        user.setPhoneNumber(makePhoneNumber());
         user.setEmail(generateUniqueEmail(seed));
         user.setPasswordHash(faker.internet().password(8, 16));
         user.setRole(role);
@@ -65,6 +66,13 @@ public class UserFactory {
         user.setAddress(userAddress);
 
         return user;
+    }
+
+    private String makePhoneNumber() {
+        return IntStream.range(0, 10)
+            .map(i -> faker.number().numberBetween(1, 10))
+            .mapToObj(String::valueOf)
+            .collect(Collectors.joining());
     }
 
     private String generateUniqueEmail(int seed) {
