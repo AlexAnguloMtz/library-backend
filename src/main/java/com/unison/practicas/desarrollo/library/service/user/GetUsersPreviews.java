@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.service;
+package com.unison.practicas.desarrollo.library.service.user;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.user.response.RoleResponse;
@@ -118,7 +118,6 @@ public class GetUsersPreviews {
 
         List<UserPreviewResponse> items = result.stream()
                 .map(r -> {
-                    Set<String> permissions = permissionsForRole(currentUser, r.get("role_slug", String.class));
 
                     String id = r.get(APP_USER.ID).toString();
                     String name = formatInvertedName(r.get(APP_USER.FIRST_NAME), r.get(APP_USER.LAST_NAME));
@@ -137,6 +136,8 @@ public class GetUsersPreviews {
                     String borrowedBooks = "5";
 
                     String profilePictureUrl = profilePictureService.profilePictureUrl(r.get(APP_USER.PROFILE_PICTURE_URL));
+
+                    Set<String> permissions = permissionsFor(currentUser, id, r.get("role_slug", String.class));
 
                     return UserPreviewResponse.builder()
                             .id(id)
@@ -166,13 +167,13 @@ public class GetUsersPreviews {
                 .build();
     }
 
-    private Set<String> permissionsForRole(CustomUserDetails currentUser, String role) {
+    private Set<String> permissionsFor(CustomUserDetails currentUser, String id, String role) {
         Optional<RoleName> roleNameOptional = RoleName.parse(role);
         if (roleNameOptional.isEmpty()) {
             return new HashSet<>();
         }
         RoleName roleName = roleNameOptional.get();
-        return userAuthorization.permissionsForRole(currentUser, roleName);
+        return userAuthorization.permissionsFor(currentUser, id, roleName);
     }
 
     private List<SortRequest> parseSorts(List<String> sorts) {

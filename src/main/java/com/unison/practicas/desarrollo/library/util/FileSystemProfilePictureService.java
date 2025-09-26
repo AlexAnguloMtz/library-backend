@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.util;
 
-import com.unison.practicas.desarrollo.library.service.ProfilePictureService;
+import com.unison.practicas.desarrollo.library.service.user.ProfilePictureService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 

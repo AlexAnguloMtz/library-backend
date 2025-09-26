@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.service;
+package com.unison.practicas.desarrollo.library.service.user;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
@@ -104,14 +104,26 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('users:delete')")
-    public void deleteUserById(String id) {
-        userRepository.deleteById(Integer.parseInt(id));
+    public void deleteUserById(String id, CustomUserDetails currentUser) {
+        User user = findUserById(id);
+        if (!userAuthorization.canDeleteUser(currentUser, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to delete this user");
+        }
+        userRepository.delete(user);
     }
 
     @PreAuthorize("hasAuthority('users:update')")
     @Transactional
-    public PersonalDataResponse updateUserPersonalData(String id, PersonalDataRequest request) {
+    public PersonalDataResponse updateUserPersonalData(
+            String id,
+            PersonalDataRequest request,
+            CustomUserDetails currentUser
+    ) {
         User user = findUserById(id);
+
+        if (!userAuthorization.canEditUser(currentUser, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to edit this user");
+        }
 
         user.setFirstName(request.firstName().trim());
         user.setLastName(request.lastName().trim());
@@ -127,8 +139,17 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('users:update')")
     @Transactional
-    public UserAddressResponse updateUserAddress(String id, UserAddressRequest request) {
+    public UserAddressResponse updateUserAddress(
+            String id,
+            UserAddressRequest request,
+            CustomUserDetails currentUser
+    ) {
         User user = findUserById(id);
+
+        if (!userAuthorization.canEditUser(currentUser, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to edit this user");
+        }
+
         State state = findStateById(request.stateId());
 
         UserAddress address = user.getAddress();
@@ -148,8 +169,16 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('users:update')")
     @Transactional
-    public AccountResponse updateUserAccount(String id, UpdateAccountRequest request) {
+    public AccountResponse updateUserAccount(
+            String id,
+            UpdateAccountRequest request,
+            CustomUserDetails currentUser
+    ) {
         User userById = findUserById(id);
+
+        if (!userAuthorization.canEditUser(currentUser, userById)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to edit this user");
+        }
 
         Optional<User> userByEmail = userRepository.findByEmailIgnoreCase(request.email());
 
@@ -205,8 +234,16 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('users:update')")
     @Transactional
-    public UpdateProfilePictureResponse updateProfilePicture(String userId, UpdateProfilePictureRequest request) {
+    public UpdateProfilePictureResponse updateProfilePicture(
+            String userId,
+            UpdateProfilePictureRequest request,
+            CustomUserDetails currentUser
+    ) {
         User user = findUserById(userId);
+
+        if (!userAuthorization.canEditUser(currentUser, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to edit this user");
+        }
 
         String oldPictureKey = user.getProfilePictureUrl();
 
@@ -232,8 +269,12 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('users:update')")
     @Transactional
-    public void changePassword(String id, ChangePasswordRequest request) {
+    public void changePassword(String id, ChangePasswordRequest request, CustomUserDetails currentUser) {
         User user = findUserById(id);
+
+        if (!userAuthorization.canEditUser(currentUser, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to edit this user");
+        }
 
         if (!request.password().trim().equals(request.confirmedPassword().trim())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords don't match");

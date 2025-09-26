@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.service;
+package com.unison.practicas.desarrollo.library.service.auth;
 
 import com.unison.practicas.desarrollo.library.dto.auth.LoginForm;
 import com.unison.practicas.desarrollo.library.dto.auth.LoginResponse;

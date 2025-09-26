@@ -1,10 +1,7 @@
 package com.unison.practicas.desarrollo.library.util.factory;
 
 import com.github.javafaker.Faker;
-import com.unison.practicas.desarrollo.library.entity.Gender;
-import com.unison.practicas.desarrollo.library.entity.Role;
-import com.unison.practicas.desarrollo.library.entity.User;
-import com.unison.practicas.desarrollo.library.entity.UserAddress;
+import com.unison.practicas.desarrollo.library.entity.*;
 import com.unison.practicas.desarrollo.library.repository.GenderRepository;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
@@ -39,12 +36,21 @@ public class UserFactory {
             throw new RuntimeException("Count must be greater than 0, got %d".formatted(count));
         }
 
-        List<Role> roles = roleRepository.findAll();
+        Role adminRole = roleRepository.findBySlug(RoleName.ADMIN.name()).get();
+        Role librarianRole = roleRepository.findBySlug(RoleName.LIBRARIAN.name()).get();
+        Role userRole = roleRepository.findBySlug(RoleName.USER.name()).get();
+        List<Role> roles = List.of(librarianRole, userRole);
         List<Gender> genders = genderRepository.findAll();
 
-        return IntStream.range(1, count + 1)
+        var users = IntStream.range(1, count + 1)
                 .mapToObj(i -> createUser(i, CollectionHelpers.randomItem(roles), CollectionHelpers.randomItem(genders)))
-                .toList();
+                .collect(Collectors.toList());
+
+        User admin = createUser(Integer.MAX_VALUE, adminRole, CollectionHelpers.randomItem(genders));
+
+        users.add(admin);
+
+        return users;
     }
 
     private User createUser(int seed, Role role, Gender gender) {
@@ -85,7 +91,6 @@ public class UserFactory {
         return List.of(
                 "profile_1.jpg",
                 "profile_2.jpg",
-                "profile_3.jpg",
                 "profile_4.jpg",
                 "profile_5.jpg",
                 "profile_6.jpg"

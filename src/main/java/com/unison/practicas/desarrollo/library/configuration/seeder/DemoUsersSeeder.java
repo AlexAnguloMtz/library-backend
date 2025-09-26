@@ -37,6 +37,9 @@ public class DemoUsersSeeder {
     }
 
     public void seed() {
+        var adminEmail = "admin@email.com";
+        var adminPassword = "Admin99##";
+
         var librarianEmail = "bibliotecario@email.com";
         var librarianPassword = "Bibliotecario99##";
 
@@ -44,6 +47,28 @@ public class DemoUsersSeeder {
         var userPassword = "Usuario99##";
 
         List<Gender> genders = genderRepository.findAll();
+
+        if (userRepository.findByEmailIgnoreCase(adminEmail).isEmpty()) {
+            Role adminRole = roleRepository.findBySlug(RoleName.ADMIN.name()).get();
+
+            var adminUser = new User();
+            adminUser.setFirstName("Administrador");
+            adminUser.setLastName("Demo");
+            adminUser.setEmail(adminEmail);
+            adminUser.setPasswordHash(passwordEncoder.encode(adminPassword));
+            adminUser.setPhoneNumber(makePhoneNumber());
+            adminUser.setRegistrationDate(Instant.now());
+            adminUser.setRole(adminRole);
+            adminUser.setGender(CollectionHelpers.randomItem(genders));
+
+            adminUser.setProfilePictureUrl("profile_5.jpg");
+
+            UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
+
+            adminUser.setAddress(userAddress);
+
+            userRepository.save(adminUser);
+        }
 
         if (userRepository.findByEmailIgnoreCase(librarianEmail).isEmpty()) {
             Role librarianRole = roleRepository.findBySlug(RoleName.LIBRARIAN.name()).get();
@@ -63,8 +88,6 @@ public class DemoUsersSeeder {
             UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
 
             librarianUser.setAddress(userAddress);
-
-            userAddress.setUser(librarianUser);
 
             userRepository.save(librarianUser);
         }
@@ -87,8 +110,6 @@ public class DemoUsersSeeder {
             UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
 
             regularUser.setAddress(userAddress);
-
-            userAddress.setUser(regularUser);
 
             userRepository.save(regularUser);
         }

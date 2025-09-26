@@ -12,6 +12,3 @@ CREATE TABLE app_user (
     FOREIGN KEY (role_id) REFERENCES app_role(id),
     FOREIGN KEY (gender_id) REFERENCES gender(id)
 );
-
-ALTER TABLE app_user
-ADD CONSTRAINT valid_phone_number CHECK (phone_number ~ '^\d{10}$');

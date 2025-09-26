@@ -39,10 +39,14 @@ public class UserAddressFactory {
         var userAddress = new UserAddress();
         userAddress.setAddress(faker.address().streetAddress());
         userAddress.setCity(faker.address().cityName());
-        userAddress.setZipCode(faker.address().zipCode());
+        userAddress.setZipCode(makeZipCode());
         userAddress.setState(state);
         userAddress.setDistrict(faker.address().streetAddress());
         return userAddress;
+    }
+
+    private String makeZipCode() {
+        return faker.number().digits(5);
     }
 
 }

@@ -6,7 +6,7 @@ import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.dto.user.request.*;
 import com.unison.practicas.desarrollo.library.dto.user.response.*;
-import com.unison.practicas.desarrollo.library.service.UserService;
+import com.unison.practicas.desarrollo.library.service.user.UserService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.validation.Valid;
@@ -50,30 +50,36 @@ public class UserController {
     @PutMapping("/{id}/personal-data")
     public PersonalDataResponse updateUserPersonalData(
             @PathVariable String id,
-            @Valid @RequestBody PersonalDataRequest request
+            @Valid @RequestBody PersonalDataRequest request,
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        return userService.updateUserPersonalData(id, request);
+        return userService.updateUserPersonalData(id, request, currentUser);
     }
 
     @PutMapping("/{id}/address")
     public UserAddressResponse updateUserAddress(
             @PathVariable String id,
-            @Valid @RequestBody UserAddressRequest request
+            @Valid @RequestBody UserAddressRequest request,
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        return userService.updateUserAddress(id, request);
+        return userService.updateUserAddress(id, request, currentUser);
     }
 
     @PutMapping("/{id}/account")
     public AccountResponse updateUserAccount(
             @PathVariable String id,
-            @Valid @RequestBody UpdateAccountRequest request
+            @Valid @RequestBody UpdateAccountRequest request,
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        return userService.updateUserAccount(id, request);
+        return userService.updateUserAccount(id, request, currentUser);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUserById(@PathVariable String id) {
-        userService.deleteUserById(id);
+    public ResponseEntity<Void> deleteUserById(
+            @PathVariable String id,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        userService.deleteUserById(id, currentUser);
         return ResponseEntity.noContent().build();
     }
 
@@ -101,17 +107,19 @@ public class UserController {
     )
     public UpdateProfilePictureResponse updateProfilePicture(
             @PathVariable String id,
-            @Valid @ModelAttribute UpdateProfilePictureRequest request
+            @Valid @ModelAttribute UpdateProfilePictureRequest request,
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        return userService.updateProfilePicture(id, request);
+        return userService.updateProfilePicture(id, request, currentUser);
     }
 
     @PutMapping("/{id}/password")
     public ResponseEntity<Void> changePassword(
             @PathVariable String id,
-            @Valid @RequestBody ChangePasswordRequest request
+            @Valid @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        userService.changePassword(id, request);
+        userService.changePassword(id, request, currentUser);
         return ResponseEntity.noContent().build();
     }
 

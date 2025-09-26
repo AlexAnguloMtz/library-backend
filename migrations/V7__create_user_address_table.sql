@@ -8,3 +8,6 @@ CREATE TABLE user_address (
     state_id INT NOT NULL REFERENCES state(id),
     CONSTRAINT one_address_per_user UNIQUE (user_id)  -- For now, each user can have only one address
 );
+
+ALTER TABLE user_address
+ADD CONSTRAINT valid_zip_code CHECK (zip_code ~ '^\d{5}$');

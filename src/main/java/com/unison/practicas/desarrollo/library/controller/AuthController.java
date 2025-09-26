@@ -2,7 +2,7 @@ package com.unison.practicas.desarrollo.library.controller;
 
 import com.unison.practicas.desarrollo.library.dto.auth.LoginForm;
 import com.unison.practicas.desarrollo.library.dto.auth.LoginResponse;
-import com.unison.practicas.desarrollo.library.service.AuthService;
+import com.unison.practicas.desarrollo.library.service.auth.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 
 public enum RoleName {
 
+    ADMIN,
     LIBRARIAN,
     USER;
 
