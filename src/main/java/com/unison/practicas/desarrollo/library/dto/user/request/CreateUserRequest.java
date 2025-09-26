@@ -6,6 +6,6 @@ import lombok.Builder;
 public record CreateUserRequest(
         PersonalDataRequest personalData,
         UserAddressRequest address,
-        AccountRequest account
+        CreateAccountRequest account
 ) {
 }

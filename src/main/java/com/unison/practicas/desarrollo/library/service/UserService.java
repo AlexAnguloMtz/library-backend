@@ -16,6 +16,7 @@ import com.unison.practicas.desarrollo.library.util.pagination.PaginationRespons
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -103,22 +104,12 @@ public class UserService {
     public PersonalDataResponse updateUserPersonalData(String id, PersonalDataRequest request) {
         User user = findUserById(id);
 
-        if (StringUtils.hasText(request.firstName())) {
-            user.setFirstName(request.firstName().trim());
-        }
+        user.setFirstName(request.firstName().trim());
+        user.setLastName(request.lastName().trim());
+        user.setPhoneNumber(request.phone().trim());
 
-        if (StringUtils.hasText(request.lastName())) {
-            user.setLastName(request.lastName().trim());
-        }
-
-        if (StringUtils.hasText(request.phone())) {
-            user.setPhoneNumber(request.phone().trim());
-        }
-
-        if (StringUtils.hasText(request.genderId())) {
-            Gender gender = findGenderById(request.genderId());
-            user.setGender(gender);
-        }
+        Gender gender = findGenderById(request.genderId());
+        user.setGender(gender);
 
         User savedUser = userRepository.save(user);
 
@@ -129,28 +120,17 @@ public class UserService {
     @Transactional
     public UserAddressResponse updateUserAddress(String id, UserAddressRequest request) {
         User user = findUserById(id);
-        UserAddress userAddress = user.getAddress();
+        State state = findStateById(request.stateId());
 
-        if (StringUtils.hasText(request.stateId())) {
-            State state = findStateById(request.stateId());
-            userAddress.setState(state);
-        }
+        UserAddress address = user.getAddress();
 
-        if (StringUtils.hasText(request.city())) {
-            userAddress.setCity(request.city().trim());
-        }
+        address.setState(state);
+        address.setCity(request.city().trim());
+        address.setAddress(request.address().trim());
+        address.setDistrict(request.district().trim());
+        address.setZipCode(request.zipCode().trim());
 
-        if (StringUtils.hasText(request.address())) {
-            userAddress.setAddress(request.address().trim());
-        }
-
-        if (StringUtils.hasText(request.district())) {
-            userAddress.setDistrict(request.district().trim());
-        }
-
-        if (StringUtils.hasText(request.zipCode())) {
-            userAddress.setZipCode(request.zipCode().trim());
-        }
+        user.setAddress(address);
 
         User savedUser = userRepository.save(user);
 
@@ -159,29 +139,21 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('users:update')")
     @Transactional
-    public AccountResponse updateUserAccount(String id, AccountRequest request) {
+    public AccountResponse updateUserAccount(String id, UpdateAccountRequest request) {
         User userById = findUserById(id);
 
-        if (StringUtils.hasText(request.email())) {
-            Optional<User> userByEmail = userRepository.findByEmailIgnoreCase(request.email());
+        Optional<User> userByEmail = userRepository.findByEmailIgnoreCase(request.email());
 
-            boolean emailConflict = userByEmail.isPresent() && !userById.getId().equals(userByEmail.get().getId());
+        boolean emailConflict = userByEmail.isPresent() && !userById.getId().equals(userByEmail.get().getId());
 
-            if (emailConflict) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is taken: %s".formatted(userByEmail.get().getEmail()));
-            }
-
-            userById.setEmail(request.email());
+        if (emailConflict) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is taken: %s".formatted(userByEmail.get().getEmail()));
         }
 
-        if (StringUtils.hasText(request.roleId())) {
-            Role role = findRoleById(request.roleId());
-            userById.setRole(role);
-        }
+        userById.setEmail(request.email().trim());
 
-        if (StringUtils.hasText(request.password())) {
-            userById.setPasswordHash(passwordEncoder.encode(request.password()));
-        }
+        Role role = findRoleById(request.roleId());
+        userById.setRole(role);
 
         User savedUser = userRepository.save(userById);
 
@@ -206,13 +178,13 @@ public class UserService {
         String profilePictureKey = profilePictureService.saveProfilePicture(request.account().profilePicture());
 
         var user = new User();
-        user.setFirstName(request.personalData().firstName());
-        user.setLastName(request.personalData().lastName());
-        user.setPhoneNumber(request.personalData().phone());
+        user.setFirstName(request.personalData().firstName().trim());
+        user.setLastName(request.personalData().lastName().trim());
+        user.setPhoneNumber(request.personalData().phone().trim());
         user.setGender(gender);
         user.setAddress(toAddressEntity(request.address()));
-        user.setEmail(request.account().email());
-        user.setPasswordHash(passwordEncoder.encode(request.account().password()));
+        user.setEmail(request.account().email().trim());
+        user.setPasswordHash(passwordEncoder.encode(request.account().password().trim()));
         user.setRole(role);
         user.setProfilePictureUrl(profilePictureKey);
         user.setRegistrationDate(Instant.now());
@@ -249,6 +221,20 @@ public class UserService {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('users:update')")
+    @Transactional
+    public void changePassword(String id, ChangePasswordRequest request) {
+        User user = findUserById(id);
+
+        if (!request.password().trim().equals(request.confirmedPassword().trim())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Passwords don't match");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.password().trim()));
+
+        userRepository.save(user);
+    }
+
     private CreateUserResponse toCreationResponse(User user) {
         return CreateUserResponse.builder()
                 .id(String.valueOf(user.getId()))
@@ -263,10 +249,10 @@ public class UserService {
 
         var address = new UserAddress();
         address.setState(state);
-        address.setCity(request.city());
-        address.setDistrict(request.district());
-        address.setAddress(request.address());
-        address.setZipCode(request.zipCode());
+        address.setCity(request.city().trim());
+        address.setDistrict(request.district().trim());
+        address.setAddress(request.address().trim());
+        address.setZipCode(request.zipCode().trim());
         return address;
     }
 

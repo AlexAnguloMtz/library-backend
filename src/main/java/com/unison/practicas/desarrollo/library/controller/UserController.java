@@ -45,24 +45,24 @@ public class UserController {
 
     @PutMapping("/{id}/personal-data")
     public PersonalDataResponse updateUserPersonalData(
-            String id,
-           @Valid PersonalDataRequest request
+            @PathVariable String id,
+            @Valid @RequestBody PersonalDataRequest request
     ) {
         return userService.updateUserPersonalData(id, request);
     }
 
     @PutMapping("/{id}/address")
     public UserAddressResponse updateUserAddress(
-            String id,
-            @Valid UserAddressRequest request
+            @PathVariable String id,
+            @Valid @RequestBody UserAddressRequest request
     ) {
         return userService.updateUserAddress(id, request);
     }
 
     @PutMapping("/{id}/account")
     public AccountResponse updateUserAccount(
-            String id,
-            @Valid AccountRequest request
+            @PathVariable String id,
+            @Valid @RequestBody UpdateAccountRequest request
     ) {
         return userService.updateUserAccount(id, request);
     }
@@ -100,6 +100,15 @@ public class UserController {
             @Valid @ModelAttribute UpdateProfilePictureRequest request
     ) {
         return userService.updateProfilePicture(id, request);
+    }
+
+    @PutMapping("/{id}/password")
+    public ResponseEntity<Void> changePassword(
+            @PathVariable String id,
+            @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        userService.changePassword(id, request);
+        return ResponseEntity.noContent().build();
     }
 
 }

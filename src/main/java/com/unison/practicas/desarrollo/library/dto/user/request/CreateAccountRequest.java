@@ -1,5 +1,6 @@
 package com.unison.practicas.desarrollo.library.dto.user.request;
 
+import com.unison.practicas.desarrollo.library.util.validation.Password;
 import com.unison.practicas.desarrollo.library.util.validation.ProfilePicture;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,8 +10,10 @@ import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
 @Builder
-public record AccountRequest(
+public record CreateAccountRequest(
+
         @NotBlank
+        @Size(max = 100)
         @Email
         String email,
 
@@ -19,7 +22,7 @@ public record AccountRequest(
         String roleId,
 
         @NotBlank
-        @Size(min = 8, max = 100)
+        @Password
         String password,
 
         @NotNull
