@@ -41,6 +41,10 @@ public class UserDetailsImpl implements UserDetails {
         return user.getEmail();
     }
 
+    public String getId() {
+        return user.getId().toString();
+    }
+
     public User getUser() {
         return user;
     }

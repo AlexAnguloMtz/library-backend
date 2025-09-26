@@ -18,6 +18,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -88,8 +89,8 @@ public class UserService {
                 .build();
     }
 
-    @PreAuthorize("hasAuthority('users:read')")
-    public FullUserResponse getFullUserById(String id) {
+    @PreAuthorize("hasAuthority('users:read') || (hasAuthority('users:read:self') && #id == principal.id)")
+    public FullUserResponse getFullUserById(@P("id") String id) {
         User user = findUserById(id);
         return toFullUser(user);
     }

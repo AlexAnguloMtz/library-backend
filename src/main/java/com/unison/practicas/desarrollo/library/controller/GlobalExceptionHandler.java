@@ -27,24 +27,25 @@ public class GlobalExceptionHandler {
     public ProblemDetail handle(MethodArgumentNotValidException ex) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problem.setTitle("Datos inválidos");
-
-        Map<String, List<String>> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.computeIfAbsent(error.getField(), key -> new ArrayList<>())
-                    .add(error.getDefaultMessage());
-        });
-
-        problem.setProperty("errors", errors);
-
+        problem.setProperty("errors", getErrors(ex));
         return problem;
     }
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handle(Exception ex) {
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        problem.setTitle("Internal server error");
-        problem.setDetail("Unknown error");
+        problem.setTitle("Error desconocido");
+        problem.setDetail("Error desconocido");
         return problem;
+    }
+
+    private Map<String, List<String>> getErrors(MethodArgumentNotValidException ex) {
+        Map<String, List<String>> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            errors.computeIfAbsent(error.getField(), key -> new ArrayList<>())
+                    .add(error.getDefaultMessage());
+        });
+        return errors;
     }
 
 }
