@@ -1,5 +1,10 @@
 package com.unison.practicas.desarrollo.library.dto.user.response;
 
+import lombok.Builder;
+
+import java.util.Set;
+
+@Builder
 public record UserPreviewResponse(
      String id,
      String name,
@@ -8,6 +13,7 @@ public record UserPreviewResponse(
      RoleResponse role,
      String registrationDate,
      String activeLoans,
-     String profilePictureUrl
+     String profilePictureUrl,
+     Set<String> permissions
 ) {
 }

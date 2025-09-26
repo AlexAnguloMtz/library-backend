@@ -1,6 +1,7 @@
 package com.unison.practicas.desarrollo.library.configuration.security;
 
 import com.unison.practicas.desarrollo.library.entity.Role;
+import com.unison.practicas.desarrollo.library.entity.RoleName;
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.entity.Permission;
 import org.springframework.security.core.GrantedAuthority;
@@ -50,7 +51,7 @@ public class CustomUserDetails implements UserDetails {
         return user;
     }
 
-    public boolean hasRole(Role.Name role) {
+    public boolean hasRole(RoleName role) {
         return user.hasRole(role);
     }
 

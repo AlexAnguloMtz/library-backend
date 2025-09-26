@@ -2,7 +2,7 @@ package com.unison.practicas.desarrollo.library.dto.user.response;
 
 import lombok.Builder;
 
-import java.util.List;
+import java.util.Set;
 
 @Builder
 public record FullUserResponse(
@@ -17,6 +17,6 @@ public record FullUserResponse(
         String profilePictureUrl,
         UserAddressResponse address,
         GenderResponse gender,
-        List<String> permissions
+        Set<String> permissions
 ) {
 }

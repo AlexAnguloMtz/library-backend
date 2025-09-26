@@ -4,17 +4,14 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @Entity
 @Table(name = "app_role")
 @Data
 public class Role {
-
-    public enum Name {
-        LIBRARIAN,
-        USER
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +27,7 @@ public class Role {
     )
     private Set<Permission> permissions = new HashSet<>();
 
-    public boolean hasCanonicalName(Name name) {
+    public boolean hasCanonicalName(RoleName name) {
         return slug.equals(name.name());
     }
 

@@ -1,8 +1,10 @@
 package com.unison.practicas.desarrollo.library.service;
 
+import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.user.response.RoleResponse;
 import com.unison.practicas.desarrollo.library.dto.user.response.UserPreviewResponse;
 import com.unison.practicas.desarrollo.library.dto.user.request.UserPreviewsRequest;
+import com.unison.practicas.desarrollo.library.entity.RoleName;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import com.unison.practicas.desarrollo.library.util.pagination.SortRequest;
@@ -35,14 +37,20 @@ public class GetUsersPreviews {
     private final DSLContext dsl;
     private final DateTimeFormatter dateTimeFormatter;
     private final ProfilePictureService profilePictureService;
+    private final UserAuthorization userAuthorization;
 
-    public GetUsersPreviews(DSLContext dsl, ProfilePictureService profilePictureService) {
+    public GetUsersPreviews(DSLContext dsl, ProfilePictureService profilePictureService, UserAuthorization userAuthorization) {
         this.dsl = dsl;
         this.profilePictureService = profilePictureService;
+        this.userAuthorization = userAuthorization;
         this.dateTimeFormatter = createDateTimeFormatter();
     }
 
-    public PaginationResponse<UserPreviewResponse> handle(UserPreviewsRequest query, PaginationRequest paginationRequest) {
+    public PaginationResponse<UserPreviewResponse> handle(
+            UserPreviewsRequest query,
+            PaginationRequest paginationRequest,
+            CustomUserDetails currentUser
+    ) {
 
         // Base query: join directo a role
         var base = dsl.select(
@@ -108,21 +116,42 @@ public class GetUsersPreviews {
         // Ejecutar
         var result = base.fetch();
 
-        // Mapear resultados
-        List<UserPreviewResponse> items = result.stream().map(r -> new UserPreviewResponse(
-                r.get(APP_USER.ID).toString(),
-                formatInvertedName(r.get(APP_USER.FIRST_NAME), r.get(APP_USER.LAST_NAME)),
-                r.get(APP_USER.EMAIL),
-                r.get(APP_USER.PHONE_NUMBER),
-                new RoleResponse(
-                        r.get("role_id").toString(),
-                        r.get("role_name", String.class),
-                        r.get("role_slug", String.class)
-                ),
-                dateTimeFormatter.format(r.get(APP_USER.REGISTRATION_DATE)),
-                "5",
-                profilePictureService.profilePictureUrl(r.get(APP_USER.PROFILE_PICTURE_URL))
-        )).toList();
+        List<UserPreviewResponse> items = result.stream()
+                .map(r -> {
+                    Set<String> permissions = permissionsForRole(currentUser, r.get("role_slug", String.class));
+
+                    String id = r.get(APP_USER.ID).toString();
+                    String name = formatInvertedName(r.get(APP_USER.FIRST_NAME), r.get(APP_USER.LAST_NAME));
+                    String email = r.get(APP_USER.EMAIL);
+                    String phone = r.get(APP_USER.PHONE_NUMBER);
+
+                    RoleResponse role = new RoleResponse(
+                            r.get("role_id").toString(),
+                            r.get("role_name", String.class),
+                            r.get("role_slug", String.class)
+                    );
+
+                    String registrationDate = dateTimeFormatter.format(r.get(APP_USER.REGISTRATION_DATE));
+
+                    // TODO: reemplazar con lógica real de books y loans
+                    String borrowedBooks = "5";
+
+                    String profilePictureUrl = profilePictureService.profilePictureUrl(r.get(APP_USER.PROFILE_PICTURE_URL));
+
+                    return UserPreviewResponse.builder()
+                            .id(id)
+                            .name(name)
+                            .email(email)
+                            .phone(phone)
+                            .role(role)
+                            .registrationDate(registrationDate)
+                            .activeLoans(borrowedBooks)
+                            .profilePictureUrl(profilePictureUrl)
+                            .permissions(permissions)
+                            .build();
+                })
+                .toList();
+
 
         long totalPages = (long) Math.ceil((double) totalItems / paginationRequest.size());
 
@@ -135,6 +164,15 @@ public class GetUsersPreviews {
                 .hasPrevious(paginationRequest.page() > 0)
                 .hasNext(paginationRequest.page() < totalPages - 1)
                 .build();
+    }
+
+    private Set<String> permissionsForRole(CustomUserDetails currentUser, String role) {
+        Optional<RoleName> roleNameOptional = RoleName.parse(role);
+        if (roleNameOptional.isEmpty()) {
+            return new HashSet<>();
+        }
+        RoleName roleName = roleNameOptional.get();
+        return userAuthorization.permissionsForRole(currentUser, roleName);
     }
 
     private List<SortRequest> parseSorts(List<String> sorts) {

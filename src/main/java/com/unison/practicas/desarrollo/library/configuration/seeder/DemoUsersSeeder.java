@@ -1,10 +1,7 @@
 package com.unison.practicas.desarrollo.library.configuration.seeder;
 
 import com.github.javafaker.Faker;
-import com.unison.practicas.desarrollo.library.entity.Gender;
-import com.unison.practicas.desarrollo.library.entity.User;
-import com.unison.practicas.desarrollo.library.entity.Role;
-import com.unison.practicas.desarrollo.library.entity.UserAddress;
+import com.unison.practicas.desarrollo.library.entity.*;
 import com.unison.practicas.desarrollo.library.repository.GenderRepository;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
@@ -49,7 +46,7 @@ public class DemoUsersSeeder {
         List<Gender> genders = genderRepository.findAll();
 
         if (userRepository.findByEmailIgnoreCase(librarianEmail).isEmpty()) {
-            Role librarianRole = roleRepository.findBySlug(Role.Name.LIBRARIAN.name()).get();
+            Role librarianRole = roleRepository.findBySlug(RoleName.LIBRARIAN.name()).get();
 
             var librarianUser = new User();
             librarianUser.setFirstName("Bibliotecario");
@@ -73,7 +70,7 @@ public class DemoUsersSeeder {
         }
 
         if (userRepository.findByEmailIgnoreCase(userEmail).isEmpty()) {
-            Role userRole = roleRepository.findBySlug(Role.Name.USER.name()).get();
+            Role userRole = roleRepository.findBySlug(RoleName.USER.name()).get();
 
             var regularUser = new User();
             regularUser.setFirstName("Usuario");

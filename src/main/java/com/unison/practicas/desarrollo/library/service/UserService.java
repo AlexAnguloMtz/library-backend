@@ -26,10 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -38,6 +35,7 @@ public class UserService {
     private final GetUsersPreviews getUsersPreviews;
     private final ExportUsers exportUsers;
     private final ProfilePictureService profilePictureService;
+    private final UserAuthorization userAuthorization;
 
     // Repositories
     private final UserRepository userRepository;
@@ -49,11 +47,12 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final DateTimeFormatter dateTimeFormatter;
 
-    public UserService(PasswordEncoder passwordEncoder, GetUsersPreviews getUsersPreviews, ExportUsers exportUsers, ProfilePictureService profilePictureService, UserRepository userRepository, RoleRepository roleRepository, StateRepository stateRepository, GenderRepository genderRepository) {
+    public UserService(PasswordEncoder passwordEncoder, GetUsersPreviews getUsersPreviews, ExportUsers exportUsers, ProfilePictureService profilePictureService, UserAuthorization userAuthorization, UserRepository userRepository, RoleRepository roleRepository, StateRepository stateRepository, GenderRepository genderRepository) {
         this.passwordEncoder = passwordEncoder;
         this.getUsersPreviews = getUsersPreviews;
         this.exportUsers = exportUsers;
         this.profilePictureService = profilePictureService;
+        this.userAuthorization = userAuthorization;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.stateRepository = stateRepository;
@@ -62,8 +61,12 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('users:read')")
-    public PaginationResponse<UserPreviewResponse> getUsersPreviews(UserPreviewsRequest query, PaginationRequest pagination) {
-        return getUsersPreviews.handle(query, pagination);
+    public PaginationResponse<UserPreviewResponse> getUsersPreviews(
+            UserPreviewsRequest query,
+            PaginationRequest pagination,
+            CustomUserDetails currentUser
+    ) {
+        return getUsersPreviews.handle(query, pagination, currentUser);
     }
 
     @PreAuthorize("hasAuthority('users:read')")
@@ -96,7 +99,7 @@ public class UserService {
             CustomUserDetails currentUser
     ) {
         User user = findUserById(id);
-        List<String> permissions = permissionsForUser(currentUser, user);
+        Set<String> permissions = permissionsForUser(currentUser, user);
         return toFullUser(user, permissions);
     }
 
@@ -354,7 +357,7 @@ public class UserService {
                 .build();
     }
 
-    private FullUserResponse toFullUser(User user, List<String> permissions) {
+    private FullUserResponse toFullUser(User user, Set<String> permissions) {
         return FullUserResponse.builder()
                 .id(user.getId().toString())
                 .firstName(user.getFirstName())
@@ -394,16 +397,8 @@ public class UserService {
         return genderOptional.get();
     }
 
-    private List<String> permissionsForUser(CustomUserDetails currentUser, User someUser) {
-        if (currentUser.hasRole(Role.Name.LIBRARIAN) && someUser.hasRole(Role.Name.LIBRARIAN)) {
-            return List.of("read");
-        }
-        if (currentUser.hasRole(Role.Name.LIBRARIAN) && someUser.hasRole(Role.Name.USER)) {
-            return List.of("read", "edit", "delete");
-        }
-        // Regular users won't have any special permissions right now.
-        // Just return an empty list by default.
-        return new ArrayList<>();
+    private Set<String> permissionsForUser(CustomUserDetails currentUser, User someUser) {
+        return userAuthorization.permissionsForUser(currentUser, someUser);
     }
 
 }

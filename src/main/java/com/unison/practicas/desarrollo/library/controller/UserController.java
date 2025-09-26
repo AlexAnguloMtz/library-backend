@@ -28,9 +28,10 @@ public class UserController {
     @GetMapping
     public PaginationResponse<UserPreviewResponse> getUsersPreviews(
             UserPreviewsRequest query,
-            PaginationRequest pagination
+            PaginationRequest pagination,
+            @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
-        return userService.getUsersPreviews(query, pagination);
+        return userService.getUsersPreviews(query, pagination, currentUser);
     }
     
     @GetMapping("/options")
