@@ -1,5 +1,6 @@
 package com.unison.practicas.desarrollo.library.configuration.security;
 
+import com.unison.practicas.desarrollo.library.entity.Role;
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.entity.Permission;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,11 +11,11 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class UserDetailsImpl implements UserDetails {
+public class CustomUserDetails implements UserDetails {
 
     private final User user;
 
-    public UserDetailsImpl(User user) {
+    public CustomUserDetails(User user) {
         this.user = user;
     }
 
@@ -47,6 +48,10 @@ public class UserDetailsImpl implements UserDetails {
 
     public User getUser() {
         return user;
+    }
+
+    public boolean hasRole(Role.Name role) {
+        return user.hasRole(role);
     }
 
 }

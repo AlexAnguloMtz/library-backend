@@ -49,7 +49,7 @@ public class DemoUsersSeeder {
         List<Gender> genders = genderRepository.findAll();
 
         if (userRepository.findByEmailIgnoreCase(librarianEmail).isEmpty()) {
-            Role librarianRole = roleRepository.findBySlug("LIBRARIAN").get();
+            Role librarianRole = roleRepository.findBySlug(Role.Name.LIBRARIAN.name()).get();
 
             var librarianUser = new User();
             librarianUser.setFirstName("Bibliotecario");
@@ -73,7 +73,7 @@ public class DemoUsersSeeder {
         }
 
         if (userRepository.findByEmailIgnoreCase(userEmail).isEmpty()) {
-            Role userRole = roleRepository.findBySlug("USER").get();
+            Role userRole = roleRepository.findBySlug(Role.Name.USER.name()).get();
 
             var regularUser = new User();
             regularUser.setFirstName("Usuario");

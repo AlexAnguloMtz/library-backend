@@ -11,6 +11,11 @@ import java.util.Set;
 @Data
 public class Role {
 
+    public enum Name {
+        LIBRARIAN,
+        USER
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -24,5 +29,9 @@ public class Role {
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<Permission> permissions = new HashSet<>();
+
+    public boolean hasCanonicalName(Name name) {
+        return slug.equals(name.name());
+    }
 
 }

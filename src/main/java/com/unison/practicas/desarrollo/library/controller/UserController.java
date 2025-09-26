@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.controller;
 
-import com.unison.practicas.desarrollo.library.configuration.security.UserDetailsImpl;
+import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.user.request.UpdateProfilePictureRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
@@ -39,8 +39,11 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public FullUserResponse getFullUserById(@PathVariable String id) {
-        return userService.getFullUserById(id);
+    public FullUserResponse getFullUserById(
+            @PathVariable String id,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return userService.getFullUserById(id, userDetails);
     }
 
     @PutMapping("/{id}/personal-data")
@@ -76,7 +79,7 @@ public class UserController {
     @PostMapping("/export")
     public ResponseEntity<byte[]> export(
             @Valid @RequestBody ExportRequest request,
-            @AuthenticationPrincipal UserDetailsImpl userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         ExportResponse response = userService.export(userDetails.getUser(), request);
 

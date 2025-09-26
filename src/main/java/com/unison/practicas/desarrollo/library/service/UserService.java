@@ -1,5 +1,6 @@
 package com.unison.practicas.desarrollo.library.service;
 
+import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
@@ -14,9 +15,7 @@ import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +26,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -90,9 +91,13 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('users:read') || (hasAuthority('users:read:self') && #id == principal.id)")
-    public FullUserResponse getFullUserById(@P("id") String id) {
+    public FullUserResponse getFullUserById(
+            @P("id") String id,
+            CustomUserDetails currentUser
+    ) {
         User user = findUserById(id);
-        return toFullUser(user);
+        List<String> permissions = permissionsForUser(currentUser, user);
+        return toFullUser(user, permissions);
     }
 
     @PreAuthorize("hasAuthority('users:delete')")
@@ -349,7 +354,7 @@ public class UserService {
                 .build();
     }
 
-    private FullUserResponse toFullUser(User user) {
+    private FullUserResponse toFullUser(User user, List<String> permissions) {
         return FullUserResponse.builder()
                 .id(user.getId().toString())
                 .firstName(user.getFirstName())
@@ -362,6 +367,7 @@ public class UserService {
                 .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
                 .address(toUserAddressResponse(user.getAddress()))
                 .gender(toGenderResponse(user.getGender()))
+                .permissions(permissions)
                 .build();
     }
 
@@ -386,6 +392,18 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find gender with id: %s".formatted(id));
         }
         return genderOptional.get();
+    }
+
+    private List<String> permissionsForUser(CustomUserDetails currentUser, User someUser) {
+        if (currentUser.hasRole(Role.Name.LIBRARIAN) && someUser.hasRole(Role.Name.LIBRARIAN)) {
+            return List.of("read");
+        }
+        if (currentUser.hasRole(Role.Name.LIBRARIAN) && someUser.hasRole(Role.Name.USER)) {
+            return List.of("read", "edit", "delete");
+        }
+        // Regular users won't have any special permissions right now.
+        // Just return an empty list by default.
+        return new ArrayList<>();
     }
 
 }

@@ -51,4 +51,8 @@ public class User {
         address.setUser(this);
     }
 
+    public boolean hasRole(Role.Name roleName) {
+        return role.hasCanonicalName(roleName);
+    }
+
 }

@@ -24,7 +24,7 @@ public class JpaUserDetailsService implements UserDetailsService {
         if (userOptional.isEmpty()) {
             throw new UsernameNotFoundException("User not found: %s".formatted(username));
         }
-        return new UserDetailsImpl(userOptional.get());
+        return new CustomUserDetails(userOptional.get());
     }
 
 }
