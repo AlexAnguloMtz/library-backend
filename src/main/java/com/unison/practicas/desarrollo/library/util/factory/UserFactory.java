@@ -55,7 +55,7 @@ public class UserFactory {
         user.setPasswordHash(faker.internet().password(8, 16));
         user.setRole(role);
         user.setRegistrationDate(TimeUtils.randomInstantBetween(Instant.parse("2020-01-24T00:00:00Z"), Instant.parse("2025-09-24T00:00:00Z")));
-        user.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/%s".formatted(CollectionHelpers.randomItem(profilePictures())));
+        user.setProfilePictureUrl(CollectionHelpers.randomItem(profilePictures()));
         user.setGender(gender);
 
         UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();

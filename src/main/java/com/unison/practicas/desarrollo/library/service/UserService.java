@@ -33,6 +33,7 @@ public class UserService {
     // Services
     private final GetUsersPreviews getUsersPreviews;
     private final ExportUsers exportUsers;
+    private final ProfilePictureService profilePictureService;
 
     // Repositories
     private final UserRepository userRepository;
@@ -44,10 +45,11 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final DateTimeFormatter dateTimeFormatter;
 
-    public UserService(PasswordEncoder passwordEncoder, GetUsersPreviews getUsersPreviews, ExportUsers exportUsers, UserRepository userRepository, RoleRepository roleRepository, StateRepository stateRepository, GenderRepository genderRepository) {
+    public UserService(PasswordEncoder passwordEncoder, GetUsersPreviews getUsersPreviews, ExportUsers exportUsers, ProfilePictureService profilePictureService, UserRepository userRepository, RoleRepository roleRepository, StateRepository stateRepository, GenderRepository genderRepository) {
         this.passwordEncoder = passwordEncoder;
         this.getUsersPreviews = getUsersPreviews;
         this.exportUsers = exportUsers;
+        this.profilePictureService = profilePictureService;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.stateRepository = stateRepository;
@@ -200,6 +202,8 @@ public class UserService {
         Gender gender = findGenderById(request.personalData().genderId());
         Role role = findRoleById(request.account().roleId());
 
+        String profilePictureKey = profilePictureService.saveProfilePicture(request.account().profilePicture());
+
         var user = new User();
         user.setFirstName(request.personalData().firstName());
         user.setLastName(request.personalData().lastName());
@@ -209,7 +213,7 @@ public class UserService {
         user.setEmail(request.account().email());
         user.setPasswordHash(passwordEncoder.encode(request.account().password()));
         user.setRole(role);
-        user.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_1.jpg");
+        user.setProfilePictureUrl(profilePictureKey);
         user.setRegistrationDate(Instant.now());
 
         var savedUser = userRepository.save(user);
@@ -312,7 +316,7 @@ public class UserService {
         return AccountResponse.builder()
                 .email(user.getEmail())
                 .role(toRoleResponse(user.getRole()))
-                .profilePictureUrl(user.getProfilePictureUrl())
+                .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
                 .build();
     }
 
@@ -340,7 +344,7 @@ public class UserService {
                 .phone(user.getPhoneNumber())
                 .role(toRoleResponse(user.getRole()))
                 .registrationDate(dateTimeFormatter.format(user.getRegistrationDate().atOffset(ZoneOffset.UTC)))
-                .profilePictureUrl(user.getProfilePictureUrl())
+                .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
                 .address(toUserAddressResponse(user.getAddress()))
                 .gender(toGenderResponse(user.getGender()))
                 .build();

@@ -34,9 +34,11 @@ public class GetUsersPreviews {
 
     private final DSLContext dsl;
     private final DateTimeFormatter dateTimeFormatter;
+    private final ProfilePictureService profilePictureService;
 
-    public GetUsersPreviews(DSLContext dsl) {
+    public GetUsersPreviews(DSLContext dsl, ProfilePictureService profilePictureService) {
         this.dsl = dsl;
+        this.profilePictureService = profilePictureService;
         this.dateTimeFormatter = createDateTimeFormatter();
     }
 
@@ -119,7 +121,7 @@ public class GetUsersPreviews {
                 ),
                 dateTimeFormatter.format(r.get(APP_USER.REGISTRATION_DATE)),
                 "5",
-                r.get(APP_USER.PROFILE_PICTURE_URL)
+                profilePictureService.profilePictureUrl(r.get(APP_USER.PROFILE_PICTURE_URL))
         )).toList();
 
         long totalPages = (long) Math.ceil((double) totalItems / paginationRequest.size());

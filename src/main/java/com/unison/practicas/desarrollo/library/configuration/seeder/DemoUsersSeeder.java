@@ -56,7 +56,7 @@ public class DemoUsersSeeder {
             librarianUser.setRole(librarianRole);
             librarianUser.setGender(CollectionHelpers.randomItem(genders));
 
-            librarianUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_1.jpg");
+            librarianUser.setProfilePictureUrl("profile_1.jpg");
 
             UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
 
@@ -80,7 +80,7 @@ public class DemoUsersSeeder {
             regularUser.setRole(userRole);
             regularUser.setGender(CollectionHelpers.randomItem(genders));
 
-            regularUser.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_4.jpg");
+            regularUser.setProfilePictureUrl("profile_4.jpg");
 
             UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
 

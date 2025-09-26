@@ -85,8 +85,8 @@ public class UserController {
                 .body(response.fileBytes());
     }
 
-    @PostMapping
-    public CreateUserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
+    @PostMapping(consumes = "multipart/form-data")
+    public CreateUserResponse createUser(@Valid @ModelAttribute CreateUserRequest request) {
         return userService.createUser(request);
     }
 
