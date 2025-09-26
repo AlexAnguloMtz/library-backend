@@ -191,7 +191,9 @@ public class UserService {
 
         User savedUser = userRepository.save(userById);
 
-        return toAccountResponse(savedUser);
+        Set<String> permissions = userAuthorization.permissionsForUser(currentUser, savedUser);
+
+        return toAccountResponse(savedUser, permissions);
     }
 
     @PreAuthorize("hasAuthority('users:read')")
@@ -232,7 +234,9 @@ public class UserService {
 
         var savedUser = userRepository.save(user);
 
-        return toCreationResponse(savedUser);
+        Set<String> permissions = userAuthorization.permissionsForUser(currentUser, savedUser);
+
+        return toCreationResponse(savedUser, permissions);
     }
 
     @PreAuthorize("hasAuthority('users:update')")
@@ -288,12 +292,12 @@ public class UserService {
         userRepository.save(user);
     }
 
-    private CreateUserResponse toCreationResponse(User user) {
+    private CreateUserResponse toCreationResponse(User user, Set<String> permissions) {
         return CreateUserResponse.builder()
                 .id(String.valueOf(user.getId()))
                 .personalData(toPersonalDataResponse(user))
                 .address(toUserAddressResponse(user.getAddress()))
-                .account(toAccountResponse(user))
+                .account(toAccountResponse(user, permissions))
                 .build();
     }
 
@@ -379,11 +383,12 @@ public class UserService {
         );
     }
 
-    private AccountResponse toAccountResponse(User user) {
+    private AccountResponse toAccountResponse(User user, Set<String> permissions) {
         return AccountResponse.builder()
                 .email(user.getEmail())
                 .role(toRoleResponse(user.getRole()))
                 .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
+                .permissions(permissions)
                 .build();
     }
 

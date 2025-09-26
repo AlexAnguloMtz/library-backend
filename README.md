@@ -9,6 +9,7 @@ La API permite gestionar usuarios, libros, préstamos y otras funcionalidades t�
 ## Documentación
 
 - **Setup y desarrollo:** [docs/setup.md](docs/setup.md)
+- **Seguridad y permisos:** [docs/permissions.md](docs/permissions.md)
 
 ## Tecnologías utilizadas
 
