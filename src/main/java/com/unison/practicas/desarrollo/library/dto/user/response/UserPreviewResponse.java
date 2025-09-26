@@ -1,6 +1,6 @@
-package com.unison.practicas.desarrollo.library.dto;
+package com.unison.practicas.desarrollo.library.dto.user.response;
 
-public record UserPreview(
+public record UserPreviewResponse(
      String id,
      String name,
      String email,

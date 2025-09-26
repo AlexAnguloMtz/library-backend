@@ -1,7 +1,10 @@
 package com.unison.practicas.desarrollo.library.controller;
 
 import com.unison.practicas.desarrollo.library.configuration.security.UserDetailsImpl;
-import com.unison.practicas.desarrollo.library.dto.*;
+import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
+import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
+import com.unison.practicas.desarrollo.library.dto.user.request.*;
+import com.unison.practicas.desarrollo.library.dto.user.response.*;
 import com.unison.practicas.desarrollo.library.service.UserService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
@@ -22,8 +25,8 @@ public class UserController {
     }
 
     @GetMapping
-    public PaginationResponse<UserPreview> getUsersPreviews(
-            UserPreviewsQuery query,
+    public PaginationResponse<UserPreviewResponse> getUsersPreviews(
+            UserPreviewsRequest query,
             PaginationRequest pagination
     ) {
         return userService.getUsersPreviews(query, pagination);
@@ -35,14 +38,14 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public FullUser getFullUserById(@PathVariable String id) {
+    public FullUserResponse getFullUserById(@PathVariable String id) {
         return userService.getFullUserById(id);
     }
 
     @PutMapping("/{id}/personal-data")
-    public UserPersonalDataResponse updateUserPersonalData(
+    public PersonalDataResponse updateUserPersonalData(
             String id,
-            UserPersonalDataUpdateRequest request
+            PersonalDataRequest request
     ) {
         return userService.updateUserPersonalData(id, request);
     }
@@ -50,15 +53,15 @@ public class UserController {
     @PutMapping("/{id}/address")
     public UserAddressResponse updateUserAddress(
             String id,
-            UserAddressUpdateRequest request
+            UserAddressRequest request
     ) {
         return userService.updateUserAddress(id, request);
     }
 
     @PutMapping("/{id}/account")
-    public UserAccountResponse updateUserAccount(
+    public AccountResponse updateUserAccount(
             String id,
-            UserAccountUpdateRequest request
+            AccountRequest request
     ) {
         return userService.updateUserAccount(id, request);
     }
@@ -83,7 +86,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserCreationResponse createUser(@Valid @RequestBody UserCreationRequest request) {
+    public CreateUserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
         return userService.createUser(request);
     }
 

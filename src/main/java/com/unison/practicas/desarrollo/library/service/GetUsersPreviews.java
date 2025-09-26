@@ -1,8 +1,8 @@
 package com.unison.practicas.desarrollo.library.service;
 
-import com.unison.practicas.desarrollo.library.dto.RoleResponse;
-import com.unison.practicas.desarrollo.library.dto.UserPreview;
-import com.unison.practicas.desarrollo.library.dto.UserPreviewsQuery;
+import com.unison.practicas.desarrollo.library.dto.user.response.RoleResponse;
+import com.unison.practicas.desarrollo.library.dto.user.response.UserPreviewResponse;
+import com.unison.practicas.desarrollo.library.dto.user.request.UserPreviewsRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import com.unison.practicas.desarrollo.library.util.pagination.SortRequest;
@@ -40,7 +40,7 @@ public class GetUsersPreviews {
         this.dateTimeFormatter = createDateTimeFormatter();
     }
 
-    public PaginationResponse<UserPreview> handle(UserPreviewsQuery query, PaginationRequest paginationRequest) {
+    public PaginationResponse<UserPreviewResponse> handle(UserPreviewsRequest query, PaginationRequest paginationRequest) {
 
         // Base query: join directo a role
         var base = dsl.select(
@@ -107,7 +107,7 @@ public class GetUsersPreviews {
         var result = base.fetch();
 
         // Mapear resultados
-        List<UserPreview> items = result.stream().map(r -> new UserPreview(
+        List<UserPreviewResponse> items = result.stream().map(r -> new UserPreviewResponse(
                 r.get(APP_USER.ID).toString(),
                 formatInvertedName(r.get(APP_USER.FIRST_NAME), r.get(APP_USER.LAST_NAME)),
                 r.get(APP_USER.EMAIL),
@@ -124,7 +124,7 @@ public class GetUsersPreviews {
 
         long totalPages = (long) Math.ceil((double) totalItems / paginationRequest.size());
 
-        return PaginationResponse.<UserPreview>builder()
+        return PaginationResponse.<UserPreviewResponse>builder()
                 .items(items)
                 .page(paginationRequest.page())
                 .size(paginationRequest.size())

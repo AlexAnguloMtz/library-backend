@@ -1,6 +1,11 @@
 package com.unison.practicas.desarrollo.library.service;
 
-import com.unison.practicas.desarrollo.library.dto.*;
+import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
+import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
+import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
+import com.unison.practicas.desarrollo.library.dto.common.StateResponse;
+import com.unison.practicas.desarrollo.library.dto.user.request.*;
+import com.unison.practicas.desarrollo.library.dto.user.response.*;
 import com.unison.practicas.desarrollo.library.entity.*;
 import com.unison.practicas.desarrollo.library.repository.GenderRepository;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
@@ -16,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -50,7 +56,7 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('users:read')")
-    public PaginationResponse<UserPreview> getUsersPreviews(UserPreviewsQuery query, PaginationRequest pagination) {
+    public PaginationResponse<UserPreviewResponse> getUsersPreviews(UserPreviewsRequest query, PaginationRequest pagination) {
         return getUsersPreviews.handle(query, pagination);
     }
 
@@ -79,7 +85,7 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('users:read')")
-    public FullUser getFullUserById(String id) {
+    public FullUserResponse getFullUserById(String id) {
         User user = findUserById(id);
         return toFullUser(user);
     }
@@ -91,7 +97,7 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('users:update')")
     @Transactional
-    public UserPersonalDataResponse updateUserPersonalData(String id, UserPersonalDataUpdateRequest request) {
+    public PersonalDataResponse updateUserPersonalData(String id, PersonalDataRequest request) {
         User user = findUserById(id);
 
         if (StringUtils.hasText(request.firstName())) {
@@ -106,24 +112,24 @@ public class UserService {
             user.setPhoneNumber(request.phone().trim());
         }
 
-        if (StringUtils.hasText(request.gender())) {
-            Gender gender = findGenderById(request.gender());
+        if (StringUtils.hasText(request.genderId())) {
+            Gender gender = findGenderById(request.genderId());
             user.setGender(gender);
         }
 
         User savedUser = userRepository.save(user);
 
-        return toPersonalDataUpdateResponse(savedUser);
+        return toPersonalDataResponse(savedUser);
     }
 
     @PreAuthorize("hasAuthority('users:update')")
     @Transactional
-    public UserAddressResponse updateUserAddress(String id, UserAddressUpdateRequest request) {
+    public UserAddressResponse updateUserAddress(String id, UserAddressRequest request) {
         User user = findUserById(id);
         UserAddress userAddress = user.getAddress();
 
-        if (StringUtils.hasText(request.state())) {
-            State state = findStateById(request.state());
+        if (StringUtils.hasText(request.stateId())) {
+            State state = findStateById(request.stateId());
             userAddress.setState(state);
         }
 
@@ -150,7 +156,7 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('users:update')")
     @Transactional
-    public UserAccountResponse updateUserAccount(String id, UserAccountUpdateRequest request) {
+    public AccountResponse updateUserAccount(String id, AccountRequest request) {
         User userById = findUserById(id);
 
         if (StringUtils.hasText(request.email())) {
@@ -165,8 +171,8 @@ public class UserService {
             userById.setEmail(request.email());
         }
 
-        if (StringUtils.hasText(request.role())) {
-            Role role = findRoleById(request.role());
+        if (StringUtils.hasText(request.roleId())) {
+            Role role = findRoleById(request.roleId());
             userById.setRole(role);
         }
 
@@ -176,7 +182,7 @@ public class UserService {
 
         User savedUser = userRepository.save(userById);
 
-        return toUserAccountResponse(savedUser);
+        return toAccountResponse(savedUser);
     }
 
     @PreAuthorize("hasAuthority('users:read')")
@@ -186,8 +192,50 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('users:create')")
     @Transactional
-    public UserCreationResponse createUser(UserCreationRequest request) {
-        return null;
+    public CreateUserResponse createUser(CreateUserRequest request) {
+        if (userRepository.existsByEmailIgnoreCase(request.account().email())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email '%s' is already taken".formatted(request.account().email()));
+        }
+
+        Gender gender = findGenderById(request.personalData().genderId());
+        Role role = findRoleById(request.account().roleId());
+
+        var user = new User();
+        user.setFirstName(request.personalData().firstName());
+        user.setLastName(request.personalData().lastName());
+        user.setPhoneNumber(request.personalData().phone());
+        user.setGender(gender);
+        user.setAddress(toAddressEntity(request.address()));
+        user.setEmail(request.account().email());
+        user.setPasswordHash(passwordEncoder.encode(request.account().password()));
+        user.setRole(role);
+        user.setProfilePictureUrl("http://localhost:8080/api/v1/users/profile-pictures/profile_1.jpg");
+        user.setRegistrationDate(Instant.now());
+
+        var savedUser = userRepository.save(user);
+
+        return toCreationResponse(savedUser);
+    }
+
+    private CreateUserResponse toCreationResponse(User user) {
+        return CreateUserResponse.builder()
+                .id(String.valueOf(user.getId()))
+                .personalData(toPersonalDataResponse(user))
+                .address(toUserAddressResponse(user.getAddress()))
+                .account(toAccountResponse(user))
+                .build();
+    }
+
+    private UserAddress toAddressEntity(UserAddressRequest request) {
+        State state = findStateById(request.stateId());
+
+        var address = new UserAddress();
+        address.setState(state);
+        address.setCity(request.city());
+        address.setDistrict(request.district());
+        address.setAddress(request.address());
+        address.setZipCode(request.zipCode());
+        return address;
     }
 
     private Role findRoleById(String id) {
@@ -206,12 +254,12 @@ public class UserService {
         return stateOptional.get();
     }
 
-    private UserPersonalDataResponse toPersonalDataUpdateResponse(User user) {
-        return UserPersonalDataResponse.builder()
+    private PersonalDataResponse toPersonalDataResponse(User user) {
+        return PersonalDataResponse.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .phone(user.getPhoneNumber())
-                .gender(user.getGender().getId().toString())
+                .gender(toGenderResponse(user.getGender()))
                 .build();
     }
 
@@ -260,10 +308,11 @@ public class UserService {
         );
     }
 
-    private UserAccountResponse toUserAccountResponse(User user) {
-        return UserAccountResponse.builder()
+    private AccountResponse toAccountResponse(User user) {
+        return AccountResponse.builder()
                 .email(user.getEmail())
-                .role(user.getRole().getName())
+                .role(toRoleResponse(user.getRole()))
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .build();
     }
 
@@ -281,8 +330,8 @@ public class UserService {
                 .build();
     }
 
-    private FullUser toFullUser(User user) {
-        return FullUser.builder()
+    private FullUserResponse toFullUser(User user) {
+        return FullUserResponse.builder()
                 .id(user.getId().toString())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())

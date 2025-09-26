@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.dto;
+package com.unison.practicas.desarrollo.library.dto.common;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -15,6 +15,7 @@ public record ExportRequest(
 
         @NotNull
         @NotEmpty
+        @Size(max = 200)
         List<@NotBlank @Size(max = 40) String> ids
 ) {
 }

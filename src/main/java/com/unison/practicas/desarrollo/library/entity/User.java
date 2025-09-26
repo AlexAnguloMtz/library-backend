@@ -46,4 +46,9 @@ public class User {
         return firstName + " " + lastName;
     }
 
+    public void setAddress(UserAddress address) {
+        this.address = address;
+        address.setUser(this);
+    }
+
 }

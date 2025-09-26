@@ -1,9 +1,9 @@
-package com.unison.practicas.desarrollo.library.dto;
+package com.unison.practicas.desarrollo.library.dto.user.response;
 
 import lombok.Builder;
 
 @Builder
-public record FullUser(
+public record FullUserResponse(
         String id,
         String firstName,
         String lastName,

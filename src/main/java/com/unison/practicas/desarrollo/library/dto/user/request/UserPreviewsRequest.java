@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.dto;
+package com.unison.practicas.desarrollo.library.dto.user.request;
 
 import lombok.Builder;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 @Builder
-public record UserPreviewsQuery(
+public record UserPreviewsRequest(
         String search,
 
         Set<String> role,

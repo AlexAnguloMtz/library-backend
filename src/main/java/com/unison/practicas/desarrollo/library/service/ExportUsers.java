@@ -1,8 +1,8 @@
 package com.unison.practicas.desarrollo.library.service;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-import com.unison.practicas.desarrollo.library.dto.ExportRequest;
-import com.unison.practicas.desarrollo.library.dto.ExportResponse;
+import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
+import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import lombok.Builder;

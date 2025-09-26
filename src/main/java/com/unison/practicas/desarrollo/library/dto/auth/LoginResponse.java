@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.dto;
+package com.unison.practicas.desarrollo.library.dto.auth;
 
 import lombok.Builder;
 

@@ -1,7 +1,7 @@
 package com.unison.practicas.desarrollo.library.service;
 
-import com.unison.practicas.desarrollo.library.dto.LoginForm;
-import com.unison.practicas.desarrollo.library.dto.LoginResponse;
+import com.unison.practicas.desarrollo.library.dto.auth.LoginForm;
+import com.unison.practicas.desarrollo.library.dto.auth.LoginResponse;
 import com.unison.practicas.desarrollo.library.entity.Permission;
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;

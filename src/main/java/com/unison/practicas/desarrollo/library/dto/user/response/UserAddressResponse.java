@@ -1,5 +1,6 @@
-package com.unison.practicas.desarrollo.library.dto;
+package com.unison.practicas.desarrollo.library.dto.user.response;
 
+import com.unison.practicas.desarrollo.library.dto.common.StateResponse;
 import lombok.Builder;
 
 @Builder
