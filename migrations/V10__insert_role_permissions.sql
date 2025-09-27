@@ -8,7 +8,12 @@ WHERE p.name IN (
     'users:read:self',
     'users:create',
     'users:update',
-    'users:delete'
+    'users:delete',
+
+    'books:read',
+    'books:create',
+    'books:update',
+    'books:delete'
 );
 
 INSERT INTO role_permission (role_id, permission_id)
@@ -22,6 +27,11 @@ WHERE p.name IN (
     'users:create',
     'users:update',
     'users:delete'
+
+    'books:read',
+    'books:create',
+    'books:update',
+    'books:delete'
 );
 
 INSERT INTO role_permission (role_id, permission_id)
@@ -29,4 +39,7 @@ SELECT
     (SELECT id FROM app_role WHERE slug = 'USER') AS role_id,
     p.id AS permission_id
 FROM permission p
-WHERE p.name IN ('users:read:self');
+WHERE p.name IN (
+    'users:read:self',
+    'books:read',
+);

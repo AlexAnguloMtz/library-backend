@@ -5,6 +5,7 @@ import com.unison.practicas.desarrollo.library.dto.auth.LoginResponse;
 import com.unison.practicas.desarrollo.library.entity.Permission;
 import com.unison.practicas.desarrollo.library.entity.User;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
+import com.unison.practicas.desarrollo.library.service.user.ProfilePictureService;
 import com.unison.practicas.desarrollo.library.util.JwtUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,11 +21,13 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final ProfilePictureService profilePictureService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils, ProfilePictureService profilePictureService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
+        this.profilePictureService = profilePictureService;
     }
 
     public LoginResponse login(LoginForm loginForm) {
@@ -47,8 +50,10 @@ public class AuthService {
     private LoginResponse toLoginResponse(User user, String accessToken) {
         return LoginResponse.builder()
                 .userId(user.getId().toString())
+                .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
+                .fullName(user.getFullName())
                 .email(user.getEmail())
-                .role(user.getRole().getSlug())
+                .role(user.getRole().getName())
                 .permissions(user.getPermissions().stream().map(Permission::getName).collect(Collectors.toSet()))
                 .accessToken(accessToken)
                 .build();

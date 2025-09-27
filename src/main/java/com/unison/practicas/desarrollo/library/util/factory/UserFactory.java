@@ -91,9 +91,11 @@ public class UserFactory {
         return List.of(
                 "profile_1.jpg",
                 "profile_2.jpg",
+                "profile_3.jpg",
                 "profile_4.jpg",
                 "profile_5.jpg",
-                "profile_6.jpg"
+                "profile_6.jpg",
+                "profile_7.jpg"
         );
     }
 

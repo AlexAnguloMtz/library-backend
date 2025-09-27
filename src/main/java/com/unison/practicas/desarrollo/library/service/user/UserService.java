@@ -262,7 +262,9 @@ public class UserService {
 
         if (StringUtils.hasText(oldPictureKey)) {
             try {
-                profilePictureService.deleteProfilePicture(oldPictureKey);
+                // TODO
+                // Commented for development purposes
+                // profilePictureService.deleteProfilePicture(oldPictureKey);
             } catch (Exception e) {
                 // Don't stop the execution flow, we can delete
                 // the orphan picture later with some worker thread

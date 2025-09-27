@@ -7,6 +7,8 @@ import java.util.Set;
 @Builder
 public record LoginResponse(
         String userId,
+        String profilePictureUrl,
+        String fullName,
         String email,
         String role,
         Set<String> permissions,
