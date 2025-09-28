@@ -6,6 +6,7 @@ import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.entity.user.User;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
+import com.unison.practicas.desarrollo.library.service.user.authorization.UserAuthorization;
 import lombok.Builder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

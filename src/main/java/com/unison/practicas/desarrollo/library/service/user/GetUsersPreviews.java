@@ -5,6 +5,7 @@ import com.unison.practicas.desarrollo.library.dto.user.response.RoleResponse;
 import com.unison.practicas.desarrollo.library.dto.user.response.UserPreviewResponse;
 import com.unison.practicas.desarrollo.library.dto.user.request.UserPreviewsRequest;
 import com.unison.practicas.desarrollo.library.entity.user.RoleName;
+import com.unison.practicas.desarrollo.library.service.user.authorization.UserAuthorization;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import com.unison.practicas.desarrollo.library.util.pagination.SortRequest;

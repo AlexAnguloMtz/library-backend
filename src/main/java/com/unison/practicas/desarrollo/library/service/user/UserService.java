@@ -15,6 +15,7 @@ import com.unison.practicas.desarrollo.library.repository.GenderRepository;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.repository.StateRepository;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
+import com.unison.practicas.desarrollo.library.service.user.authorization.UserAuthorization;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
@@ -186,11 +187,10 @@ public class UserService {
         boolean emailConflict = userByEmail.isPresent() && !userById.getId().equals(userByEmail.get().getId());
 
         if (emailConflict) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is taken: %s".formatted(userByEmail.get().getEmail()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El correo ya está ocupado por otra cuenta".formatted(userByEmail.get().getEmail()));
         }
 
         userById.setEmail(request.email().trim());
-
         userById.setRole(role);
 
         User savedUser = userRepository.save(userById);
@@ -209,34 +209,20 @@ public class UserService {
     @Transactional
     public CreateUserResponse createUser(CreateUserRequest request, CustomUserDetails currentUser) {
         if (userRepository.existsByEmailIgnoreCase(request.account().email())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email '%s' is already taken".formatted(request.account().email()));
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "El correo ya está ocupado por otra cuenta".formatted(request.account().email()));
         }
 
         Role role = findRoleById(request.account().roleId());
         if (!userAuthorization.canAssignRole(currentUser, role.getSlug())) {
             throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "No tienes permisos para asignar el rol '%s'".formatted(role.getName())
+                    HttpStatus.FORBIDDEN, "No tienes permisos para asignar el rol '%s'".formatted(role.getName())
             );
         }
 
-        Gender gender = findGenderById(request.personalData().genderId());
+        User user = mapUser(request, role);
 
-        String profilePictureKey = profilePictureService.saveProfilePicture(request.account().profilePicture());
-
-        var user = new User();
-        user.setFirstName(request.personalData().firstName().trim());
-        user.setLastName(request.personalData().lastName().trim());
-        user.setPhoneNumber(request.personalData().phone().trim());
-        user.setGender(gender);
-        user.setAddress(toAddressEntity(request.address()));
-        user.setEmail(request.account().email().trim());
-        user.setPasswordHash(passwordEncoder.encode(request.account().password().trim()));
-        user.setRole(role);
-        user.setProfilePictureUrl(profilePictureKey);
-        user.setRegistrationDate(Instant.now());
-
-        var savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         Set<String> permissions = userAuthorization.permissionsForUser(currentUser, savedUser);
 
@@ -433,6 +419,25 @@ public class UserService {
 
     private Set<String> permissionsForUser(CustomUserDetails currentUser, User someUser) {
         return userAuthorization.permissionsForUser(currentUser, someUser);
+    }
+
+    private User mapUser(CreateUserRequest request, Role role) {
+        Gender gender = findGenderById(request.personalData().genderId());
+        String profilePictureKey = profilePictureService.saveProfilePicture(request.account().profilePicture());
+
+        var user = new User();
+        user.setFirstName(request.personalData().firstName().trim());
+        user.setLastName(request.personalData().lastName().trim());
+        user.setPhoneNumber(request.personalData().phone().trim());
+        user.setGender(gender);
+        user.setAddress(toAddressEntity(request.address()));
+        user.setEmail(request.account().email().trim());
+        user.setPasswordHash(passwordEncoder.encode(request.account().password().trim()));
+        user.setRole(role);
+        user.setProfilePictureUrl(profilePictureKey);
+        user.setRegistrationDate(Instant.now());
+
+        return user;
     }
 
 }
