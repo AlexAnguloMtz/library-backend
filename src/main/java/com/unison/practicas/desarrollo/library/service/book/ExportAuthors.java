@@ -84,6 +84,7 @@ public class ExportAuthors {
                 .lastName(author.getLastName())
                 .dateOfBirth(dateFormatter.format(author.getDateOfBirth()))
                 .country(author.getCountry().getNicename())
+                .bookCount(String.valueOf(author.getBooks().size()))
                 .build();
     }
 
@@ -93,7 +94,8 @@ public class ExportAuthors {
             String firstName,
             String lastName,
             String dateOfBirth,
-            String country
+            String country,
+            String bookCount
     ) {}
 
     private DateTimeFormatter createDateFormatter() {
