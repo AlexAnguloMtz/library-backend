@@ -11,4 +11,8 @@ INSERT INTO permission (name) VALUES
 ('authors:read'),
 ('authors:create'),
 ('authors:edit'),
-('authors:delete');
+('authors:delete'),
+('book-categories:read'),
+('book-categories:create'),
+('book-categories:update'),
+('book-categories:delete');

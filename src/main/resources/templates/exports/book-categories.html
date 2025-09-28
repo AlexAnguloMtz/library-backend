@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page { size: landscape; margin: 20px; }
+
+        body { font-family: Arial, sans-serif; margin: 20px; }
+
+        .page-title { margin: 0 0 20px 0; }
+
+        .card { border: 1px solid #ccc; padding: 15px; border-radius: 5px;
+                background: #f5f5f5; margin-bottom: 20px; }
+
+        .card h3 { margin-top: 0; }
+
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; word-wrap: break-word; }
+        th { background-color: #eee; }
+        tbody tr:nth-child(odd) { background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+<h2 class="page-title">Categorías de Libros</h2>
+<div class="card">
+    <h3>Detalles de exportación de datos:</h3>
+    <p><strong>ID del responsable:</strong> <span th:text="${currentUser.id}"></span></p>
+    <p><strong>Nombre del responsable:</strong> <span th:text="${currentUser.fullName}"></span></p>
+    <p><strong>Email del responsable:</strong> <span th:text="${currentUser.email}"></span></p>
+    <p><strong>Fecha y hora:</strong> <span th:text="${exportDate}"></span></p>
+</div>
+
+<p><strong>Registros exportados:</strong> <span th:text="${#lists.size(bookCategories)}"></span></p>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Libros asignados</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="bookCategory : ${bookCategories}">
+        <td th:text="${bookCategory.id}"></td>
+        <td th:text="${bookCategory.name}"></td>
+        <td th:text="${bookCategory.bookCount}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

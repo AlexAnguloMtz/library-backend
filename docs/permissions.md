@@ -12,3 +12,9 @@
 |                   | **Administrador**                            | **Bibliotecario**                                | **Usuario**                                      |
 |-------------------|----------------------------------------------|--------------------------------------------------|--------------------------------------------------|
 | **Autores**       | ✅ Leer<br> ✅ Crear<br> ✅ Editar<br> ✅ Borrar<br> | ✅ Leer<br> ✅ Crear<br> ✅ Editar<br> ✅ Borrar<br> | ✅ Leer<br> ❌ Crear<br> ❌ Editar<br> ❌ Borrar<br> |
+
+### 📊 Matriz de permisos. Catálogo 'Categorías'.
+
+|                | **Administrador**                            | **Bibliotecario**                                | **Usuario**                                      |
+|----------------|----------------------------------------------|--------------------------------------------------|--------------------------------------------------|
+| **Categorías** | ✅ Leer<br> ✅ Crear<br> ✅ Editar<br> ✅ Borrar<br> | ✅ Leer<br> ✅ Crear<br> ✅ Editar<br> ✅ Borrar<br> | ✅ Leer<br> ❌ Crear<br> ❌ Editar<br> ❌ Borrar<br> |

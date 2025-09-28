@@ -1,13 +1,15 @@
 package com.unison.practicas.desarrollo.library.entity.book;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
+@EqualsAndHashCode(exclude = {"books"})
 public class BookCategory {
 
     @Id
@@ -15,5 +17,8 @@ public class BookCategory {
     private Integer id;
 
     private String name;
+
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    private Set<Book> books = new HashSet<>();
 
 }

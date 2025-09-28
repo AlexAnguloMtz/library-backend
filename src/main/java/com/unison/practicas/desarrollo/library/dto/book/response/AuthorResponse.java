@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.dto.book;
+package com.unison.practicas.desarrollo.library.dto.book.response;
 
 import com.unison.practicas.desarrollo.library.dto.common.CountryResponse;
 import lombok.Builder;

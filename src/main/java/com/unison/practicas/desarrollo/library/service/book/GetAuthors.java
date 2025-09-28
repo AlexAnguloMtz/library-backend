@@ -1,7 +1,7 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
-import com.unison.practicas.desarrollo.library.dto.book.AuthorResponse;
-import com.unison.practicas.desarrollo.library.dto.book.GetAuthorsRequest;
+import com.unison.practicas.desarrollo.library.dto.book.response.AuthorResponse;
+import com.unison.practicas.desarrollo.library.dto.book.request.GetAuthorsRequest;
 import com.unison.practicas.desarrollo.library.dto.common.CountryResponse;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;

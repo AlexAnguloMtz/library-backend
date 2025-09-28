@@ -1,10 +1,10 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
-import com.unison.practicas.desarrollo.library.dto.book.AuthorOptions;
-import com.unison.practicas.desarrollo.library.dto.book.AuthorRequest;
-import com.unison.practicas.desarrollo.library.dto.book.AuthorResponse;
-import com.unison.practicas.desarrollo.library.dto.book.GetAuthorsRequest;
+import com.unison.practicas.desarrollo.library.dto.book.response.AuthorOptions;
+import com.unison.practicas.desarrollo.library.dto.book.request.AuthorRequest;
+import com.unison.practicas.desarrollo.library.dto.book.response.AuthorResponse;
+import com.unison.practicas.desarrollo.library.dto.book.request.GetAuthorsRequest;
 import com.unison.practicas.desarrollo.library.dto.common.CountryResponse;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
@@ -20,14 +20,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
 public class AuthorService {
 
+    // Services
     private final GetAuthors getAuthors;
     private final ExportAuthors exportAuthors;
 
@@ -35,15 +34,11 @@ public class AuthorService {
     private final AuthorRepository authorRepository;
     private final CountryRepository countryRepository;
 
-    // Utils
-    private final DateTimeFormatter dateTimeFormatter;
-
     public AuthorService(GetAuthors getAuthors, ExportAuthors exportAuthors, AuthorRepository authorRepository, CountryRepository countryRepository) {
         this.getAuthors = getAuthors;
         this.exportAuthors = exportAuthors;
         this.authorRepository = authorRepository;
         this.countryRepository = countryRepository;
-        this.dateTimeFormatter = createDateTimeFormatter();
     }
 
     @PreAuthorize("hasAuthority('authors:read')")
@@ -59,19 +54,24 @@ public class AuthorService {
 
     @PreAuthorize("hasAuthority('authors:create')")
     public AuthorResponse createAuthor(AuthorRequest request) {
-        Author author = setAuthorFields(request, new Author());
+        Author author = mapAuthor(request, new Author());
         return toResponse(authorRepository.save(author));
     }
 
     @PreAuthorize("hasAuthority('authors:edit')")
     public AuthorResponse updateAuthor(String id, AuthorRequest request) {
-        Author author = setAuthorFields(request, findAuthorById(id));
+        Author author = mapAuthor(request, findAuthorById(id));
         return toResponse(authorRepository.save(author));
     }
 
     @PreAuthorize("hasAuthority('authors:delete')")
     public void deleteAuthorById(String id) {
-        authorRepository.delete(findAuthorById(id));
+        Author author = findAuthorById(id);
+
+        author.getBooks().forEach(book -> book.getAuthors().remove(author));
+        author.getBooks().clear();
+
+        authorRepository.delete(author);
     }
 
     @PreAuthorize("hasAuthority('authors:read')")
@@ -94,7 +94,7 @@ public class AuthorService {
                 .lastName(author.getLastName())
                 .country(toResponse(author.getCountry()))
                 .dateOfBirth(author.getDateOfBirth())
-                .bookCount(author.getBooks().size())
+                .bookCount(author.getBooks() != null ? author.getBooks().size() : 0)
                 .build();
     }
 
@@ -110,11 +110,6 @@ public class AuthorService {
                 .value(String.valueOf(country.getId()))
                 .label(country.getNicename())
                 .build();
-    }
-
-    private DateTimeFormatter createDateTimeFormatter() {
-        Locale spanish = Locale.forLanguageTag("es");
-        return DateTimeFormatter.ofPattern("d/MMM/yyyy", spanish);
     }
 
     private Author findAuthorById(String id) {
@@ -133,7 +128,7 @@ public class AuthorService {
         return countryOptional.get();
     }
 
-    private Author setAuthorFields(AuthorRequest request, Author author) {
+    private Author mapAuthor(AuthorRequest request, Author author) {
         author.setFirstName(request.firstName().trim());
         author.setLastName(request.lastName().trim());
         author.setDateOfBirth(request.dateOfBirth());
