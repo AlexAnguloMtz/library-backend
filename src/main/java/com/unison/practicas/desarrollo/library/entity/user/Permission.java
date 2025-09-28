@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.entity;
+package com.unison.practicas.desarrollo.library.entity.user;
 
 import jakarta.persistence.*;
 import lombok.Data;

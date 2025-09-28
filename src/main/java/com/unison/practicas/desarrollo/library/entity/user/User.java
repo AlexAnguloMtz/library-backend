@@ -1,5 +1,6 @@
-package com.unison.practicas.desarrollo.library.entity;
+package com.unison.practicas.desarrollo.library.entity.user;
 
+import com.unison.practicas.desarrollo.library.entity.common.Gender;
 import jakarta.persistence.*;
 import lombok.Data;
 

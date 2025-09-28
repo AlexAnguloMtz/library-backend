@@ -1,12 +1,10 @@
-package com.unison.practicas.desarrollo.library.entity;
+package com.unison.practicas.desarrollo.library.entity.user;
 
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 @Entity
 @Table(name = "app_role")

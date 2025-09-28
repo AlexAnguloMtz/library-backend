@@ -1,9 +1,8 @@
 package com.unison.practicas.desarrollo.library.configuration.security;
 
-import com.unison.practicas.desarrollo.library.entity.Role;
-import com.unison.practicas.desarrollo.library.entity.RoleName;
-import com.unison.practicas.desarrollo.library.entity.User;
-import com.unison.practicas.desarrollo.library.entity.Permission;
+import com.unison.practicas.desarrollo.library.entity.user.Role;
+import com.unison.practicas.desarrollo.library.entity.user.User;
+import com.unison.practicas.desarrollo.library.entity.user.Permission;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

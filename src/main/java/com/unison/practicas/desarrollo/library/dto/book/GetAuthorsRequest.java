@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.dto.user.request;
+package com.unison.practicas.desarrollo.library.dto.book;
 
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -8,21 +8,22 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Builder
-public record UserPreviewsRequest(
+public record GetAuthorsRequest(
+
         @Size(max = 50)
         String search,
 
-        @Size(max = 5)
-        List<@Size(max = 40) String> role,
+        @Size(max = 20)
+        List<@Size(max = 40) String> countryId,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate registrationDateMin,
+        LocalDate dateOfBirthMin,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate registrationDateMax,
+        LocalDate dateOfBirthMax,
 
-        Integer activeBookLoansMin,
+        Integer bookCountMin,
 
-        Integer activeBookLoansMax
-) {
-}
+        Integer bookCountMax
+
+) {}

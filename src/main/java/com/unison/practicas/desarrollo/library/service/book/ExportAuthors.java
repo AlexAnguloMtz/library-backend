@@ -1,16 +1,15 @@
-package com.unison.practicas.desarrollo.library.service.user;
+package com.unison.practicas.desarrollo.library.service.book;
 
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
+import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.user.User;
-import com.unison.practicas.desarrollo.library.repository.UserRepository;
+import com.unison.practicas.desarrollo.library.repository.AuthorRepository;
 import lombok.Builder;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -21,19 +20,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-@Service
-public class ExportUsers {
+@Component
+public class ExportAuthors {
 
-    private final UserRepository userRepository;
+    private final AuthorRepository authorRepository;
     private final TemplateEngine templateEngine;
     private final DateTimeFormatter dateFormatter;
     private final DateTimeFormatter dateTimeFormatter;
-    private final UserAuthorization userAuthorization;
 
-    public ExportUsers(UserRepository userRepository, TemplateEngine templateEngine, UserAuthorization userAuthorization) {
-        this.userRepository = userRepository;
+    public ExportAuthors(TemplateEngine templateEngine, AuthorRepository authorRepository) {
         this.templateEngine = templateEngine;
-        this.userAuthorization = userAuthorization;
+        this.authorRepository = authorRepository;
         this.dateFormatter = createDateFormatter();
         this.dateTimeFormatter = createDateTimeFormatter();
     }
@@ -47,33 +44,26 @@ public class ExportUsers {
                 .map(Integer::parseInt)
                 .toList();
 
-        List<User> users = userRepository.findAllById(ids);
-
-        users.forEach(user -> {
-            if (!userAuthorization.canReadUser(currentUser, user)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "You don't have permissions to read at least one of the requested items");
-            }
-        });
+        List<Author> authors = authorRepository.findAllById(ids);
 
         return ExportResponse.builder()
-                .fileBytes(generatePdf(currentUser, users))
-                .fileName("users_export.pdf")
+                .fileBytes(generatePdf(currentUser, authors))
+                .fileName("authors_export.pdf")
                 .mediaType(MediaType.APPLICATION_PDF)
                 .build();
     }
 
-    private byte[] generatePdf(CustomUserDetails currentUser, List<User> users) {
+    private byte[] generatePdf(CustomUserDetails currentUser, List<Author> authors) {
         User user = currentUser.getUser();
 
         try (var byteArrayOutputStream = new ByteArrayOutputStream()) {
 
             var context = new Context();
             context.setVariable("currentUser", user);
-            context.setVariable("users", users.stream().map(this::toExportModel).toList());
+            context.setVariable("authors", authors.stream().map(this::toExportModel).toList());
             context.setVariable("exportDate", dateTimeFormatter.format(Instant.now().atOffset(ZoneOffset.UTC)));
 
-            String html = templateEngine.process("exports/users", context);
+            String html = templateEngine.process("exports/authors", context);
 
             var builder = new PdfRendererBuilder();
             builder.withHtmlContent(html, null);
@@ -87,29 +77,23 @@ public class ExportUsers {
         }
     }
 
-    private UserExportModel toExportModel(User user) {
-        return UserExportModel.builder()
-                .id(user.getId().toString())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .phoneNumber(user.getPhoneNumber())
-                .registrationDate(dateFormatter.format(Instant.now().atOffset(ZoneOffset.UTC)))
-                .role(user.getRole().getName())
-                .gender(user.getGender().getName())
+    private ExportAuthors.AuthorExportModel toExportModel(Author author) {
+        return AuthorExportModel.builder()
+                .id(author.getId().toString())
+                .firstName(author.getFirstName())
+                .lastName(author.getLastName())
+                .dateOfBirth(dateFormatter.format(author.getDateOfBirth()))
+                .country(author.getCountry().getNicename())
                 .build();
     }
 
     @Builder
-    private record UserExportModel(
+    private record AuthorExportModel(
             String id,
             String firstName,
             String lastName,
-            String email,
-            String phoneNumber,
-            String registrationDate,
-            String gender,
-            String role
+            String dateOfBirth,
+            String country
     ) {}
 
     private DateTimeFormatter createDateFormatter() {
@@ -131,5 +115,6 @@ public class ExportUsers {
                         .build()
         );
     }
+
 
 }

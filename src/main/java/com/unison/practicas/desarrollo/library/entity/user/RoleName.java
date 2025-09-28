@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.entity;
+package com.unison.practicas.desarrollo.library.entity.user;
 
 import java.util.Optional;
 import java.util.stream.Stream;

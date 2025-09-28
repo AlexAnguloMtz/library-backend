@@ -1,8 +1,8 @@
 package com.unison.practicas.desarrollo.library.service.user;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
-import com.unison.practicas.desarrollo.library.entity.RoleName;
-import com.unison.practicas.desarrollo.library.entity.User;
+import com.unison.practicas.desarrollo.library.entity.user.RoleName;
+import com.unison.practicas.desarrollo.library.entity.user.User;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

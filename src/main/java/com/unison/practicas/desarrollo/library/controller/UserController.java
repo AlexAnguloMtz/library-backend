@@ -27,8 +27,8 @@ public class UserController {
 
     @GetMapping
     public PaginationResponse<UserPreviewResponse> getUsersPreviews(
-            UserPreviewsRequest query,
-            PaginationRequest pagination,
+            @Valid UserPreviewsRequest query,
+            @Valid PaginationRequest pagination,
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
         return userService.getUsersPreviews(query, pagination, currentUser);

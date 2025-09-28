@@ -5,8 +5,8 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.unison.practicas.desarrollo.library.entity.Permission;
-import com.unison.practicas.desarrollo.library.entity.User;
+import com.unison.practicas.desarrollo.library.entity.user.Permission;
+import com.unison.practicas.desarrollo.library.entity.user.User;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;

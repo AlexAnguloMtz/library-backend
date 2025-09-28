@@ -1,8 +1,8 @@
 package com.unison.practicas.desarrollo.library.util.factory;
 
 import com.github.javafaker.Faker;
-import com.unison.practicas.desarrollo.library.entity.State;
-import com.unison.practicas.desarrollo.library.entity.UserAddress;
+import com.unison.practicas.desarrollo.library.entity.common.State;
+import com.unison.practicas.desarrollo.library.entity.user.UserAddress;
 import com.unison.practicas.desarrollo.library.repository.StateRepository;
 import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
 import org.springframework.context.annotation.Profile;

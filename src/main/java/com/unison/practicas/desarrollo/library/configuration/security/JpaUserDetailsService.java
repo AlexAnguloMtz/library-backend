@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.configuration.security;
 
-import com.unison.practicas.desarrollo.library.entity.User;
+import com.unison.practicas.desarrollo.library.entity.user.User;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

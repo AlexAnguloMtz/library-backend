@@ -13,7 +13,12 @@ WHERE p.name IN (
     'books:read',
     'books:create',
     'books:update',
-    'books:delete'
+    'books:delete',
+
+    'authors:read',
+    'authors:create',
+    'authors:edit',
+    'authors:delete'
 );
 
 INSERT INTO role_permission (role_id, permission_id)
@@ -26,12 +31,17 @@ WHERE p.name IN (
     'users:read:self',
     'users:create',
     'users:update',
-    'users:delete'
+    'users:delete',
 
     'books:read',
     'books:create',
     'books:update',
-    'books:delete'
+    'books:delete',
+
+    'authors:read',
+    'authors:create',
+    'authors:edit',
+    'authors:delete'
 );
 
 INSERT INTO role_permission (role_id, permission_id)
@@ -42,4 +52,5 @@ FROM permission p
 WHERE p.name IN (
     'users:read:self',
     'books:read',
+    'authors:read'
 );

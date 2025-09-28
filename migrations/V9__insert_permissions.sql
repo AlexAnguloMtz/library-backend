@@ -1,10 +1,14 @@
 INSERT INTO permission (name) VALUES
-('users:read'), -- users
+('users:read'),
 ('users:read:self'),
 ('users:create'),
 ('users:update'),
 ('users:delete'),
-('books:read'), -- books
+('books:read'),
 ('books:create'),
 ('books:update'),
-('books:delete');
+('books:delete'),
+('authors:read'),
+('authors:create'),
+('authors:edit'),
+('authors:delete');

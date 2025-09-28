@@ -2,8 +2,8 @@ package com.unison.practicas.desarrollo.library.service.auth;
 
 import com.unison.practicas.desarrollo.library.dto.auth.LoginForm;
 import com.unison.practicas.desarrollo.library.dto.auth.LoginResponse;
-import com.unison.practicas.desarrollo.library.entity.Permission;
-import com.unison.practicas.desarrollo.library.entity.User;
+import com.unison.practicas.desarrollo.library.entity.user.Permission;
+import com.unison.practicas.desarrollo.library.entity.user.User;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.service.user.ProfilePictureService;
 import com.unison.practicas.desarrollo.library.util.JwtUtils;

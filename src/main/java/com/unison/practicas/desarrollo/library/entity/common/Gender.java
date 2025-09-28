@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.entity;
+package com.unison.practicas.desarrollo.library.entity.common;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

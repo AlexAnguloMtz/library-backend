@@ -2,9 +2,9 @@ package com.unison.practicas.desarrollo.library.service.user;
 
 import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
 import com.unison.practicas.desarrollo.library.dto.user.response.UserOptionsResponse;
-import com.unison.practicas.desarrollo.library.entity.Gender;
-import com.unison.practicas.desarrollo.library.entity.Role;
-import com.unison.practicas.desarrollo.library.entity.State;
+import com.unison.practicas.desarrollo.library.entity.common.Gender;
+import com.unison.practicas.desarrollo.library.entity.user.Role;
+import com.unison.practicas.desarrollo.library.entity.common.State;
 import com.unison.practicas.desarrollo.library.repository.GenderRepository;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.repository.StateRepository;
