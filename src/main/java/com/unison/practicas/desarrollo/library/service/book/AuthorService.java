@@ -93,7 +93,7 @@ public class AuthorService {
                 .firstName(author.getFirstName())
                 .lastName(author.getLastName())
                 .country(toResponse(author.getCountry()))
-                .dateOfBirth(dateTimeFormatter.format(author.getDateOfBirth()))
+                .dateOfBirth(author.getDateOfBirth())
                 .bookCount(author.getBooks().size())
                 .build();
     }

@@ -21,7 +21,7 @@ public class AuthorSeeder {
         if (authorRepository.count() > 0) {
             return;
         }
-        authorRepository.saveAll(authorFactory.createAuthors(60));
+        authorRepository.saveAll(authorFactory.createAuthors(300));
     }
 
 }

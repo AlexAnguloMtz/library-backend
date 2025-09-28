@@ -116,9 +116,7 @@ public class GetAuthors {
                             .lastName(r.get(AUTHOR.LAST_NAME))
                             .country(country)
                             .bookCount(r.get("book_count", Long.class).intValue())
-                            .dateOfBirth(r.get(AUTHOR.DATE_OF_BIRTH) != null
-                                    ? dateFormatter.format(r.get(AUTHOR.DATE_OF_BIRTH))
-                                    : null)
+                            .dateOfBirth(r.get(AUTHOR.DATE_OF_BIRTH) != null ? r.get(AUTHOR.DATE_OF_BIRTH) : null)
                             .build();
                 })
                 .toList();
