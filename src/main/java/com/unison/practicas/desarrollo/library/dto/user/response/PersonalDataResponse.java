@@ -10,6 +10,7 @@ public record PersonalDataResponse(
         String lastName,
         String phone,
         LocalDate dateOfBirth,
+        Integer age,
         GenderResponse gender
 ) {
 }

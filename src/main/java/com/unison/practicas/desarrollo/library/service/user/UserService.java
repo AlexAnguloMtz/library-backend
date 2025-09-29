@@ -29,6 +29,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -330,6 +332,7 @@ public class UserService {
                 .lastName(user.getLastName())
                 .phone(user.getPhoneNumber())
                 .gender(toGenderResponse(user.getGender()))
+                .age(calculateAge(user.getDateOfBirth()))
                 .build();
     }
 
@@ -401,8 +404,13 @@ public class UserService {
                 .address(toUserAddressResponse(user.getAddress()))
                 .gender(toGenderResponse(user.getGender()))
                 .dateOfBirth(user.getDateOfBirth())
+                .age(calculateAge(user.getDateOfBirth()))
                 .permissions(permissions)
                 .build();
+    }
+
+    private Integer calculateAge(LocalDate dateOfBirth) {
+        return Period.between(dateOfBirth, LocalDate.now()).getYears();
     }
 
     private GenderResponse toGenderResponse(Gender gender) {

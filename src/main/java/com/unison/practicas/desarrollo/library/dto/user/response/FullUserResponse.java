@@ -19,6 +19,7 @@ public record FullUserResponse(
         UserAddressResponse address,
         GenderResponse gender,
         LocalDate dateOfBirth,
+        Integer age,
         Set<String> permissions
 ) {
 }
