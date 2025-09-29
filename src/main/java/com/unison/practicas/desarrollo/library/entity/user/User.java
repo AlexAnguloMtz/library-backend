@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
@@ -21,6 +22,7 @@ public class User {
     private String passwordHash;
     private String phoneNumber;
     private String profilePictureUrl;
+    private LocalDate dateOfBirth;
     private Instant registrationDate;
 
     @ManyToOne(fetch = FetchType.EAGER)

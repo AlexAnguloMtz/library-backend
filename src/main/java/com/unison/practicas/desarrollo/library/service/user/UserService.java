@@ -19,6 +19,7 @@ import com.unison.practicas.desarrollo.library.service.user.authorization.UserAu
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.parameters.P;
@@ -33,6 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
+@Slf4j
 public class UserService {
 
     // Services
@@ -123,6 +125,7 @@ public class UserService {
         user.setFirstName(request.firstName().trim());
         user.setLastName(request.lastName().trim());
         user.setPhoneNumber(request.phone().trim());
+        user.setDateOfBirth(request.dateOfBirth());
 
         Gender gender = findGenderById(request.genderId());
         user.setGender(gender);
@@ -397,6 +400,7 @@ public class UserService {
                 .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
                 .address(toUserAddressResponse(user.getAddress()))
                 .gender(toGenderResponse(user.getGender()))
+                .dateOfBirth(user.getDateOfBirth())
                 .permissions(permissions)
                 .build();
     }
@@ -434,6 +438,7 @@ public class UserService {
         user.setEmail(request.account().email().trim());
         user.setPasswordHash(passwordEncoder.encode(request.account().password().trim()));
         user.setRole(role);
+        user.setDateOfBirth(request.personalData().dateOfBirth());
         user.setProfilePictureUrl(profilePictureKey);
         user.setRegistrationDate(Instant.now());
 

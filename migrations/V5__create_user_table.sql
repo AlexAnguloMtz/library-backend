@@ -9,6 +9,7 @@ CREATE TABLE app_user (
     registration_date TIMESTAMPTZ NOT NULL,
     role_id INT NOT NULL,
     gender_id INT NOT NULL,
+    date_of_birth DATE NOT NULL,
     FOREIGN KEY (role_id) REFERENCES app_role(id),
     FOREIGN KEY (gender_id) REFERENCES gender(id)
 );

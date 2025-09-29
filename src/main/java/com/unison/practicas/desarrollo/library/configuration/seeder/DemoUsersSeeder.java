@@ -10,13 +10,16 @@ import com.unison.practicas.desarrollo.library.repository.GenderRepository;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
+import com.unison.practicas.desarrollo.library.util.TimeUtils;
 import com.unison.practicas.desarrollo.library.util.factory.UserAddressFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -64,6 +67,7 @@ public class DemoUsersSeeder {
             adminUser.setRegistrationDate(Instant.now());
             adminUser.setRole(adminRole);
             adminUser.setGender(CollectionHelpers.randomItem(genders));
+            adminUser.setDateOfBirth(dateOfBirth());
 
             adminUser.setProfilePictureUrl("profile_5.jpg");
 
@@ -86,6 +90,7 @@ public class DemoUsersSeeder {
             librarianUser.setRegistrationDate(Instant.now());
             librarianUser.setRole(librarianRole);
             librarianUser.setGender(CollectionHelpers.randomItem(genders));
+            librarianUser.setDateOfBirth(dateOfBirth());
 
             librarianUser.setProfilePictureUrl("profile_1.jpg");
 
@@ -108,6 +113,7 @@ public class DemoUsersSeeder {
             regularUser.setRegistrationDate(Instant.now());
             regularUser.setRole(userRole);
             regularUser.setGender(CollectionHelpers.randomItem(genders));
+            regularUser.setDateOfBirth(dateOfBirth());
 
             regularUser.setProfilePictureUrl("profile_4.jpg");
 
@@ -117,6 +123,13 @@ public class DemoUsersSeeder {
 
             userRepository.save(regularUser);
         }
+    }
+
+    private LocalDate dateOfBirth() {
+        return TimeUtils.randomLocalDateBetween(
+                LocalDate.of(1950, 1, 1),
+                LocalDate.of(2000, 1, 1)
+        );
     }
 
     private String makePhoneNumber() {

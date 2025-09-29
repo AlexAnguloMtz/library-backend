@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,6 +69,7 @@ public class UserFactory {
         user.setRegistrationDate(TimeUtils.randomInstantBetween(Instant.parse("2020-01-24T00:00:00Z"), Instant.parse("2025-09-24T00:00:00Z")));
         user.setProfilePictureUrl(CollectionHelpers.randomItem(profilePictures()));
         user.setGender(gender);
+        user.setDateOfBirth(TimeUtils.randomLocalDateBetween(LocalDate.of(1945, 3, 15), LocalDate.of(2015, 3, 15)));
 
         UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
 

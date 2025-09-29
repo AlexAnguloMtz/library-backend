@@ -17,6 +17,7 @@ import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -63,6 +64,7 @@ public class GetUsersPreviews {
                         APP_USER.PHONE_NUMBER,
                         APP_USER.PROFILE_PICTURE_URL,
                         APP_USER.REGISTRATION_DATE,
+                        APP_USER.DATE_OF_BIRTH,
                         APP_ROLE.ID.as("role_id"),
                         APP_ROLE.NAME.as("role_name"),
                         APP_ROLE.SLUG.as("role_slug")
@@ -148,6 +150,8 @@ public class GetUsersPreviews {
 
                     String profilePictureUrl = profilePictureService.profilePictureUrl(r.get(APP_USER.PROFILE_PICTURE_URL));
 
+                    LocalDate dateOfBirth = r.get(APP_USER.DATE_OF_BIRTH);
+
                     Set<String> permissions = permissionsFor(currentUser, id, r.get("role_slug", String.class));
 
                     return UserPreviewResponse.builder()
@@ -159,6 +163,7 @@ public class GetUsersPreviews {
                             .registrationDate(registrationDate)
                             .activeLoans(borrowedBooks)
                             .profilePictureUrl(profilePictureUrl)
+                            .dateOfBirth(dateOfBirth)
                             .permissions(permissions)
                             .build();
                 })

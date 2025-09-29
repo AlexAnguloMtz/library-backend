@@ -2,6 +2,7 @@ package com.unison.practicas.desarrollo.library.dto.user.response;
 
 import lombok.Builder;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Builder
@@ -17,6 +18,7 @@ public record FullUserResponse(
         String profilePictureUrl,
         UserAddressResponse address,
         GenderResponse gender,
+        LocalDate dateOfBirth,
         Set<String> permissions
 ) {
 }
