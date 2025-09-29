@@ -12,6 +12,6 @@ public record AuthorResponse(
         String lastName,
         LocalDate dateOfBirth,
         CountryResponse country,
-        int bookCount
+        Integer bookCount
 ) {
 }

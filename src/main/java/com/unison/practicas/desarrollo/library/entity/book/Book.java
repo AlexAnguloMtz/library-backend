@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -18,6 +18,7 @@ public class Book {
     private String title;
     private String isbn;
     private Integer year;
+    private String image;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
@@ -29,16 +30,17 @@ public class Book {
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "author_id")
     )
-    private Set<Author> authors = new HashSet<>();
+    @OrderColumn(name = "position")
+    private List<Author> authors = new ArrayList<>();
 
-    public void setAuthors(Set<Author> authors) {
+    public void setAuthors(List<Author> authors) {
         if (this.authors != null) {
             for (Author oldAuthor : this.authors) {
                 oldAuthor.getBooks().remove(this);
             }
         }
 
-        this.authors = authors != null ? authors : new HashSet<>();
+        this.authors = authors != null ? authors : new ArrayList<>();
 
         for (Author author : this.authors) {
             author.getBooks().add(this);

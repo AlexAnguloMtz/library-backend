@@ -54,4 +54,15 @@ class OtherUserPermissionsRule {
                 .collect(Collectors.toSet());
     }
 
+    Set<String> permissionsForRole(CustomUserDetails currentUser, RoleName roleName) {
+        Optional<RoleName> currentUserRoleOptional = RoleName.parse(currentUser.getRole().getSlug());
+        if (currentUserRoleOptional.isEmpty() || roleName == null) {
+            return Set.of();
+        }
+        RoleName currentUserRole = currentUserRoleOptional.get();
+        return TARGET_USER_PERMISSIONS
+                .getOrDefault(currentUserRole, Map.of())
+                .getOrDefault(roleName, Set.of());
+    }
+
 }

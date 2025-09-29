@@ -40,6 +40,13 @@ public class UserAuthorization {
         return otherUserPermissionsRule.permissionsForUser(currentUser, targetUser);
     }
 
+    public Set<String> permissionsFor(CustomUserDetails currentUser, String targetUserId, RoleName roleName) {
+        if (currentUser.getId().equals(targetUserId)) {
+            return selfPermissionsRule.selfPermissions(currentUser);
+        }
+        return otherUserPermissionsRule.permissionsForRole(currentUser, roleName);
+    }
+
     public Set<RoleName> listableRoles(CustomUserDetails currentUser) {
         return otherUserPermissionsRule.actionableRoles(currentUser, "read");
     }

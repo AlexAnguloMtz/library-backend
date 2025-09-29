@@ -41,6 +41,7 @@ public class BookFactory {
         book.setIsbn(makeUniqueIsbn(seed));
         book.setYear(faker.number().numberBetween(1300, 2025));
         book.setCategory(category);
+        book.setImage(randomBookImage());
 
         book.setAuthors(pickRandomAuthors(authors, 3));
 
@@ -54,15 +55,31 @@ public class BookFactory {
         return prefix + middle + "-" + suffix;
     }
 
-    private Set<Author> pickRandomAuthors(List<Author> authors, int count) {
-        if (authors.isEmpty()) return Set.of();
+    private List<Author> pickRandomAuthors(List<Author> authors, int count) {
+        if (authors.isEmpty()) return new ArrayList<>();
 
         List<Author> copy = new ArrayList<>(authors);
+
         Collections.shuffle(copy);
 
         int n = Math.min(count, copy.size());
 
-        return new HashSet<>(copy.subList(0, n));
+        return new ArrayList<>(copy.subList(0, n));
+    }
+
+    private String randomBookImage() {
+        return CollectionHelpers.randomItem(List.of(
+                "book_1.jpg",
+                "book_2.jpg",
+                "book_3.jpg",
+                "book_4.jpg",
+                "book_5.jpg",
+                "book_6.jpg",
+                "book_7.jpg",
+                "book_8.jpg",
+                "book_9.jpg",
+                "book_10.jpg"
+        ));
     }
 
 }

@@ -11,10 +11,13 @@ public class WebMvcConfigurerImpl implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String absolutePath = Paths.get("data/users/profile-pictures").toAbsolutePath().toString();
-
+        String userProfilePicturesPath = Paths.get("data/users/profile-pictures").toAbsolutePath().toString();
         registry.addResourceHandler("/api/v1/users/profile-pictures/**")
-                .addResourceLocations("file:" + absolutePath + "/");
+                .addResourceLocations("file:" + userProfilePicturesPath + "/");
+
+        String booksImagesPath = Paths.get("data/books/images").toAbsolutePath().toString();
+        registry.addResourceHandler("/api/v1/books/images/**")
+                .addResourceLocations("file:" + booksImagesPath + "/");
     }
 
 }

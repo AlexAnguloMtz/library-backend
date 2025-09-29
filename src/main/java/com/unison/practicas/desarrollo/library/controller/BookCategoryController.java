@@ -33,7 +33,6 @@ public class BookCategoryController {
         return bookCategoryService.getBookCategories(request, pagination);
     }
 
-
     @PostMapping
     public BookCategoryResponse createBookCategory(@Valid @RequestBody BookCategoryRequest request) {
         return bookCategoryService.createBookCategory(request);

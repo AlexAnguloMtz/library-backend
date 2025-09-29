@@ -6,6 +6,6 @@ import lombok.Builder;
 public record BookCategoryResponse(
         String id,
         String name,
-        int bookCount
+        Integer bookCount
 ) {
 }

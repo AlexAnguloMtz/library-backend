@@ -178,13 +178,13 @@ public class GetUsersPreviews {
                 .build();
     }
 
-    private Set<String> permissionsFor(CustomUserDetails currentUser, String id, String role) {
+    private Set<String> permissionsFor(CustomUserDetails currentUser, String targetUserId, String role) {
         Optional<RoleName> roleNameOptional = RoleName.parse(role);
         if (roleNameOptional.isEmpty()) {
             return new HashSet<>();
         }
         RoleName roleName = roleNameOptional.get();
-        return userAuthorization.permissionsFor(currentUser, id, roleName);
+        return userAuthorization.permissionsFor(currentUser, targetUserId, roleName);
     }
 
     private List<SortRequest> parseSorts(List<String> sorts) {
