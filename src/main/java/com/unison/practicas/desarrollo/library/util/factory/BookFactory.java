@@ -43,7 +43,7 @@ public class BookFactory {
         book.setCategory(category);
         book.setImage(randomBookImage());
 
-        book.setAuthors(pickRandomAuthors(authors, 3));
+        book.setAuthors(pickRandomAuthors(authors, faker.random().nextInt(1, 4)));
 
         return book;
     }
