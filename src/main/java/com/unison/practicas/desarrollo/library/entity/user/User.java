@@ -59,4 +59,8 @@ public class User {
         return Optional.ofNullable(address);
     }
 
+    public Optional<String> getProfilePictureUrl() {
+        return Optional.ofNullable(profilePictureUrl);
+    }
+
 }

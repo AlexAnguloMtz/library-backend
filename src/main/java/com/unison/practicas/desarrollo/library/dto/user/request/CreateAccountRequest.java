@@ -25,7 +25,6 @@ public record CreateAccountRequest(
         @Password
         String password,
 
-        @NotNull
         @ProfilePicture
         MultipartFile profilePicture
 

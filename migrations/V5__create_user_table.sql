@@ -5,7 +5,7 @@ CREATE TABLE app_user (
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     phone_number VARCHAR(10) NOT NULL,
-    profile_picture_url TEXT NOT NULL,
+    profile_picture_url TEXT,
     registration_date TIMESTAMPTZ NOT NULL,
     role_id INT NOT NULL,
     gender_id INT NOT NULL,

@@ -50,7 +50,7 @@ public class AuthService {
     private LoginResponse toLoginResponse(User user, String accessToken) {
         return LoginResponse.builder()
                 .userId(user.getId().toString())
-                .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
+                .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl().orElse(null)))
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .role(user.getRole().getName())

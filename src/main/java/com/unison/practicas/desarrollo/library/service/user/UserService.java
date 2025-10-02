@@ -25,7 +25,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
@@ -218,7 +217,7 @@ public class UserService {
     public CreateUserResponse createUser(CreateUserRequest request, CustomUserDetails currentUser) {
         if (userRepository.existsByEmailIgnoreCase(request.account().email())) {
             throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "El correo ya está ocupado por otra cuenta".formatted(request.account().email()));
+                    HttpStatus.CONFLICT, "El correo ya está ocupado por otra cuenta: %s".formatted(request.account().email()));
         }
 
         Role role = findRoleById(request.account().roleId());
@@ -250,7 +249,7 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to edit this user");
         }
 
-        String oldPictureKey = user.getProfilePictureUrl();
+        Optional<String> oldPictureKeyOptional = user.getProfilePictureUrl();
 
         String newPictureKey = profilePictureService.saveProfilePicture(request.profilePicture());
 
@@ -258,11 +257,11 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        if (StringUtils.hasText(oldPictureKey)) {
+        if (oldPictureKeyOptional.isPresent()) {
             try {
                 // TODO
                 // Commented for development purposes
-                // profilePictureService.deleteProfilePicture(oldPictureKey);
+                // profilePictureService.deleteProfilePicture(oldPictureKeyOptional.get());
             } catch (Exception e) {
                 // Don't stop the execution flow, we can delete
                 // the orphan picture later with some worker thread
@@ -270,7 +269,7 @@ public class UserService {
         }
 
         return UpdateProfilePictureResponse.builder()
-                .profilePictureUrl(profilePictureService.profilePictureUrl(savedUser.getProfilePictureUrl()))
+                .profilePictureUrl(profilePictureService.profilePictureUrl(savedUser.getProfilePictureUrl().orElse(null)))
                 .build();
     }
 
@@ -387,7 +386,7 @@ public class UserService {
         return AccountResponse.builder()
                 .email(user.getEmail())
                 .role(toRoleResponse(user.getRole()))
-                .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
+                .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl().orElse(null)))
                 .permissions(permissions)
                 .build();
     }
@@ -402,7 +401,7 @@ public class UserService {
                 .phone(user.getPhoneNumber())
                 .role(toRoleResponse(user.getRole()))
                 .registrationDate(dateTimeFormatter.format(user.getRegistrationDate().atOffset(ZoneOffset.UTC)))
-                .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
+                .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl().orElse(null)))
                 .address(user.getAddress().map(this::toUserAddressResponse).orElse(null))
                 .gender(toGenderResponse(user.getGender()))
                 .dateOfBirth(user.getDateOfBirth())
@@ -437,7 +436,6 @@ public class UserService {
 
     private User mapUser(CreateUserRequest request, Role role) {
         Gender gender = findGenderById(request.personalData().genderId());
-        String profilePictureKey = profilePictureService.saveProfilePicture(request.account().profilePicture());
 
         var user = new User();
         user.setFirstName(request.personalData().firstName().trim());
@@ -448,8 +446,12 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(request.account().password().trim()));
         user.setRole(role);
         user.setDateOfBirth(request.personalData().dateOfBirth());
-        user.setProfilePictureUrl(profilePictureKey);
         user.setRegistrationDate(Instant.now());
+
+        if (request.account().profilePicture() != null) {
+            String profilePictureKey = profilePictureService.saveProfilePicture(request.account().profilePicture());
+            user.setProfilePictureUrl(profilePictureKey);
+        }
 
         return user;
     }
