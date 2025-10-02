@@ -31,4 +31,7 @@ public class Author {
     @ManyToMany(mappedBy = "authors", fetch = FetchType.EAGER)
     private Set<Book> books = new HashSet<>();
 
+    public String getFullNameReversed() {
+        return "%s, %s".formatted(lastName, firstName);
+    }
 }

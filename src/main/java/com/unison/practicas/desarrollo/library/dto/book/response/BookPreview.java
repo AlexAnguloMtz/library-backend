@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record BookResponse(
+public record BookPreview(
         String id,
         String title,
         String isbn,

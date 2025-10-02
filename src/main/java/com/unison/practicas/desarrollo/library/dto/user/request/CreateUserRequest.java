@@ -5,7 +5,6 @@ import lombok.Builder;
 @Builder
 public record CreateUserRequest(
         PersonalDataRequest personalData,
-        UserAddressRequest address,
         CreateAccountRequest account
 ) {
 }

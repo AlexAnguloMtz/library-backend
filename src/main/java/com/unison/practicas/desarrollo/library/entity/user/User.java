@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 @Entity
@@ -52,6 +53,10 @@ public class User {
     public void setAddress(UserAddress address) {
         this.address = address;
         address.setUser(this);
+    }
+
+    public Optional<UserAddress> getAddress() {
+        return Optional.ofNullable(address);
     }
 
 }

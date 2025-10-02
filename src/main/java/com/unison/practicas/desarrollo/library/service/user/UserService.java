@@ -152,7 +152,7 @@ public class UserService {
 
         State state = findStateById(request.stateId());
 
-        UserAddress address = user.getAddress();
+        UserAddress address =  user.getAddress().orElseGet(UserAddress::new);
 
         address.setState(state);
         address.setCity(request.city().trim());
@@ -164,7 +164,10 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return toUserAddressResponse(savedUser.getAddress());
+        // This Optional unboxing should be safe, we now know the address is present
+        UserAddress savedAddress = savedUser.getAddress().get();
+
+        return toUserAddressResponse(savedAddress);
     }
 
     @PreAuthorize("hasAuthority('users:update')")
@@ -293,7 +296,6 @@ public class UserService {
         return CreateUserResponse.builder()
                 .id(String.valueOf(user.getId()))
                 .personalData(toPersonalDataResponse(user))
-                .address(toUserAddressResponse(user.getAddress()))
                 .account(toAccountResponse(user, permissions))
                 .build();
     }
@@ -401,7 +403,7 @@ public class UserService {
                 .role(toRoleResponse(user.getRole()))
                 .registrationDate(dateTimeFormatter.format(user.getRegistrationDate().atOffset(ZoneOffset.UTC)))
                 .profilePictureUrl(profilePictureService.profilePictureUrl(user.getProfilePictureUrl()))
-                .address(toUserAddressResponse(user.getAddress()))
+                .address(user.getAddress().map(this::toUserAddressResponse).orElse(null))
                 .gender(toGenderResponse(user.getGender()))
                 .dateOfBirth(user.getDateOfBirth())
                 .age(calculateAge(user.getDateOfBirth()))
@@ -442,7 +444,6 @@ public class UserService {
         user.setLastName(request.personalData().lastName().trim());
         user.setPhoneNumber(request.personalData().phone().trim());
         user.setGender(gender);
-        user.setAddress(toAddressEntity(request.address()));
         user.setEmail(request.account().email().trim());
         user.setPasswordHash(passwordEncoder.encode(request.account().password().trim()));
         user.setRole(role);

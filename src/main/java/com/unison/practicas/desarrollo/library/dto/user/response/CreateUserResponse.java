@@ -6,7 +6,6 @@ import lombok.Builder;
 public record CreateUserResponse(
     String id,
     PersonalDataResponse personalData,
-    UserAddressResponse address,
     AccountResponse account
 ) {
 }
