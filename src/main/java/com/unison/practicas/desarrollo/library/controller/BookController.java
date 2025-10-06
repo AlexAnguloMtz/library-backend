@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.controller;
 
-import com.unison.practicas.desarrollo.library.dto.BookRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.BookRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.CreateBookResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookOptionsResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookPreview;
@@ -35,7 +35,7 @@ public class BookController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public CreateBookResponse createBook(@Valid @RequestBody BookRequest request) {
+    public CreateBookResponse createBook(@Valid @ModelAttribute BookRequest request) {
         return bookService.createBook(request);
     }
 

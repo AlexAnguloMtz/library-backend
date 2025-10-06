@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.dto;
+package com.unison.practicas.desarrollo.library.dto.book.request;
 
 import com.unison.practicas.desarrollo.library.util.validation.BookPicture;
 import com.unison.practicas.desarrollo.library.util.validation.BookYear;
@@ -26,7 +26,7 @@ public record BookRequest(
 
         @NotNull
         @Size(min = 1, max = 10)
-        List<@Size(max = 40) String> authorsIds,
+        List<@Size(max = 40) String> authorIds,
 
         @NotBlank
         @Size(max = 40)

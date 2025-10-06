@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
-import com.unison.practicas.desarrollo.library.dto.BookRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.BookRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.CreateBookResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookOptionsResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookPreview;
@@ -74,7 +74,7 @@ public class BookService {
 
     private Book toBook(BookRequest request) {
         BookCategory category = findCategoryById(request.categoryId());
-        List<Author> authors = findAuthorsByIds(request.authorsIds());
+        List<Author> authors = findAuthorsByIds(request.authorIds());
         String pictureKey = bookImageService.saveBookImage(request.bookPicture());
 
         var book = new Book();

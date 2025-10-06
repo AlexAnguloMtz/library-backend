@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -34,7 +33,14 @@ public class DemoUsersSeeder {
     private final UserAddressFactory userAddressFactory;
     private final GenderRepository genderRepository;
 
-    public DemoUsersSeeder(Faker faker, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, UserAddressFactory userAddressFactory, GenderRepository genderRepository) {
+    public DemoUsersSeeder(
+            Faker faker,
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder,
+            UserAddressFactory userAddressFactory,
+            GenderRepository genderRepository
+    ) {
         this.faker = faker;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -44,88 +50,65 @@ public class DemoUsersSeeder {
     }
 
     public void seed() {
-        var adminEmail = "admin@email.com";
-        var adminPassword = "Admin99##";
-
-        var librarianEmail = "bibliotecario@email.com";
-        var librarianPassword = "Bibliotecario99##";
-
-        var userEmail = "usuario@email.com";
-        var userPassword = "Usuario99##";
-
         List<Gender> genders = genderRepository.findAll();
 
-        if (userRepository.findByEmailIgnoreCase(adminEmail).isEmpty()) {
-            Role adminRole = roleRepository.findBySlug(RoleName.ADMIN.name()).get();
+        createDemoUserIfNotExists(
+                "admin@email.com",
+                "Admin99##",
+                "Administrador",
+                RoleName.ADMIN,
+                "profile_5.jpg",
+                genders
+        );
 
-            var adminUser = new User();
-            adminUser.setFirstName("Administrador");
-            adminUser.setLastName("Demo");
-            adminUser.setEmail(adminEmail);
-            adminUser.setPasswordHash(passwordEncoder.encode(adminPassword));
-            adminUser.setPhoneNumber(makePhoneNumber());
-            adminUser.setRegistrationDate(Instant.now());
-            adminUser.setRole(adminRole);
-            adminUser.setGender(CollectionHelpers.randomItem(genders));
-            adminUser.setDateOfBirth(dateOfBirth());
+        createDemoUserIfNotExists(
+                "bibliotecario@email.com",
+                "Bibliotecario99##",
+                "Bibliotecario",
+                RoleName.LIBRARIAN,
+                "profile_1.jpg",
+                genders
+        );
 
-            adminUser.setProfilePictureUrl("profile_5.jpg");
-
-            UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
-
-            adminUser.setAddress(userAddress);
-
-            userRepository.save(adminUser);
-        }
-
-        if (userRepository.findByEmailIgnoreCase(librarianEmail).isEmpty()) {
-            Role librarianRole = roleRepository.findBySlug(RoleName.LIBRARIAN.name()).get();
-
-            var librarianUser = new User();
-            librarianUser.setFirstName("Bibliotecario");
-            librarianUser.setLastName("Demo");
-            librarianUser.setEmail(librarianEmail);
-            librarianUser.setPasswordHash(passwordEncoder.encode(librarianPassword));
-            librarianUser.setPhoneNumber(makePhoneNumber());
-            librarianUser.setRegistrationDate(Instant.now());
-            librarianUser.setRole(librarianRole);
-            librarianUser.setGender(CollectionHelpers.randomItem(genders));
-            librarianUser.setDateOfBirth(dateOfBirth());
-
-            librarianUser.setProfilePictureUrl("profile_1.jpg");
-
-            UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
-
-            librarianUser.setAddress(userAddress);
-
-            userRepository.save(librarianUser);
-        }
-
-        if (userRepository.findByEmailIgnoreCase(userEmail).isEmpty()) {
-            Role userRole = roleRepository.findBySlug(RoleName.USER.name()).get();
-
-            var regularUser = new User();
-            regularUser.setFirstName("Usuario");
-            regularUser.setLastName("Demo");
-            regularUser.setEmail(userEmail);
-            regularUser.setPasswordHash(passwordEncoder.encode(userPassword));
-            regularUser.setPhoneNumber(makePhoneNumber());
-            regularUser.setRegistrationDate(Instant.now());
-            regularUser.setRole(userRole);
-            regularUser.setGender(CollectionHelpers.randomItem(genders));
-            regularUser.setDateOfBirth(dateOfBirth());
-
-            regularUser.setProfilePictureUrl("profile_4.jpg");
-
-            UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();
-
-            regularUser.setAddress(userAddress);
-
-            userRepository.save(regularUser);
-        }
+        createDemoUserIfNotExists(
+                "usuario@email.com",
+                "Usuario99##",
+                "Usuario",
+                RoleName.USER,
+                "profile_4.jpg",
+                genders
+        );
     }
 
-    private LocalDate dateOfBirth() {
+    private void createDemoUserIfNotExists(
+            String email,
+            String password,
+            String firstName,
+            RoleName roleName,
+            String profilePicture,
+            List<Gender> genders
+    ) {
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) return;
+
+        Role role = roleRepository.findBySlug(roleName.name()).orElseThrow();
+
+        User user = new User();
+        user.setFirstName(firstName);
+        user.setLastName("Demo");
+        user.setEmail(email);
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setPhoneNumber(makePhoneNumber());
+        user.setRegistrationDate(Instant.now());
+        user.setRole(role);
+        user.setGender(CollectionHelpers.randomItem(genders));
+        user.setDateOfBirth(randomDateOfBirth());
+        user.setProfilePictureUrl(profilePicture);
+        user.setAddress(userAddressFactory.createUserAddresses(1).getFirst());
+
+        userRepository.save(user);
+    }
+
+    private LocalDate randomDateOfBirth() {
         return TimeUtils.randomLocalDateBetween(
                 LocalDate.of(1950, 1, 1),
                 LocalDate.of(2000, 1, 1)
@@ -138,5 +121,4 @@ public class DemoUsersSeeder {
                 .mapToObj(String::valueOf)
                 .collect(Collectors.joining());
     }
-
 }
