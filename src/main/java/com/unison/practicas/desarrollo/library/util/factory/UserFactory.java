@@ -36,7 +36,7 @@ public class UserFactory {
         this.userAddressFactory = userAddressFactory;
     }
 
-    public Collection<User> createUsers(int count) {
+    public List<User> createUsers(int count) {
         if (count < 0) {
             throw new RuntimeException("Count must be greater than 0, got %d".formatted(count));
         }

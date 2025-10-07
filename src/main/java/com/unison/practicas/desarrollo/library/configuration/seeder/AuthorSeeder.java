@@ -1,15 +1,16 @@
 package com.unison.practicas.desarrollo.library.configuration.seeder;
 
+import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.repository.AuthorRepository;
 import com.unison.practicas.desarrollo.library.util.factory.AuthorFactory;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Profile({"dev", "test"})
-@Slf4j
-public class AuthorSeeder {
+class AuthorSeeder extends BaseSeeder<Author> {
 
     private final AuthorRepository authorRepository;
     private final AuthorFactory authorFactory;
@@ -19,18 +20,29 @@ public class AuthorSeeder {
         this.authorFactory = authorFactory;
     }
 
-    public void seed() {
-        if (authorRepository.count() > 0) {
-            log.debug("author table not empty, will skip seeding of authors");
-            return;
-        }
-        int count = 300;
+    @Override
+    long countExisting() {
+        return authorRepository.count();
+    }
 
-        log.debug("seeding {} authors...", count);
+    @Override
+    int countToSeed() {
+        return 300;
+    }
 
-        authorRepository.saveAll(authorFactory.createAuthors(count));
+    @Override
+    String resourceName() {
+        return "authors";
+    }
 
-        log.debug("seeded {} authors", count);
+    @Override
+    void saveAll(List<Author> authors) {
+        authorRepository.saveAll(authors);
+    }
+
+    @Override
+    List<Author> makeItems(int count) {
+        return authorFactory.createAuthors(count);
     }
 
 }

@@ -1,15 +1,16 @@
 package com.unison.practicas.desarrollo.library.configuration.seeder;
 
+import com.unison.practicas.desarrollo.library.entity.user.User;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.util.factory.UserFactory;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Profile({"dev", "test"})
-@Slf4j
-public class UserSeeder {
+class UserSeeder extends BaseSeeder<User> {
 
     private final UserFactory userFactory;
     private final UserRepository userRepository;
@@ -19,18 +20,29 @@ public class UserSeeder {
         this.userRepository = userRepository;
     }
 
-    public void seed() {
-        if (userRepository.count() > 0) {
-            log.debug("user table not empty, will skip seeding of users");
-            return;
-        }
-        int count = 500;
+    @Override
+    long countExisting() {
+        return userRepository.count();
+    }
 
-        log.debug("seeding {} users...", count);
+    @Override
+    int countToSeed() {
+        return 500;
+    }
 
-        userRepository.saveAll(userFactory.createUsers(count));
+    @Override
+    String resourceName() {
+        return "users";
+    }
 
-        log.debug("seeded {} users", count);
+    @Override
+    void saveAll(List<User> users) {
+        userRepository.saveAll(users);
+    }
+
+    @Override
+    List<User> makeItems(int count) {
+        return userFactory.createUsers(count);
     }
 
 }

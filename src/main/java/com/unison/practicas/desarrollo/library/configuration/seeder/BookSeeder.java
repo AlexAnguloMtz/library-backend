@@ -1,15 +1,16 @@
 package com.unison.practicas.desarrollo.library.configuration.seeder;
 
+import com.unison.practicas.desarrollo.library.entity.book.Book;
 import com.unison.practicas.desarrollo.library.repository.BookRepository;
 import com.unison.practicas.desarrollo.library.util.factory.BookFactory;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Profile({"dev", "test"})
-@Slf4j
-public class BookSeeder {
+class BookSeeder extends BaseSeeder<Book> {
 
     private final BookRepository bookRepository;
     private final BookFactory bookFactory;
@@ -19,19 +20,29 @@ public class BookSeeder {
         this.bookFactory = bookFactory;
     }
 
-    public void seed() {
-        if (bookRepository.count() > 0) {
-            log.debug("book table not empty, will skip seeding of books");
-            return;
-        }
+    @Override
+    long countExisting() {
+        return bookRepository.count();
+    }
 
-        int count = 600;
+    @Override
+    int countToSeed() {
+        return 600;
+    }
 
-        log.debug("seeding {} books...", count);
+    @Override
+    String resourceName() {
+        return "books";
+    }
 
-        bookRepository.saveAll(bookFactory.createBooks(count));
+    @Override
+    void saveAll(List<Book> books) {
+        bookRepository.saveAll(books);
+    }
 
-        log.debug("seeded {} books", count);
+    @Override
+    List<Book> makeItems(int count) {
+        return bookFactory.createBooks(count);
     }
 
 }
