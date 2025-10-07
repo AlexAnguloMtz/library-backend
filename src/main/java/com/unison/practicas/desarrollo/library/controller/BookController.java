@@ -1,9 +1,10 @@
 package com.unison.practicas.desarrollo.library.controller;
 
-import com.unison.practicas.desarrollo.library.dto.book.request.BookRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.CreateBookResponse;
+import com.unison.practicas.desarrollo.library.dto.book.request.CreateBookRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.UpdateBookRequest;
+import com.unison.practicas.desarrollo.library.dto.book.response.BookDetailsResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookOptionsResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookPreview;
+import com.unison.practicas.desarrollo.library.dto.book.response.BookPreviewResponse;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBooksRequest;
 import com.unison.practicas.desarrollo.library.service.book.BookService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
@@ -22,7 +23,7 @@ public class BookController {
     }
 
     @GetMapping
-    public PaginationResponse<BookPreview> getBooks(
+    public PaginationResponse<BookPreviewResponse> getBooks(
             @Valid GetBooksRequest filters,
             @Valid PaginationRequest pagination
     ) {
@@ -35,8 +36,16 @@ public class BookController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public CreateBookResponse createBook(@Valid @ModelAttribute BookRequest request) {
+    public BookDetailsResponse createBook(@Valid @ModelAttribute CreateBookRequest request) {
         return bookService.createBook(request);
+    }
+
+    @PatchMapping(consumes = "multipart/form-data")
+    public BookDetailsResponse updateBook(
+            @PathVariable String id,
+            @Valid @ModelAttribute UpdateBookRequest request
+    ) {
+        return bookService.updateBook(id, request);
     }
 
 }

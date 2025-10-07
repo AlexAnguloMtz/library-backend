@@ -5,7 +5,6 @@ import com.unison.practicas.desarrollo.library.entity.common.Gender;
 import com.unison.practicas.desarrollo.library.entity.user.Role;
 import com.unison.practicas.desarrollo.library.entity.user.RoleName;
 import com.unison.practicas.desarrollo.library.entity.user.User;
-import com.unison.practicas.desarrollo.library.entity.user.UserAddress;
 import com.unison.practicas.desarrollo.library.repository.GenderRepository;
 import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;

@@ -1,9 +1,10 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
-import com.unison.practicas.desarrollo.library.dto.book.request.BookRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.CreateBookResponse;
+import com.unison.practicas.desarrollo.library.dto.book.request.CreateBookRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.UpdateBookRequest;
+import com.unison.practicas.desarrollo.library.dto.book.response.BookDetailsResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookOptionsResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookPreview;
+import com.unison.practicas.desarrollo.library.dto.book.response.BookPreviewResponse;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBooksRequest;
 import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
 import com.unison.practicas.desarrollo.library.entity.book.Author;
@@ -18,6 +19,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -43,7 +46,7 @@ public class BookService {
     }
 
     @PreAuthorize("hasAuthority('books:read')")
-    public PaginationResponse<BookPreview> getBooks(GetBooksRequest filters, PaginationRequest pagination) {
+    public PaginationResponse<BookPreviewResponse> getBooks(GetBooksRequest filters, PaginationRequest pagination) {
         return getBooks.handle(filters, pagination);
     }
 
@@ -60,19 +63,63 @@ public class BookService {
 
     @PreAuthorize("hasAuthority('books:create')")
     @Transactional
-    public CreateBookResponse createBook(BookRequest request) {
+    public BookDetailsResponse createBook(CreateBookRequest request) {
         if (bookRepository.existsByIsbn(request.isbn())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ISBN already exists: %s".formatted(request.isbn()));
         }
-
         Book book = toBook(request);
-
         Book savedBook = bookRepository.save(book);
-
-        return toCreationResponse(savedBook);
+        return toBookDetailsResponse(savedBook);
     }
 
-    private Book toBook(BookRequest request) {
+    @PreAuthorize("hasAuthority('books:update')")
+    @Transactional
+    public BookDetailsResponse updateBook(String bookId, UpdateBookRequest request) {
+        Book book = findBookById(bookId);
+        Optional<Book> byIsbn = bookRepository.findByIsbn(request.isbn());
+        boolean isbnConflict = byIsbn.isPresent() && !byIsbn.get().getId().equals(book.getId());
+        if (isbnConflict) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ISBN already exists: %s".formatted(request.isbn()));
+        }
+        Book updatedBook = updatedBook(book, request);
+        Book savedBook = bookRepository.save(updatedBook);
+        return toBookDetailsResponse(savedBook);
+    }
+
+    private Book updatedBook(Book book, UpdateBookRequest request) {
+        if (StringUtils.hasText(request.title())) {
+            book.setIsbn(request.title());
+        }
+        if (StringUtils.hasText(request.isbn())) {
+            book.setIsbn(request.isbn());
+        }
+        if (request.year() != null) {
+            book.setYear(request.year());
+        }
+        if (!CollectionUtils.isEmpty(request.authorIds())) {
+            List<Author> authors = findAuthorsByIds(request.authorIds());
+            book.setAuthors(authors);
+        }
+        if (StringUtils.hasText(request.categoryId())) {
+            BookCategory category = findCategoryById(request.categoryId());
+            book.setCategory(category);
+        }
+        if (request.bookPicture() != null) {
+            String pictureKey = bookImageService.saveBookImage(request.bookPicture());
+            book.setImage(pictureKey);
+        }
+        return book;
+    }
+
+    private Book findBookById(String id) {
+        Optional<Book> bookOptional = bookRepository.findById(Integer.parseInt(id));
+        if (bookOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find book with id: %s".formatted(id));
+        }
+        return bookOptional.get();
+    }
+
+    private Book toBook(CreateBookRequest request) {
         BookCategory category = findCategoryById(request.categoryId());
         List<Author> authors = findAuthorsByIds(request.authorIds());
         String pictureKey = bookImageService.saveBookImage(request.bookPicture());
@@ -128,8 +175,8 @@ public class BookService {
                 .build();
     }
 
-    private CreateBookResponse toCreationResponse(Book book) {
-        return CreateBookResponse.builder()
+    private BookDetailsResponse toBookDetailsResponse(Book book) {
+        return BookDetailsResponse.builder()
                 .id(String.valueOf(book.getId()))
                 .title(book.getTitle())
                 .isbn(book.getIsbn())

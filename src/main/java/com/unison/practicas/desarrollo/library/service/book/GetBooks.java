@@ -2,7 +2,7 @@ package com.unison.practicas.desarrollo.library.service.book;
 
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBooksRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookAvailabilityResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookPreview;
+import com.unison.practicas.desarrollo.library.dto.book.response.BookPreviewResponse;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import com.unison.practicas.desarrollo.library.util.pagination.SortRequest;
@@ -30,7 +30,7 @@ public class GetBooks {
         this.bookImageService = bookImageService;
     }
 
-    public PaginationResponse<BookPreview> handle(GetBooksRequest filters, PaginationRequest pagination) {
+    public PaginationResponse<BookPreviewResponse> handle(GetBooksRequest filters, PaginationRequest pagination) {
 
         // Subquery principal: concatenación de autores
         var booksSubquery = dsl.select(
@@ -126,7 +126,7 @@ public class GetBooks {
         var result = base.fetch();
 
         // Mapear a BookResponse
-        List<BookPreview> items = result.stream().map(r -> {
+        List<BookPreviewResponse> items = result.stream().map(r -> {
             List<String> authors = r.get("authors", List.class);
             var availability = BookAvailabilityResponse.builder()
                     .available(true)
@@ -134,7 +134,7 @@ public class GetBooks {
                     .totalCopies(10)
                     .build();
 
-            return BookPreview.builder()
+            return BookPreviewResponse.builder()
                     .id(String.valueOf(r.get(booksSubquery.field("id", Integer.class))))
                     .title(r.get(booksSubquery.field("title", String.class)))
                     .isbn(r.get(booksSubquery.field("isbn", String.class)))
@@ -154,7 +154,7 @@ public class GetBooks {
 
         long totalPages = (long) Math.ceil((double) totalItems / pagination.size());
 
-        return PaginationResponse.<BookPreview>builder()
+        return PaginationResponse.<BookPreviewResponse>builder()
                 .items(items)
                 .page(pagination.page())
                 .size(pagination.size())

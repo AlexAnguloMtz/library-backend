@@ -5,13 +5,14 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record CreateBookResponse(
+public record BookPreviewResponse(
         String id,
         String title,
         String isbn,
         Integer year,
-        String category,
+        String imageUrl,
         List<String> authors,
-        String pictureUrl
+        String category,
+        BookAvailabilityResponse availability
 ) {
 }

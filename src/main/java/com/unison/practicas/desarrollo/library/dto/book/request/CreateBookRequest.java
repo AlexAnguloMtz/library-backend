@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Builder
-public record BookRequest(
+public record CreateBookRequest(
 
         @NotBlank
         @Size(max = 100)
