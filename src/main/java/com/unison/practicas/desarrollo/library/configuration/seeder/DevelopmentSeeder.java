@@ -35,6 +35,7 @@ public class DevelopmentSeeder implements CommandLineRunner {
             log.debug("seeding of data for development was successful");
         } catch (Exception e) {
             log.debug("could not seed data for development");
+            log.debug(e.getMessage());
         }
     }
 
