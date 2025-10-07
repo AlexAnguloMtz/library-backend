@@ -28,15 +28,19 @@ public class DevelopmentSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.debug("seeding data for development...");
         try {
-            userSeeder.seed();
-            demoUsersSeeder.seed();
-            authorSeeder.seed();
-            bookSeeder.seed();
+            seed();
             log.debug("seeding of data for development was successful");
         } catch (Exception e) {
             log.debug("could not seed data for development");
             log.debug(e.getMessage());
         }
+    }
+
+    private void seed() {
+        userSeeder.seed();
+        demoUsersSeeder.seed();
+        authorSeeder.seed();
+        bookSeeder.seed();
     }
 
 }
