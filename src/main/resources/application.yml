@@ -3,3 +3,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/dev_library_db
     username: dev_user
     password: dev_password
+logging:
+  level:
+    com.unison.practicas.desarrollo.library.configuration.seeder: DEBUG

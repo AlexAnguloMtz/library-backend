@@ -11,6 +11,7 @@ import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
 import com.unison.practicas.desarrollo.library.util.TimeUtils;
 import com.unison.practicas.desarrollo.library.util.factory.UserAddressFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.util.stream.IntStream;
 
 @Component
 @Profile({"dev", "test"})
+@Slf4j
 public class DemoUsersSeeder {
 
     private final Faker faker;
@@ -49,6 +51,8 @@ public class DemoUsersSeeder {
     }
 
     public void seed() {
+        log.debug("seeding demo users...");
+
         List<Gender> genders = genderRepository.findAll();
 
         createDemoUserIfNotExists(
@@ -77,6 +81,8 @@ public class DemoUsersSeeder {
                 "profile_4.jpg",
                 genders
         );
+
+        log.debug("seeded demo users");
     }
 
     private void createDemoUserIfNotExists(
@@ -87,7 +93,10 @@ public class DemoUsersSeeder {
             String profilePicture,
             List<Gender> genders
     ) {
-        if (userRepository.findByEmailIgnoreCase(email).isPresent()) return;
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
+            log.debug("user with email {} already exists, will skip seeding of this user", email);
+            return;
+        }
 
         Role role = roleRepository.findBySlug(roleName.name()).orElseThrow();
 
@@ -105,6 +114,8 @@ public class DemoUsersSeeder {
         user.setAddress(userAddressFactory.createUserAddresses(1).getFirst());
 
         userRepository.save(user);
+
+        log.debug("seeded demo user with email {} and role {}", email, roleName.name());
     }
 
     private LocalDate randomDateOfBirth() {

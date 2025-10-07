@@ -24,7 +24,7 @@ public class Book {
     @JoinColumn(name = "category_id")
     private BookCategory category;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "book_author",
             joinColumns = @JoinColumn(name = "book_id"),

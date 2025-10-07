@@ -1,12 +1,14 @@
 package com.unison.practicas.desarrollo.library.configuration.seeder;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
 @Profile({"dev"})
+@Slf4j
 public class DevelopmentSeeder implements CommandLineRunner {
 
     private final UserSeeder userSeeder;
@@ -24,10 +26,16 @@ public class DevelopmentSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        userSeeder.seed();
-        demoUsersSeeder.seed();
-        authorSeeder.seed();
-        bookSeeder.seed();
+        log.debug("seeding data for development...");
+        try {
+            userSeeder.seed();
+            demoUsersSeeder.seed();
+            authorSeeder.seed();
+            bookSeeder.seed();
+            log.debug("seeding of data for development was successful");
+        } catch (Exception e) {
+            log.debug("could not seed data for development");
+        }
     }
 
 }
