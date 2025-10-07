@@ -26,8 +26,8 @@ public class DevelopmentSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        log.debug("seeding data for development...");
         try {
+            log.debug("seeding data for development...");
             seed();
             log.debug("seeding of data for development was successful");
         } catch (Exception e) {
