@@ -3,7 +3,7 @@ package com.unison.practicas.desarrollo.library.service.book;
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.book.response.AuthorOptions;
 import com.unison.practicas.desarrollo.library.dto.book.request.AuthorRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.AuthorResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.AuthorSummaryResponse;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetAuthorsRequest;
 import com.unison.practicas.desarrollo.library.dto.common.CountryResponse;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
@@ -53,13 +53,13 @@ public class AuthorService {
     }
 
     @PreAuthorize("hasAuthority('authors:create')")
-    public AuthorResponse createAuthor(AuthorRequest request) {
+    public AuthorSummaryResponse createAuthor(AuthorRequest request) {
         Author author = mapAuthor(request, new Author());
         return toResponse(authorRepository.save(author));
     }
 
     @PreAuthorize("hasAuthority('authors:edit')")
-    public AuthorResponse updateAuthor(String id, AuthorRequest request) {
+    public AuthorSummaryResponse updateAuthor(String id, AuthorRequest request) {
         Author author = mapAuthor(request, findAuthorById(id));
         return toResponse(authorRepository.save(author));
     }
@@ -80,15 +80,15 @@ public class AuthorService {
     }
 
     @PreAuthorize("hasAuthority('authors:read')")
-    public PaginationResponse<AuthorResponse> getAuthors(
+    public PaginationResponse<AuthorSummaryResponse> getAuthors(
             GetAuthorsRequest request,
             PaginationRequest pagination
     ) {
         return getAuthors.handle(request, pagination);
     }
 
-    private AuthorResponse toResponse(Author author) {
-        return AuthorResponse.builder()
+    private AuthorSummaryResponse toResponse(Author author) {
+        return AuthorSummaryResponse.builder()
                 .id(String.valueOf(author.getId()))
                 .firstName(author.getFirstName())
                 .lastName(author.getLastName())

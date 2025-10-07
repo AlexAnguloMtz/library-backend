@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.util;
+package com.unison.practicas.desarrollo.library.util.impl;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 
 @Component
-public class FileSystemImageService {
+class FileSystemImageService {
 
     public String saveImage(MultipartFile file, Path folder) {
         try {

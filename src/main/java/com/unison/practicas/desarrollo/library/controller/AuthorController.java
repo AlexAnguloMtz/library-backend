@@ -2,7 +2,7 @@ package com.unison.practicas.desarrollo.library.controller;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.book.response.AuthorOptions;
-import com.unison.practicas.desarrollo.library.dto.book.response.AuthorResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.AuthorSummaryResponse;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetAuthorsRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.AuthorRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
@@ -27,7 +27,7 @@ public class AuthorController {
     }
 
     @GetMapping
-    public PaginationResponse<AuthorResponse> getAuthors(
+    public PaginationResponse<AuthorSummaryResponse> getAuthors(
             @Valid GetAuthorsRequest request,
             @Valid PaginationRequest pagination
     ) {
@@ -40,12 +40,12 @@ public class AuthorController {
     }
 
     @PostMapping
-    public AuthorResponse createAuthor(@Valid @RequestBody AuthorRequest request) {
+    public AuthorSummaryResponse createAuthor(@Valid @RequestBody AuthorRequest request) {
         return authorService.createAuthor(request);
     }
 
     @PutMapping("/{id}")
-    public AuthorResponse updateAuthor(
+    public AuthorSummaryResponse updateAuthor(
             @PathVariable String id,
             @Valid @RequestBody AuthorRequest request
     ) {

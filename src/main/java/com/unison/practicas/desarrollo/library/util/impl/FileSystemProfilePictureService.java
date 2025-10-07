@@ -1,6 +1,5 @@
-package com.unison.practicas.desarrollo.library.util;
+package com.unison.practicas.desarrollo.library.util.impl;
 
-import com.unison.practicas.desarrollo.library.entity.user.User;
 import com.unison.practicas.desarrollo.library.service.user.ProfilePictureService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -10,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
-public class FileSystemProfilePictureService implements ProfilePictureService {
+class FileSystemProfilePictureService implements ProfilePictureService {
 
     private final FileSystemImageService imageService;
     private final Path rootFolder;

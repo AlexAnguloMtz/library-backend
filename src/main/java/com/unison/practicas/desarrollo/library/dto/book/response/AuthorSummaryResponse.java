@@ -6,7 +6,7 @@ import lombok.Builder;
 import java.time.LocalDate;
 
 @Builder
-public record AuthorResponse(
+public record AuthorSummaryResponse(
         String id,
         String firstName,
         String lastName,

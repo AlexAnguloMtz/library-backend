@@ -8,4 +8,5 @@ public interface BookImageService {
 
     String bookImageUrl(String bookImageKey);
 
+    void deleteImage(String key);
 }

@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
-import com.unison.practicas.desarrollo.library.dto.book.response.AuthorResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.AuthorSummaryResponse;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetAuthorsRequest;
 import com.unison.practicas.desarrollo.library.dto.common.CountryResponse;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
@@ -36,7 +36,7 @@ public class GetAuthors {
         this.dateFormatter = DateTimeFormatter.ofPattern("d/MMM/yyyy", Locale.forLanguageTag("es"));
     }
 
-    public PaginationResponse<AuthorResponse> handle(GetAuthorsRequest request, PaginationRequest pagination) {
+    public PaginationResponse<AuthorSummaryResponse> handle(GetAuthorsRequest request, PaginationRequest pagination) {
 
         var base = dsl.select(
                         AUTHOR.ID,
@@ -101,7 +101,7 @@ public class GetAuthors {
         // Execute
         var result = base.fetch();
 
-        List<AuthorResponse> items = result.stream()
+        List<AuthorSummaryResponse> items = result.stream()
                 .map(r -> {
                     CountryResponse country = r.get("country_id") != null
                             ? CountryResponse.builder()
@@ -110,7 +110,7 @@ public class GetAuthors {
                             .build()
                             : null;
 
-                    return AuthorResponse.builder()
+                    return AuthorSummaryResponse.builder()
                             .id(String.valueOf(r.get(AUTHOR.ID)))
                             .firstName(r.get(AUTHOR.FIRST_NAME))
                             .lastName(r.get(AUTHOR.LAST_NAME))
@@ -123,7 +123,7 @@ public class GetAuthors {
 
         long totalPages = (long) Math.ceil((double) totalItems / pagination.size());
 
-        return PaginationResponse.<AuthorResponse>builder()
+        return PaginationResponse.<AuthorSummaryResponse>builder()
                 .items(items)
                 .page(pagination.page())
                 .size(pagination.size())

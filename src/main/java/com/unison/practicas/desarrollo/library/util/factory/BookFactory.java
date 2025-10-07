@@ -49,7 +49,7 @@ public class BookFactory {
     }
 
     private String makeUniqueIsbn(int seed) {
-        String prefix = "978-1-";
+        String prefix = "978-1";
         String middle = String.format("%05d", faker.number().numberBetween(10000, 99999));
         String suffix = String.format("%03d", seed);
         return prefix + middle + "-" + suffix;

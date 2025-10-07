@@ -10,8 +10,8 @@ public record BookDetailsResponse(
         String title,
         String isbn,
         Integer year,
-        String category,
-        List<String> authors,
+        BookCategoryMinimalResponse category,
+        List<AuthorSummaryResponse> authors,
         String pictureUrl
 ) {
 }

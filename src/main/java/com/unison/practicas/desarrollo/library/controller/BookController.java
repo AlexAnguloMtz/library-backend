@@ -10,6 +10,7 @@ import com.unison.practicas.desarrollo.library.service.book.BookService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,6 +31,11 @@ public class BookController {
         return bookService.getBooks(filters, pagination);
     }
 
+    @GetMapping("/{id}")
+    public BookDetailsResponse getBookDetailsById(@PathVariable String id) {
+        return bookService.getBookDetailsById(id);
+    }
+
     @GetMapping("/options")
     public BookOptionsResponse getBookOptions() {
         return bookService.getBookOptions();
@@ -40,12 +46,21 @@ public class BookController {
         return bookService.createBook(request);
     }
 
-    @PatchMapping(consumes = "multipart/form-data")
+    @PatchMapping(
+            path = "/{id}",
+            consumes = "multipart/form-data"
+    )
     public BookDetailsResponse updateBook(
             @PathVariable String id,
             @Valid @ModelAttribute UpdateBookRequest request
     ) {
         return bookService.updateBook(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBookById(@PathVariable String id) {
+        bookService.deleteBookById(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

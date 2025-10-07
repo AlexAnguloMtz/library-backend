@@ -2,14 +2,14 @@ package com.unison.practicas.desarrollo.library.service.book;
 
 import com.unison.practicas.desarrollo.library.dto.book.request.CreateBookRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.UpdateBookRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookDetailsResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookOptionsResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookPreviewResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.*;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBooksRequest;
+import com.unison.practicas.desarrollo.library.dto.common.CountryResponse;
 import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
 import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.book.Book;
 import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
+import com.unison.practicas.desarrollo.library.entity.common.Country;
 import com.unison.practicas.desarrollo.library.repository.AuthorRepository;
 import com.unison.practicas.desarrollo.library.repository.BookCategoryRepository;
 import com.unison.practicas.desarrollo.library.repository.BookRepository;
@@ -21,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -48,6 +49,11 @@ public class BookService {
     @PreAuthorize("hasAuthority('books:read')")
     public PaginationResponse<BookPreviewResponse> getBooks(GetBooksRequest filters, PaginationRequest pagination) {
         return getBooks.handle(filters, pagination);
+    }
+
+    @PreAuthorize("hasAuthority('books:read')")
+    public BookDetailsResponse getBookDetailsById(String id) {
+        return toBookDetailsResponse(findBookById(id));
     }
 
     @PreAuthorize("hasAuthority('books:read')")
@@ -86,9 +92,20 @@ public class BookService {
         return toBookDetailsResponse(savedBook);
     }
 
+    @PreAuthorize("hasAuthority('books:delete')")
+    @Transactional
+    public void deleteBookById(String id) {
+        // TODO
+        // Don't delete book if it has active
+        // loans or copies on inventory.
+        // The loan system and inventory are not implemented yet.
+        Book book = findBookById(id);
+        bookRepository.delete(book);
+    }
+
     private Book updatedBook(Book book, UpdateBookRequest request) {
         if (StringUtils.hasText(request.title())) {
-            book.setIsbn(request.title());
+            book.setTitle(request.title());
         }
         if (StringUtils.hasText(request.isbn())) {
             book.setIsbn(request.isbn());
@@ -105,10 +122,25 @@ public class BookService {
             book.setCategory(category);
         }
         if (request.bookPicture() != null) {
-            String pictureKey = bookImageService.saveBookImage(request.bookPicture());
-            book.setImage(pictureKey);
+            updateBookImage(book, request.bookPicture());
         }
         return book;
+    }
+
+    private void updateBookImage(Book book, MultipartFile newPictureFile) {
+        String oldPictureKey = book.getImage();
+        String pictureKey = bookImageService.saveBookImage(newPictureFile);
+        book.setImage(pictureKey);
+        if (StringUtils.hasText(oldPictureKey)) {
+            try {
+                // TODO
+                // Commented for development purposes
+                // bookImageService.deleteImage(oldPictureKey);
+            } catch (Exception e) {
+                // Don't stop the execution flow, we can delete
+                // the orphan picture later with some worker thread
+            }
+        }
     }
 
     private Book findBookById(String id) {
@@ -181,9 +213,34 @@ public class BookService {
                 .title(book.getTitle())
                 .isbn(book.getIsbn())
                 .year(book.getYear())
-                .category(book.getCategory().getName())
-                .authors(book.getAuthors().stream().map(Author::getFullNameReversed).toList())
+                .category(toCategoryMinimalResponse(book.getCategory()))
+                .authors(book.getAuthors().stream().map(this::toAuthorResponse).toList())
                 .pictureUrl(bookImageService.bookImageUrl(book.getImage()))
+                .build();
+    }
+
+    private BookCategoryMinimalResponse toCategoryMinimalResponse(BookCategory category) {
+        return BookCategoryMinimalResponse.builder()
+                .id(category.getId().toString())
+                .name(category.getName())
+                .build();
+    }
+
+    private AuthorSummaryResponse toAuthorResponse(Author author) {
+        return AuthorSummaryResponse.builder()
+                .id(author.getId().toString())
+                .firstName(author.getFirstName())
+                .lastName(author.getLastName())
+                .dateOfBirth(author.getDateOfBirth())
+                .country(toCountryResponse(author.getCountry()))
+                .bookCount(author.getBooks().size())
+                .build();
+    }
+
+    private CountryResponse toCountryResponse(Country country) {
+        return CountryResponse.builder()
+                .id(country.getId().toString())
+                .name(country.getNicename())
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.util;
+package com.unison.practicas.desarrollo.library.util.impl;
 
 import com.unison.practicas.desarrollo.library.service.book.BookImageService;
 import org.springframework.stereotype.Component;
@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
-public class FileSystemBookImageService implements BookImageService {
+class FileSystemBookImageService implements BookImageService {
 
     private final FileSystemImageService imageService;
     private final Path rootFolder;
@@ -27,6 +27,11 @@ public class FileSystemBookImageService implements BookImageService {
     public String bookImageUrl(String key) {
         String publicUrlPrefix = "http://localhost:8080/api/v1/books/images/";
         return publicUrlPrefix + key;
+    }
+
+    @Override
+    public void deleteImage(String key) {
+        imageService.deleteImage(key, rootFolder);
     }
 
 }

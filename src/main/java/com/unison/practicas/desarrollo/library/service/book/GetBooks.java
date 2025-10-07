@@ -128,6 +128,7 @@ public class GetBooks {
         // Mapear a BookResponse
         List<BookPreviewResponse> items = result.stream().map(r -> {
             List<String> authors = r.get("authors", List.class);
+
             var availability = BookAvailabilityResponse.builder()
                     .available(true)
                     .availableCopies(3)
