@@ -12,6 +12,6 @@ public record BookDetailsResponse(
         Integer year,
         BookCategoryMinimalResponse category,
         List<AuthorSummaryResponse> authors,
-        String pictureUrl
+        String imageUrl
 ) {
 }

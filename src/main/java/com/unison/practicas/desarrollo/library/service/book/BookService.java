@@ -216,7 +216,7 @@ public class BookService {
                 .year(book.getYear())
                 .category(toCategoryMinimalResponse(book.getCategory()))
                 .authors(book.getAuthors().stream().map(this::toAuthorResponse).toList())
-                .pictureUrl(bookImageService.bookImageUrl(book.getImage()))
+                .imageUrl(bookImageService.bookImageUrl(book.getImage()))
                 .build();
     }
 

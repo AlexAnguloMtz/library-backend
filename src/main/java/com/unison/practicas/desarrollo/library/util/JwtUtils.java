@@ -27,7 +27,7 @@ public class JwtUtils {
                     .claim("role", user.getRole().getSlug())
                     .claim("permissions", user.getRole().getPermissions().stream().map(Permission::getName).toList())
                     .issueTime(Date.from(now))
-                    .expirationTime(Date.from(now.plusSeconds(3600)))
+                    .expirationTime(Date.from(now.plusSeconds(7200)))
                     .build();
 
             JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.HS256)
