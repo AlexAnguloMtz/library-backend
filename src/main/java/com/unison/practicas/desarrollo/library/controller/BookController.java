@@ -1,16 +1,21 @@
 package com.unison.practicas.desarrollo.library.controller;
 
+import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.book.request.CreateBookRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.UpdateBookRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookDetailsResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookOptionsResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookPreviewResponse;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBooksRequest;
+import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
+import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.service.book.BookService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -61,6 +66,19 @@ public class BookController {
     public ResponseEntity<Void> deleteBookById(@PathVariable String id) {
         bookService.deleteBookById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/export")
+    public ResponseEntity<byte[]> export(
+            @Valid @RequestBody ExportRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        ExportResponse response = bookService.export(userDetails, request);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + response.fileName())
+                .contentType(response.mediaType())
+                .body(response.fileBytes());
     }
 
 }

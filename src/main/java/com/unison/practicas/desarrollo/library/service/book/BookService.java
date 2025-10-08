@@ -1,10 +1,13 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
+import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.book.request.CreateBookRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.UpdateBookRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.*;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBooksRequest;
 import com.unison.practicas.desarrollo.library.dto.common.CountryResponse;
+import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
+import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
 import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.book.Book;
@@ -16,6 +19,7 @@ import com.unison.practicas.desarrollo.library.repository.BookRepository;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,13 +42,15 @@ public class BookService {
     private final BookCategoryRepository bookCategoryRepository;
     private final AuthorRepository authorRepository;
     private final BookImageService bookImageService;
+    private final ExportBooks exportBooks;
 
-    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, AuthorRepository authorRepository, BookImageService bookImageService) {
+    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, AuthorRepository authorRepository, BookImageService bookImageService, ExportBooks exportBooks) {
         this.getBooks = getBooks;
         this.bookRepository = bookRepository;
         this.bookCategoryRepository = bookCategoryRepository;
         this.authorRepository = authorRepository;
         this.bookImageService = bookImageService;
+        this.exportBooks = exportBooks;
     }
 
     @PreAuthorize("hasAuthority('books:read')")
@@ -102,6 +108,11 @@ public class BookService {
         // The loan system and inventory are not implemented yet.
         Book book = findBookById(id);
         bookRepository.delete(book);
+    }
+
+    @PreAuthorize("hasAuthority('books:read')")
+    public ExportResponse export(CustomUserDetails userDetails, @Valid ExportRequest request) {
+        return exportBooks.handle(userDetails, request);
     }
 
     private Book updatedBook(Book book, UpdateBookRequest request) {
