@@ -13,7 +13,6 @@ import com.unison.practicas.desarrollo.library.repository.BookCategoryRepository
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -74,6 +73,11 @@ public class BookCategoryService {
     @Transactional
     public void deleteBookCategoryById(String id) {
         BookCategory bookCategory = findBookCategoryById(id);
+        if (!bookCategory.getBooks().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "No puedes borrar una categoria que tiene libros. " +
+                    "Si realmente deseas eliminarla mejor intenta combinarla y será eliminada correctamente.");
+        }
         bookCategoryRepository.delete(bookCategory);
     }
 
