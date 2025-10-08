@@ -2,20 +2,27 @@ package com.unison.practicas.desarrollo.library.service.book;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoryRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.MergeBookCategoriesRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryResponse;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBookCategoriesRequest;
+import com.unison.practicas.desarrollo.library.dto.book.response.MergeBookCategoriesResponse;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
 import com.unison.practicas.desarrollo.library.repository.BookCategoryRepository;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class BookCategoryService {
@@ -35,6 +42,7 @@ public class BookCategoryService {
 
 
     @PreAuthorize("hasAuthority('book-categories:create')")
+    @Transactional
     public BookCategoryResponse createBookCategory(BookCategoryRequest request) {
         if (bookCategoryRepository.existsByNameIgnoreCase(request.name().trim())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category with name '%s' already exists".formatted(request.name().trim()));
@@ -44,6 +52,7 @@ public class BookCategoryService {
     }
 
     @PreAuthorize("hasAuthority('book-categories:update')")
+    @Transactional
     public BookCategoryResponse updateBookCategory(String id, BookCategoryRequest request) {
         BookCategory bookCategoryById = findBookCategoryById(id);
 
@@ -62,6 +71,7 @@ public class BookCategoryService {
     }
 
     @PreAuthorize("hasAuthority('book-categories:delete')")
+    @Transactional
     public void deleteBookCategoryById(String id) {
         BookCategory bookCategory = findBookCategoryById(id);
         bookCategoryRepository.delete(bookCategory);
@@ -78,6 +88,62 @@ public class BookCategoryService {
             PaginationRequest pagination
     ) {
         return getBookCategories.handle(request, pagination);
+    }
+
+    @PreAuthorize("hasAuthority('book-categories:update')")
+    @Transactional
+    public MergeBookCategoriesResponse merge(MergeBookCategoriesRequest request) {
+        if (request.mergedCategoriesIds().contains(request.targetCategoryId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "La categoría resultante no debe estar incluida en las categorías que serán eliminadas");
+        }
+
+        BookCategory targetCategory = findBookCategoryById(request.targetCategoryId());
+
+        List<BookCategory> mergedCategories = findBookCategoriesByIds(request.mergedCategoriesIds());
+
+        int movedBooks = mergedCategories.stream()
+                .flatMap(cat -> cat.getBooks().stream())
+                .peek(book -> book.setCategory(targetCategory))
+                .toList()
+                .size();
+
+        mergedCategories.forEach(cat -> {
+            targetCategory.getBooks().addAll(cat.getBooks());
+            cat.getBooks().clear();
+        });
+
+        bookCategoryRepository.save(targetCategory);
+
+        bookCategoryRepository.deleteAll(mergedCategories);
+
+        return MergeBookCategoriesResponse.builder()
+                .targetCategory(toResponse(targetCategory))
+                .deletedCategories(mergedCategories.size())
+                .movedBooks(movedBooks)
+                .build();
+    }
+
+    private List<BookCategory> findBookCategoriesByIds(Set<String> ids) {
+        Set<Integer> intIds = ids.stream()
+                .map(Integer::parseInt)
+                .collect(Collectors.toSet());
+
+        List<BookCategory> categories = bookCategoryRepository.findAllById(intIds);
+
+        if (categories.size() != intIds.size()) {
+            Set<Integer> foundIds = categories.stream()
+                    .map(BookCategory::getId)
+                    .collect(Collectors.toSet());
+
+            intIds.removeAll(foundIds);
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "No se encontraron las categorías con IDs: " + intIds
+            );
+        }
+
+        return categories;
     }
 
     private BookCategoryResponse toResponse(BookCategory bookCategory) {
@@ -100,4 +166,5 @@ public class BookCategoryService {
         bookCategory.setName(request.name().trim());
         return bookCategory;
     }
+
 }

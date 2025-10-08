@@ -16,8 +16,9 @@ abstract class BaseSeeder<T> {
     abstract void saveAll(List<T> items);
 
     public void seed(int count) {
-        if (countExisting() > 0) {
-            log.debug("found {}, will skip seeding", resourceName());
+        long existingCount = countExisting();
+        if (existingCount > 0) {
+            log.debug("found {} {}, will skip seeding", existingCount, resourceName());
             return;
         }
 

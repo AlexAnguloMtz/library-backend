@@ -2,8 +2,10 @@ package com.unison.practicas.desarrollo.library.controller;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoryRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.MergeBookCategoriesRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryResponse;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBookCategoriesRequest;
+import com.unison.practicas.desarrollo.library.dto.book.response.MergeBookCategoriesResponse;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.service.book.BookCategoryService;
@@ -64,4 +66,10 @@ public class BookCategoryController {
                 .contentType(response.mediaType())
                 .body(response.fileBytes());
     }
+
+    @PostMapping("/merge")
+    public MergeBookCategoriesResponse merge(@Valid @RequestBody MergeBookCategoriesRequest request) {
+        return bookCategoryService.merge(request);
+    }
+
 }
