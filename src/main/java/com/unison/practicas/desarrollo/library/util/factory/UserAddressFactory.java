@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.util.factory;
 
-import com.github.javafaker.Faker;
+import net.datafaker.Faker;
 import com.unison.practicas.desarrollo.library.entity.common.State;
 import com.unison.practicas.desarrollo.library.entity.user.UserAddress;
 import com.unison.practicas.desarrollo.library.repository.StateRepository;

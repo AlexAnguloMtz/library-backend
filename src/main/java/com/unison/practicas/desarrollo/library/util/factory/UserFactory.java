@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.util.factory;
 
-import com.github.javafaker.Faker;
+import net.datafaker.Faker;
 import com.unison.practicas.desarrollo.library.entity.common.Gender;
 import com.unison.practicas.desarrollo.library.entity.user.Role;
 import com.unison.practicas.desarrollo.library.entity.user.RoleName;
@@ -11,12 +11,12 @@ import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.util.CollectionHelpers;
 import com.unison.practicas.desarrollo.library.util.TimeUtils;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -28,12 +28,14 @@ public class UserFactory {
     private final RoleRepository roleRepository;
     private final GenderRepository genderRepository;
     private final UserAddressFactory userAddressFactory;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserFactory(Faker faker, RoleRepository roleRepository, GenderRepository genderRepository, UserAddressFactory userAddressFactory) {
+    public UserFactory(Faker faker, RoleRepository roleRepository, GenderRepository genderRepository, UserAddressFactory userAddressFactory, PasswordEncoder passwordEncoder) {
         this.faker = faker;
         this.roleRepository = roleRepository;
         this.genderRepository = genderRepository;
         this.userAddressFactory = userAddressFactory;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> createUsers(int count) {
@@ -64,7 +66,7 @@ public class UserFactory {
         user.setLastName(faker.name().lastName());
         user.setPhoneNumber(makePhoneNumber());
         user.setEmail(generateUniqueEmail(seed));
-        user.setPasswordHash(faker.internet().password(8, 16));
+        user.setPasswordHash(passwordEncoder.encode(generatePassword()));
         user.setRole(role);
         user.setRegistrationDate(TimeUtils.randomInstantBetween(Instant.parse("2020-01-24T00:00:00Z"), Instant.parse("2025-09-24T00:00:00Z")));
         user.setProfilePictureUrl(CollectionHelpers.randomItem(profilePictures()));
@@ -78,6 +80,35 @@ public class UserFactory {
         user.setAddress(userAddress);
 
         return user;
+    }
+
+    private String generatePassword() {
+        Faker faker = new Faker();
+
+        var lower = "abcdefghijklmnopqrstuvwxyz";
+        var upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var digits = "0123456789";
+        var symbols = "!@#$%^&*?";
+
+        List<Character> passwordChars = new ArrayList<>();
+
+        passwordChars.add(lower.charAt(faker.random().nextInt(lower.length())));
+        passwordChars.add(upper.charAt(faker.random().nextInt(upper.length())));
+        passwordChars.add(digits.charAt(faker.random().nextInt(digits.length())));
+        passwordChars.add(symbols.charAt(faker.random().nextInt(symbols.length())));
+
+        String all = lower + upper + digits + symbols;
+        for (int i = 0; i < 6; i++) {
+            passwordChars.add(all.charAt(faker.random().nextInt(all.length())));
+        }
+
+        Collections.shuffle(passwordChars, new Random());
+
+        StringBuilder sb = new StringBuilder();
+        for (char c : passwordChars) {
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
     private String makePhoneNumber() {

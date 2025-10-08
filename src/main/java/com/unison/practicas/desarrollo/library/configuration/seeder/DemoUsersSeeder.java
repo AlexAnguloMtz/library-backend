@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.configuration.seeder;
 
-import com.github.javafaker.Faker;
+import net.datafaker.Faker;
 import com.unison.practicas.desarrollo.library.entity.common.Gender;
 import com.unison.practicas.desarrollo.library.entity.user.Role;
 import com.unison.practicas.desarrollo.library.entity.user.RoleName;
@@ -81,8 +81,6 @@ public class DemoUsersSeeder {
                 "profile_4.jpg",
                 genders
         );
-
-        log.debug("seeded demo users");
     }
 
     private void createDemoUserIfNotExists(
