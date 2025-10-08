@@ -26,11 +26,6 @@ class BookSeeder extends BaseSeeder<Book> {
     }
 
     @Override
-    int countToSeed() {
-        return 600;
-    }
-
-    @Override
     String resourceName() {
         return "books";
     }

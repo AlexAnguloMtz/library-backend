@@ -26,11 +26,6 @@ class AuthorSeeder extends BaseSeeder<Author> {
     }
 
     @Override
-    int countToSeed() {
-        return 300;
-    }
-
-    @Override
     String resourceName() {
         return "authors";
     }

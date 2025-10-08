@@ -26,11 +26,6 @@ class UserSeeder extends BaseSeeder<User> {
     }
 
     @Override
-    int countToSeed() {
-        return 500;
-    }
-
-    @Override
     String resourceName() {
         return "users";
     }

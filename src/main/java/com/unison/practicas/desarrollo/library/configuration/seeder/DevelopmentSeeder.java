@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile({"dev"})
 @Slf4j
-public class DevelopmentSeeder implements CommandLineRunner {
+class DevelopmentSeeder implements CommandLineRunner {
 
     private final UserSeeder userSeeder;
     private final DemoUsersSeeder demoUsersSeeder;
     private final AuthorSeeder authorSeeder;
     private final BookSeeder bookSeeder;
 
-    protected DevelopmentSeeder(UserSeeder userSeeder, DemoUsersSeeder demoUsersSeeder, AuthorSeeder authorSeeder, BookSeeder bookSeeder) {
+    DevelopmentSeeder(UserSeeder userSeeder, DemoUsersSeeder demoUsersSeeder, AuthorSeeder authorSeeder, BookSeeder bookSeeder) {
         this.userSeeder = userSeeder;
         this.demoUsersSeeder = demoUsersSeeder;
         this.authorSeeder = authorSeeder;
@@ -37,10 +37,10 @@ public class DevelopmentSeeder implements CommandLineRunner {
     }
 
     private void seed() {
-        userSeeder.seed();
+        userSeeder.seed(500);
         demoUsersSeeder.seed();
-        authorSeeder.seed();
-        bookSeeder.seed();
+        authorSeeder.seed(300);
+        bookSeeder.seed(600);
     }
 
 }

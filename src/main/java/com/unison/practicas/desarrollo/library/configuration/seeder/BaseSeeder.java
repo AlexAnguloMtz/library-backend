@@ -9,21 +9,17 @@ abstract class BaseSeeder<T> {
 
     abstract long countExisting();
 
-    abstract int countToSeed();
-
     abstract String resourceName();
 
     abstract List<T> makeItems(int count);
 
     abstract void saveAll(List<T> items);
 
-    public void seed() {
+    public void seed(int count) {
         if (countExisting() > 0) {
             log.debug("found {}, will skip seeding", resourceName());
             return;
         }
-
-        int count = countToSeed();
 
         log.debug("seeding {} {}...", count, resourceName());
 
