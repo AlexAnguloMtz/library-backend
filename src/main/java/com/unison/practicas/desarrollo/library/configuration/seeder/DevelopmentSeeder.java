@@ -19,13 +19,17 @@ class DevelopmentSeeder implements CommandLineRunner {
     private final AuthorSeeder authorSeeder;
     private final PublisherSeeder publisherSeeder;
     private final BookSeeder bookSeeder;
+    private final BookCopySeeder bookCopySeeder;
+    private final BookLoanSeeder bookLoanSeeder;
 
-    DevelopmentSeeder(UserSeeder userSeeder, DemoUsersSeeder demoUsersSeeder, AuthorSeeder authorSeeder, PublisherSeeder publisherSeeder, BookSeeder bookSeeder) {
+    DevelopmentSeeder(UserSeeder userSeeder, DemoUsersSeeder demoUsersSeeder, AuthorSeeder authorSeeder, PublisherSeeder publisherSeeder, BookSeeder bookSeeder, BookCopySeeder bookCopySeeder, BookLoanSeeder bookLoanSeeder) {
         this.userSeeder = userSeeder;
         this.demoUsersSeeder = demoUsersSeeder;
         this.authorSeeder = authorSeeder;
         this.publisherSeeder = publisherSeeder;
         this.bookSeeder = bookSeeder;
+        this.bookCopySeeder = bookCopySeeder;
+        this.bookLoanSeeder = bookLoanSeeder;
     }
 
     @Override
@@ -47,6 +51,8 @@ class DevelopmentSeeder implements CommandLineRunner {
         authorSeeder.seed(300);
         publisherSeeder.seed(50);
         bookSeeder.seed(600);
+        bookCopySeeder.seed(10_000);
+        bookLoanSeeder.seed(7_000);
     }
 
 }

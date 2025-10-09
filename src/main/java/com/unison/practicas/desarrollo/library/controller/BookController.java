@@ -2,7 +2,9 @@ package com.unison.practicas.desarrollo.library.controller;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.book.request.CreateBookRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.GetBookAvailabilityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.UpdateBookRequest;
+import com.unison.practicas.desarrollo.library.dto.book.response.BookAvailabilityDetailsResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookDetailsResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookOptionsResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookPreviewResponse;
@@ -79,6 +81,14 @@ public class BookController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + response.fileName())
                 .contentType(response.mediaType())
                 .body(response.fileBytes());
+    }
+
+    @GetMapping("/{id}/availability")
+    public BookAvailabilityDetailsResponse availabilityById(
+            @PathVariable String id,
+            @Valid @ModelAttribute GetBookAvailabilityRequest request
+    ) {
+        return bookService.availabilityById(id, request);
     }
 
 }

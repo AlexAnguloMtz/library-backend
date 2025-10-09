@@ -2,6 +2,7 @@ package com.unison.practicas.desarrollo.library.service.book;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.dto.book.request.CreateBookRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.GetBookAvailabilityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.UpdateBookRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.*;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBooksRequest;
@@ -9,15 +10,9 @@ import com.unison.practicas.desarrollo.library.dto.common.CountryResponse;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
-import com.unison.practicas.desarrollo.library.entity.book.Author;
-import com.unison.practicas.desarrollo.library.entity.book.Book;
-import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
-import com.unison.practicas.desarrollo.library.entity.book.Publisher;
+import com.unison.practicas.desarrollo.library.entity.book.*;
 import com.unison.practicas.desarrollo.library.entity.common.Country;
-import com.unison.practicas.desarrollo.library.repository.AuthorRepository;
-import com.unison.practicas.desarrollo.library.repository.BookCategoryRepository;
-import com.unison.practicas.desarrollo.library.repository.BookRepository;
-import com.unison.practicas.desarrollo.library.repository.PublisherRepository;
+import com.unison.practicas.desarrollo.library.repository.*;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
@@ -43,17 +38,23 @@ public class BookService {
     private final BookCategoryRepository bookCategoryRepository;
     private final PublisherRepository publisherRepository;
     private final AuthorRepository authorRepository;
+    private final BookLoanRepository bookLoanRepository;
+    private final BookCopyRepository bookCopyRepository;
     private final BookImageService bookImageService;
     private final ExportBooks exportBooks;
+    private final GetBookAvailabilityDetails getBookAvailabilityDetails;
 
-    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, PublisherRepository publisherRepository, AuthorRepository authorRepository, BookImageService bookImageService, ExportBooks exportBooks) {
+    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, PublisherRepository publisherRepository, AuthorRepository authorRepository, BookLoanRepository bookLoanRepository, BookImageService bookImageService, ExportBooks exportBooks, BookCopyRepository bookCopyRepository, GetBookAvailabilityDetails getBookAvailabilityDetails) {
         this.getBooks = getBooks;
         this.bookRepository = bookRepository;
         this.bookCategoryRepository = bookCategoryRepository;
         this.publisherRepository = publisherRepository;
         this.authorRepository = authorRepository;
+        this.bookLoanRepository = bookLoanRepository;
         this.bookImageService = bookImageService;
         this.exportBooks = exportBooks;
+        this.bookCopyRepository = bookCopyRepository;
+        this.getBookAvailabilityDetails = getBookAvailabilityDetails;
     }
 
     @PreAuthorize("hasAuthority('books:read')")
@@ -121,6 +122,11 @@ public class BookService {
     @PreAuthorize("hasAuthority('books:read')")
     public ExportResponse export(CustomUserDetails userDetails, @Valid ExportRequest request) {
         return exportBooks.handle(userDetails, request);
+    }
+
+    @PreAuthorize("hasAuthority('books:read')")
+    public BookAvailabilityDetailsResponse availabilityById(String id, GetBookAvailabilityRequest request) {
+        return getBookAvailabilityDetails.handle(id, request);
     }
 
     private Book updatedBook(Book book, UpdateBookRequest request) {
