@@ -82,6 +82,7 @@ public class ExportBooks {
                 .title(book.getTitle())
                 .isbn(book.getIsbn())
                 .category(book.getCategory().getName())
+                .publisher(book.getPublisher().getName())
                 .year(book.getYear().toString())
                 .authors(book.getAuthors().stream().map(Author::getReversedFullName).toList())
                 .build();
@@ -93,6 +94,7 @@ public class ExportBooks {
             String title,
             String isbn,
             String category,
+            String publisher,
             String year,
             List<String> authors
     ) {}
