@@ -141,6 +141,10 @@ public class BookService {
             BookCategory category = findCategoryById(request.categoryId());
             book.setCategory(category);
         }
+        if (StringUtils.hasText(request.publisherId())) {
+            Publisher publisher = findPublisherById(request.publisherId());
+            book.setPublisher(publisher);
+        }
         if (request.bookPicture() != null) {
             updateBookImage(book, request.bookPicture());
         }
