@@ -13,6 +13,7 @@ public record BookPreviewResponse(
         String imageUrl,
         List<String> authors,
         String category,
+        String publisher,
         BookAvailabilityResponse availability
 ) {
 }

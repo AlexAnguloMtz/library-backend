@@ -13,6 +13,8 @@ public record GetBooksRequest(
 
         List<@Size(max = 40) String> categoryId,
 
+        List<@Size(max = 40) String> publisherId,
+
         Boolean available,
 
         Integer yearMin,

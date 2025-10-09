@@ -5,6 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record BookOptionsResponse(
-        Iterable<OptionResponse> categories
+        Iterable<OptionResponse> categories,
+        Iterable<OptionResponse> publishers
 ) {
 }

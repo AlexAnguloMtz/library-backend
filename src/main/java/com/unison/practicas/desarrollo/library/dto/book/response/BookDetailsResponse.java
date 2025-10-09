@@ -11,6 +11,7 @@ public record BookDetailsResponse(
         String isbn,
         Integer year,
         BookCategoryMinimalResponse category,
+        PublisherMinimalResponse publisher,
         List<AuthorSummaryResponse> authors,
         String imageUrl
 ) {

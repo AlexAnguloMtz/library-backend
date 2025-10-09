@@ -1,5 +1,7 @@
 package com.unison.practicas.desarrollo.library.util.factory;
 
+import com.unison.practicas.desarrollo.library.entity.book.Publisher;
+import com.unison.practicas.desarrollo.library.repository.PublisherRepository;
 import net.datafaker.Faker;
 import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.book.Book;
@@ -19,29 +21,33 @@ public class BookFactory {
 
     private final AuthorRepository authorRepository;
     private final BookCategoryRepository bookCategoryRepository;
+    private final PublisherRepository publisherRepository;
     private final Faker faker;
     
-    public BookFactory(AuthorRepository authorRepository, BookCategoryRepository bookCategoryRepository, Faker faker) {
+    public BookFactory(AuthorRepository authorRepository, BookCategoryRepository bookCategoryRepository, PublisherRepository publisherRepository, Faker faker) {
         this.authorRepository = authorRepository;
         this.bookCategoryRepository = bookCategoryRepository;
+        this.publisherRepository = publisherRepository;
         this.faker = faker;
     }
     
     public List<Book> createBooks(int count) {
         List<BookCategory> categories = bookCategoryRepository.findAll();
         List<Author> authors = authorRepository.findAll();
+        List<Publisher> publishers = publisherRepository.findAll();
         List<String> uniqueIsbns = new ArrayList<>(makeUniqueBookIsbns(count));
         return IntStream.range(0, count)
-                .mapToObj(i -> createBook(i, CollectionHelpers.randomItem(categories), authors,  uniqueIsbns.get(i)))
+                .mapToObj(i -> createBook(i, CollectionHelpers.randomItem(categories), CollectionHelpers.randomItem(publishers), authors,  uniqueIsbns.get(i)))
                 .toList();
     }
 
-    private Book createBook(int seed, BookCategory category, List<Author> authors, String isbn) {
+    private Book createBook(int seed, BookCategory category, Publisher publisher, List<Author> authors, String isbn) {
         var book = new Book();
         book.setTitle(faker.book().title());
         book.setIsbn(isbn);
         book.setYear(faker.number().numberBetween(1300, 2025));
         book.setCategory(category);
+        book.setPublisher(publisher);
         book.setImage(randomBookImage());
 
         book.setAuthors(pickRandomAuthors(authors, faker.random().nextInt(1, 4)));

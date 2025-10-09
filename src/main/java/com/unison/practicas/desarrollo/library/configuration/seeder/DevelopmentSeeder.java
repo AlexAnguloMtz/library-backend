@@ -17,12 +17,14 @@ class DevelopmentSeeder implements CommandLineRunner {
     private final UserSeeder userSeeder;
     private final DemoUsersSeeder demoUsersSeeder;
     private final AuthorSeeder authorSeeder;
+    private final PublisherSeeder publisherSeeder;
     private final BookSeeder bookSeeder;
 
-    DevelopmentSeeder(UserSeeder userSeeder, DemoUsersSeeder demoUsersSeeder, AuthorSeeder authorSeeder, BookSeeder bookSeeder) {
+    DevelopmentSeeder(UserSeeder userSeeder, DemoUsersSeeder demoUsersSeeder, AuthorSeeder authorSeeder, PublisherSeeder publisherSeeder, BookSeeder bookSeeder) {
         this.userSeeder = userSeeder;
         this.demoUsersSeeder = demoUsersSeeder;
         this.authorSeeder = authorSeeder;
+        this.publisherSeeder = publisherSeeder;
         this.bookSeeder = bookSeeder;
     }
 
@@ -43,6 +45,7 @@ class DevelopmentSeeder implements CommandLineRunner {
         userSeeder.seed(500);
         demoUsersSeeder.seed();
         authorSeeder.seed(300);
+        publisherSeeder.seed(50);
         bookSeeder.seed(600);
     }
 

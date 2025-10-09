@@ -23,7 +23,12 @@ WHERE p.name IN (
     'book-categories:read',
     'book-categories:create',
     'book-categories:update',
-    'book-categories:delete'
+    'book-categories:delete',
+
+    'publishers:read',
+    'publishers:create',
+    'publishers:update',
+    'publishers:delete'
 );
 
 INSERT INTO role_permission (role_id, permission_id)
@@ -51,7 +56,12 @@ WHERE p.name IN (
     'book-categories:read',
     'book-categories:create',
     'book-categories:update',
-    'book-categories:delete'
+    'book-categories:delete',
+
+    'publishers:read',
+    'publishers:create',
+    'publishers:update',
+    'publishers:delete'
 );
 
 INSERT INTO role_permission (role_id, permission_id)

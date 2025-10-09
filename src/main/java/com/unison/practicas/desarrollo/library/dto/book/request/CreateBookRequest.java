@@ -32,6 +32,10 @@ public record CreateBookRequest(
         @Size(max = 40)
         String categoryId,
 
+        @NotBlank
+        @Size(max = 40)
+        String publisherId,
+
         @NotNull
         @BookPicture
         MultipartFile bookPicture

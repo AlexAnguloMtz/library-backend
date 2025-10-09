@@ -12,15 +12,16 @@ import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
 import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.book.Book;
 import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
+import com.unison.practicas.desarrollo.library.entity.book.Publisher;
 import com.unison.practicas.desarrollo.library.entity.common.Country;
 import com.unison.practicas.desarrollo.library.repository.AuthorRepository;
 import com.unison.practicas.desarrollo.library.repository.BookCategoryRepository;
 import com.unison.practicas.desarrollo.library.repository.BookRepository;
+import com.unison.practicas.desarrollo.library.repository.PublisherRepository;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -40,14 +41,16 @@ public class BookService {
     private final GetBooks getBooks;
     private final BookRepository bookRepository;
     private final BookCategoryRepository bookCategoryRepository;
+    private final PublisherRepository publisherRepository;
     private final AuthorRepository authorRepository;
     private final BookImageService bookImageService;
     private final ExportBooks exportBooks;
 
-    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, AuthorRepository authorRepository, BookImageService bookImageService, ExportBooks exportBooks) {
+    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, PublisherRepository publisherRepository, AuthorRepository authorRepository, BookImageService bookImageService, ExportBooks exportBooks) {
         this.getBooks = getBooks;
         this.bookRepository = bookRepository;
         this.bookCategoryRepository = bookCategoryRepository;
+        this.publisherRepository = publisherRepository;
         this.authorRepository = authorRepository;
         this.bookImageService = bookImageService;
         this.exportBooks = exportBooks;
@@ -69,8 +72,13 @@ public class BookService {
                 .map(this::toOptionResponse)
                 .toList();
 
+        Iterable<OptionResponse> publishers = publisherRepository.findAll().stream()
+                .map(this::toOptionResponse)
+                .toList();
+
         return BookOptionsResponse.builder()
                 .categories(categories)
+                .publishers(publishers)
                 .build();
     }
 
@@ -92,7 +100,7 @@ public class BookService {
         Optional<Book> byIsbn = bookRepository.findByIsbn(request.isbn());
         boolean isbnConflict = byIsbn.isPresent() && !byIsbn.get().getId().equals(book.getId());
         if (isbnConflict) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "ISBN already exists: %s".formatted(request.isbn()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ISBN ya existe: %s".formatted(request.isbn()));
         }
         Book updatedBook = updatedBook(book, request);
         Book savedBook = bookRepository.save(updatedBook);
@@ -165,6 +173,7 @@ public class BookService {
 
     private Book toBook(CreateBookRequest request) {
         BookCategory category = findCategoryById(request.categoryId());
+        Publisher publisher = findPublisherById(request.publisherId());
         List<Author> authors = findAuthorsByIds(request.authorIds());
         String pictureKey = bookImageService.saveBookImage(request.bookPicture());
 
@@ -173,6 +182,7 @@ public class BookService {
         book.setIsbn(request.isbn());
         book.setYear(request.year());
         book.setCategory(category);
+        book.setPublisher(publisher);
         book.setAuthors(authors);
         book.setImage(pictureKey);
 
@@ -212,10 +222,25 @@ public class BookService {
         return categoryOptional.get();
     }
 
+    private Publisher findPublisherById(String id) {
+        Optional<Publisher> publisherOptional = publisherRepository.findById(Integer.parseInt(id));
+        if (publisherOptional.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find publisher with id: %s".formatted(id));
+        }
+        return publisherOptional.get();
+    }
+
     private OptionResponse toOptionResponse(BookCategory category) {
         return OptionResponse.builder()
                 .value(String.valueOf(category.getId()))
                 .label(category.getName())
+                .build();
+    }
+
+    private OptionResponse toOptionResponse(Publisher publisher) {
+        return OptionResponse.builder()
+                .value(String.valueOf(publisher.getId()))
+                .label(publisher.getName())
                 .build();
     }
 
@@ -226,8 +251,16 @@ public class BookService {
                 .isbn(book.getIsbn())
                 .year(book.getYear())
                 .category(toCategoryMinimalResponse(book.getCategory()))
+                .publisher(toPublisherMinimalResponse(book.getPublisher()))
                 .authors(book.getAuthors().stream().map(this::toAuthorResponse).toList())
                 .imageUrl(bookImageService.bookImageUrl(book.getImage()))
+                .build();
+    }
+
+    private PublisherMinimalResponse toPublisherMinimalResponse(Publisher publisher) {
+        return PublisherMinimalResponse.builder()
+                .id(publisher.getId().toString())
+                .name(publisher.getName())
                 .build();
     }
 

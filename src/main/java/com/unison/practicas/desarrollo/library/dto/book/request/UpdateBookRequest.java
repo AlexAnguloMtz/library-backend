@@ -27,6 +27,9 @@ public record UpdateBookRequest(
         @Size(max = 40)
         String categoryId,
 
+        @Size(max = 40)
+        String publisherId,
+
         @BookPicture
         MultipartFile bookPicture
 
