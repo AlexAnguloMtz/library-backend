@@ -4,10 +4,7 @@ import com.unison.practicas.desarrollo.library.configuration.security.CustomUser
 import com.unison.practicas.desarrollo.library.dto.book.request.CreateBookRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBookAvailabilityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.UpdateBookRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookAvailabilityDetailsResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookDetailsResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookOptionsResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookPreviewResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.*;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetBooksRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
@@ -83,12 +80,13 @@ public class BookController {
                 .body(response.fileBytes());
     }
 
-    @GetMapping("/{id}/availability")
-    public BookAvailabilityDetailsResponse availabilityById(
+    @GetMapping("/{id}/copies")
+    public PaginationResponse<BookCopyResponse> getBookCopies(
             @PathVariable String id,
-            @Valid @ModelAttribute GetBookAvailabilityRequest request
+            @Valid GetBookAvailabilityRequest request,
+            @Valid PaginationRequest pagination
     ) {
-        return bookService.availabilityById(id, request);
+        return bookService.getBookCopiesById(id, request, pagination);
     }
 
 }

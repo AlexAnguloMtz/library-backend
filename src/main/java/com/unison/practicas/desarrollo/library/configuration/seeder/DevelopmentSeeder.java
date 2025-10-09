@@ -51,8 +51,8 @@ class DevelopmentSeeder implements CommandLineRunner {
         authorSeeder.seed(300);
         publisherSeeder.seed(50);
         bookSeeder.seed(600);
-        bookCopySeeder.seed(10_000);
-        bookLoanSeeder.seed(7_000);
+        bookCopySeeder.seed(30_000);
+        bookLoanSeeder.seed(18_000);
     }
 
 }

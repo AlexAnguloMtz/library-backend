@@ -38,23 +38,19 @@ public class BookService {
     private final BookCategoryRepository bookCategoryRepository;
     private final PublisherRepository publisherRepository;
     private final AuthorRepository authorRepository;
-    private final BookLoanRepository bookLoanRepository;
-    private final BookCopyRepository bookCopyRepository;
     private final BookImageService bookImageService;
     private final ExportBooks exportBooks;
-    private final GetBookAvailabilityDetails getBookAvailabilityDetails;
+    private final GetBookCopies getBookCopies;
 
-    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, PublisherRepository publisherRepository, AuthorRepository authorRepository, BookLoanRepository bookLoanRepository, BookImageService bookImageService, ExportBooks exportBooks, BookCopyRepository bookCopyRepository, GetBookAvailabilityDetails getBookAvailabilityDetails) {
+    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, PublisherRepository publisherRepository, AuthorRepository authorRepository, BookImageService bookImageService, ExportBooks exportBooks, GetBookCopies getBookCopies) {
         this.getBooks = getBooks;
         this.bookRepository = bookRepository;
         this.bookCategoryRepository = bookCategoryRepository;
         this.publisherRepository = publisherRepository;
         this.authorRepository = authorRepository;
-        this.bookLoanRepository = bookLoanRepository;
         this.bookImageService = bookImageService;
         this.exportBooks = exportBooks;
-        this.bookCopyRepository = bookCopyRepository;
-        this.getBookAvailabilityDetails = getBookAvailabilityDetails;
+        this.getBookCopies = getBookCopies;
     }
 
     @PreAuthorize("hasAuthority('books:read')")
@@ -125,8 +121,12 @@ public class BookService {
     }
 
     @PreAuthorize("hasAuthority('books:read')")
-    public BookAvailabilityDetailsResponse availabilityById(String id, GetBookAvailabilityRequest request) {
-        return getBookAvailabilityDetails.handle(id, request);
+    public PaginationResponse<BookCopyResponse> getBookCopiesById(
+            String id,
+            GetBookAvailabilityRequest request,
+            PaginationRequest pagination
+    ) {
+        return getBookCopies.handle(id, request, pagination);
     }
 
     private Book updatedBook(Book book, UpdateBookRequest request) {
