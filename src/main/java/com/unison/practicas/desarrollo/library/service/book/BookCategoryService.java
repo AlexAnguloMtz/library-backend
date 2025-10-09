@@ -75,8 +75,8 @@ public class BookCategoryService {
         BookCategory bookCategory = findBookCategoryById(id);
         if (!bookCategory.getBooks().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "No puedes borrar una categoria que tiene libros. " +
-                    "Si realmente deseas eliminarla mejor intenta combinarla y será eliminada correctamente.");
+                    "No puedes borrar una categoria que tiene libros asociados. " +
+                    "Intenta combinarla con otra y será eliminada en el proceso.");
         }
         bookCategoryRepository.delete(bookCategory);
     }
