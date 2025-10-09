@@ -41,6 +41,8 @@ public class GetBooks {
                         BOOK.IMAGE,
                         BOOK.CATEGORY_ID,
                         BOOK_CATEGORY.NAME.as("category"),
+                        BOOK.PUBLISHER_ID,
+                        PUBLISHER.NAME.as("publisher"),
                         DSL.coalesce(
                                 DSL.stringAgg(AUTHOR.LAST_NAME.concat(",").concat(AUTHOR.FIRST_NAME), DSL.inline("-"))
                                         .orderBy(BOOK_AUTHOR.POSITION),
@@ -49,9 +51,10 @@ public class GetBooks {
                 )
                 .from(BOOK)
                 .leftJoin(BOOK_CATEGORY).on(BOOK.CATEGORY_ID.eq(BOOK_CATEGORY.ID))
+                .leftJoin(PUBLISHER).on(BOOK.PUBLISHER_ID.eq(PUBLISHER.ID))
                 .leftJoin(BOOK_AUTHOR).on(BOOK.ID.eq(BOOK_AUTHOR.BOOK_ID))
                 .leftJoin(AUTHOR).on(BOOK_AUTHOR.AUTHOR_ID.eq(AUTHOR.ID))
-                .groupBy(BOOK.ID, BOOK.TITLE, BOOK.ISBN, BOOK.YEAR, BOOK.IMAGE, BOOK.CATEGORY_ID, BOOK_CATEGORY.NAME)
+                .groupBy(BOOK.ID, BOOK.TITLE, BOOK.ISBN, BOOK.YEAR, BOOK.IMAGE, BOOK.CATEGORY_ID, BOOK_CATEGORY.NAME, BOOK.PUBLISHER_ID, PUBLISHER.NAME)
                 .asTable("b");
 
         // Condición de búsqueda
@@ -72,6 +75,12 @@ public class GetBooks {
             );
         }
 
+        if (!CollectionUtils.isEmpty(filters.publisherId())) {
+            condition = condition.and(
+                    booksSubquery.field("publisher_id", Integer.class).in(filters.publisherId())
+            );
+        }
+
         if (filters.yearMin() != null) {
             condition = condition.and(booksSubquery.field("year", Integer.class).ge(filters.yearMin()));
         }
@@ -88,6 +97,7 @@ public class GetBooks {
                         booksSubquery.field("year"),
                         booksSubquery.field("image"),
                         booksSubquery.field("category"),
+                        booksSubquery.field("publisher"),
                         DSL.multiset(
                                         DSL.select(AUTHOR.FIRST_NAME, AUTHOR.LAST_NAME)
                                                 .from(BOOK_AUTHOR)
@@ -111,6 +121,7 @@ public class GetBooks {
                     case "year" -> field = booksSubquery.field("year");
                     case "author" -> field = booksSubquery.field("authors_full_name");
                     case "category" -> field = booksSubquery.field("category");
+                    case "publisher" -> field = booksSubquery.field("publisher");
                     default -> field = booksSubquery.field("title");
                 }
                 base.orderBy(SortingOrder.DESC.equals(sort.order()) ? field.desc() : field.asc());
@@ -143,6 +154,7 @@ public class GetBooks {
                     .imageUrl(bookImageService.bookImageUrl(r.get(booksSubquery.field("image", String.class))))
                     .authors(authors)
                     .category(r.get(booksSubquery.field("category"), String.class))
+                    .publisher(r.get(booksSubquery.field("publisher"), String.class))
                     .availability(availability)
                     .build();
         }).toList();
