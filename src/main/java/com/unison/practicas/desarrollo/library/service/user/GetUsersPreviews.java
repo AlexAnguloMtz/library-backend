@@ -26,9 +26,6 @@ import java.util.stream.Collectors;
 import static com.unison.practicas.desarrollo.library.jooq.Tables.APP_ROLE;
 import static com.unison.practicas.desarrollo.library.jooq.Tables.APP_USER;
 
-// TODO
-// Some users show 'Invalid Date' on the UI. Check why and fix.
-
 @Component
 public class GetUsersPreviews {
 
@@ -220,7 +217,7 @@ public class GetUsersPreviews {
     }
 
     private String formatInvertedName(String firstName, String lastName) {
-        return "%s, %s".formatted(lastName, firstName);
+        return "%s %s".formatted(lastName, firstName);
     }
 
     private DateTimeFormatter createDateTimeFormatter() {
