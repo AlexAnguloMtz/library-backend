@@ -50,5 +50,17 @@ public class Book {
             author.getBooks().add(this);
         }
     }
+    // Necesarios para el ReportController
+    public Integer getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public List<Author> getAuthors() {
+        return authors;
+    }
 
 }

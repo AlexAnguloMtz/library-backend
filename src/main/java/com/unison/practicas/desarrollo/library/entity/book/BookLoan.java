@@ -37,4 +37,18 @@ public class BookLoan {
         return Optional.ofNullable(returnDate);
     }
 
+    // Getters requeridos por el ReportController
+    public BookCopy getBookCopy() {
+        return bookCopy;
+    }
+
+    public Instant getLoanDate() {
+        return loanDate;
+    }
+
+    public Instant getDueDate() {
+        return dueDate;
+    }
+
+
 }

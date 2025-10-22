@@ -24,4 +24,15 @@ public class BookCopy {
         return Optional.ofNullable(observations);
     }
 
+    //  Método para compatibilidad con el Reporte
+    public Book getBook() {
+        Book b = new Book();
+        try {
+            java.lang.reflect.Field idField = Book.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.set(b, bookId);
+        } catch (Exception ignored) {}
+        return b;
+    }
+
 }
