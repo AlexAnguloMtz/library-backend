@@ -28,7 +28,9 @@ WHERE p.name IN (
     'publishers:read',
     'publishers:create',
     'publishers:update',
-    'publishers:delete'
+    'publishers:delete',
+
+    'reports:read'
 );
 
 INSERT INTO role_permission (role_id, permission_id)
@@ -61,7 +63,9 @@ WHERE p.name IN (
     'publishers:read',
     'publishers:create',
     'publishers:update',
-    'publishers:delete'
+    'publishers:delete',
+
+    'reports:read'
 );
 
 INSERT INTO role_permission (role_id, permission_id)
@@ -73,5 +77,6 @@ WHERE p.name IN (
     'users:read:self',
     'books:read',
     'authors:read',
-    'book-categories:read'
+    'book-categories:read',
+    'publishers:read'
 );

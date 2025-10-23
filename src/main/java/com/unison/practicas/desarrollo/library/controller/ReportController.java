@@ -3,6 +3,7 @@ package com.unison.practicas.desarrollo.library.controller;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.book.Book;
 import com.unison.practicas.desarrollo.library.entity.book.BookCopy;
 import com.unison.practicas.desarrollo.library.entity.book.BookLoan;
@@ -10,11 +11,14 @@ import com.unison.practicas.desarrollo.library.entity.book.BookLoan;
 import com.unison.practicas.desarrollo.library.repository.BookLoanRepository;
 import com.unison.practicas.desarrollo.library.repository.BookRepository;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
 import java.time.Instant;
@@ -37,6 +41,7 @@ public class ReportController {
     }
 
     @GetMapping("/books")
+    @PreAuthorize("hasAuthority('reports:read')")
     public ResponseEntity<byte[]> generateBooksReport() {
         try {
             // === Preparar flujo de salida PDF ===
@@ -80,14 +85,14 @@ public class ReportController {
                             return copy != null && copy.getBook() != null
                                     && copy.getBook().getId().equals(book.getId());
                         })
-                        .collect(Collectors.toList());
+                        .toList();
 
                 if (loans.isEmpty()) {
                     // Libros sin préstamo
                     table.addCell(book.getTitle());
                     table.addCell(
                             book.getAuthors().stream()
-                                    .map(a -> a.getFullName()) // ✅ Autor corregido
+                                    .map(Author::getFullName)
                                     .collect(Collectors.joining(", "))
                     );
                     table.addCell("-");
@@ -99,7 +104,7 @@ public class ReportController {
                         table.addCell(book.getTitle());
                         table.addCell(
                                 book.getAuthors().stream()
-                                        .map(a -> a.getFullName())
+                                        .map(Author::getFullName)
                                         .collect(Collectors.joining(", "))
                         );
 
@@ -117,9 +122,7 @@ public class ReportController {
 
                         Optional<Instant> returnDateOpt = loan.getReturnDate();
                         table.addCell(
-                                returnDateOpt.isPresent()
-                                        ? formatter.format(returnDateOpt.get())
-                                        : "-"
+                                returnDateOpt.map(formatter::format).orElse("-")
                         );
                     }
                 }
@@ -136,12 +139,9 @@ public class ReportController {
                     .body(baos.toByteArray());
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().build();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 
 
 }

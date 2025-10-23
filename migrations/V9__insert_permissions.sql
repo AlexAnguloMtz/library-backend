@@ -23,4 +23,6 @@ INSERT INTO permission (name) VALUES
 ('publishers:read'),
 ('publishers:create'),
 ('publishers:update'),
-('publishers:delete');
+('publishers:delete'),
+
+('reports:read');
