@@ -3,6 +3,7 @@ package com.unison.practicas.desarrollo.library.controller;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityGroupResponse;
 import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.book.Book;
 import com.unison.practicas.desarrollo.library.entity.book.BookCopy;
@@ -10,6 +11,7 @@ import com.unison.practicas.desarrollo.library.entity.book.BookLoan;
 
 import com.unison.practicas.desarrollo.library.repository.BookLoanRepository;
 import com.unison.practicas.desarrollo.library.repository.BookRepository;
+import com.unison.practicas.desarrollo.library.service.book.ReportsService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,10 +34,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/reports")
 public class ReportController {
 
+    private final ReportsService reportsService;
     private final BookRepository bookRepository;
     private final BookLoanRepository bookLoanRepository;
 
-    public ReportController(BookRepository bookRepository, BookLoanRepository bookLoanRepository) {
+    public ReportController(ReportsService reportsService, BookRepository bookRepository, BookLoanRepository bookLoanRepository) {
+        this.reportsService = reportsService;
         this.bookRepository = bookRepository;
         this.bookLoanRepository = bookLoanRepository;
     }
@@ -143,5 +147,9 @@ public class ReportController {
         }
     }
 
+    @GetMapping("/popular-book-categories")
+    public List<BookCategoryPopularityGroupResponse> getPopularBookCategories() {
+        return reportsService.getPopularBookCategories();
+    }
 
 }
