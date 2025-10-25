@@ -7,6 +7,7 @@ import com.unison.practicas.desarrollo.library.dto.book.request.AuthorsPopularit
 import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoriesPopularityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.AuthorPopularityResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.UsersAcquisitionResponse;
 import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.book.Book;
 import com.unison.practicas.desarrollo.library.entity.book.BookCopy;
@@ -149,6 +150,11 @@ public class ReportController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GetMapping("/users-acquisition")
+    public List<UsersAcquisitionResponse> getUsersAcquisition() {
+        return reportsService.getUsersAcquisition();
     }
 
     @GetMapping("/book-categories-popularity")
