@@ -3,7 +3,7 @@ package com.unison.practicas.desarrollo.library.dto.book.response;
 import lombok.Builder;
 
 @Builder
-public record BookCategoryPopularityGroupResponse(
+public record BookCategoryPopularityResponse(
         String gender,
         int ageMin,
         int ageMax,

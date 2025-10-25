@@ -1,6 +1,6 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
-import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityGroupResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityResponse;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
@@ -15,15 +15,15 @@ import static com.unison.practicas.desarrollo.library.jooq.tables.BookLoan.BOOK_
 import static com.unison.practicas.desarrollo.library.jooq.tables.Gender.GENDER;
 
 @Component
-public class GetPopularBookCategories {
+public class GetBookCategoriesPopularity {
 
     private final DSLContext dsl;
 
-    public GetPopularBookCategories(DSLContext dsl) {
+    public GetBookCategoriesPopularity(DSLContext dsl) {
         this.dsl = dsl;
     }
 
-    public List<BookCategoryPopularityGroupResponse> get() {
+    public List<BookCategoryPopularityResponse> get() {
 
         var loansPerUser = DSL.select(
                         BOOK_CATEGORY.NAME.as("category"),
@@ -99,7 +99,7 @@ public class GetPopularBookCategories {
                 .map(record -> {
                     double value = record.get("value", Double.class);
                     value = Math.round(value * 100.0) / 100.0; // round for 2 decimals
-                    return BookCategoryPopularityGroupResponse.builder()
+                    return BookCategoryPopularityResponse.builder()
                             .category(record.get("category", String.class))
                             .gender(record.get("gender", String.class))
                             .ageMin(record.get("age_min", Integer.class))
