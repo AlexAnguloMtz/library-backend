@@ -25,6 +25,7 @@ public class User {
     private String profilePictureUrl;
     private LocalDate dateOfBirth;
     private Instant registrationDate;
+    private Boolean canLogin;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "gender_id", nullable = false)

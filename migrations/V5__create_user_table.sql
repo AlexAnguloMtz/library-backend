@@ -10,6 +10,7 @@ CREATE TABLE app_user (
     role_id INT NOT NULL,
     gender_id INT NOT NULL,
     date_of_birth DATE NOT NULL,
+    can_login BOOLEAN NOT NULL DEFAULT TRUE,
     FOREIGN KEY (role_id) REFERENCES app_role(id),
     FOREIGN KEY (gender_id) REFERENCES gender(id)
 );

@@ -20,6 +20,7 @@ public record FullUserResponse(
         GenderResponse gender,
         LocalDate dateOfBirth,
         Integer age,
+        Boolean canLogin,
         Set<String> permissions
 ) {
 }

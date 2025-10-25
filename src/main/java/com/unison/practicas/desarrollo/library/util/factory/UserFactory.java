@@ -71,6 +71,7 @@ public class UserFactory {
         user.setRegistrationDate(TimeUtils.randomInstantBetween(Instant.parse("2020-01-24T00:00:00Z"), Instant.parse("2025-09-24T00:00:00Z")));
         user.setProfilePictureUrl(CollectionHelpers.randomItem(profilePictures()));
         user.setGender(gender);
+        user.setCanLogin(true);
         user.setDateOfBirth(TimeUtils.randomLocalDateBetween(LocalDate.of(1935, 3, 15), LocalDate.of(2015, 3, 15)));
 
         UserAddress userAddress = userAddressFactory.createUserAddresses(1).getFirst();

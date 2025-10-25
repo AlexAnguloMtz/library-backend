@@ -151,7 +151,7 @@ public class UserService {
 
         State state = findStateById(request.stateId());
 
-        UserAddress address =  user.getAddress().orElseGet(UserAddress::new);
+        UserAddress address = user.getAddress().orElseGet(UserAddress::new);
 
         address.setState(state);
         address.setCity(request.city().trim());
@@ -163,7 +163,7 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        // This Optional unboxing should be safe, we now know the address is present
+        // This Optional unboxing is 100% safe, we now know the address is present
         UserAddress savedAddress = savedUser.getAddress().get();
 
         return toUserAddressResponse(savedAddress);
@@ -291,24 +291,32 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @PreAuthorize("hasAuthority('users:update')")
+    @Transactional
+    public UserPermissionsResponse updateUserPermissions(String id, UpdateUserPermissionsRequest request, CustomUserDetails currentUser) {
+        User user = findUserById(id);
+
+        if (!userAuthorization.canChangeIndividualPermissions(currentUser, user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You don't have permissions to change the individual permissions of this user");
+        }
+
+        if (request.login() != null) {
+            user.setCanLogin(request.login());
+        }
+
+        User savedUser = userRepository.save(user);
+
+        return UserPermissionsResponse.builder()
+                .login(savedUser.getCanLogin())
+                .build();
+    }
+
     private CreateUserResponse toCreationResponse(User user, Set<String> permissions) {
         return CreateUserResponse.builder()
                 .id(String.valueOf(user.getId()))
                 .personalData(toPersonalDataResponse(user))
                 .account(toAccountResponse(user, permissions))
                 .build();
-    }
-
-    private UserAddress toAddressEntity(UserAddressRequest request) {
-        State state = findStateById(request.stateId());
-
-        var address = new UserAddress();
-        address.setState(state);
-        address.setCity(request.city().trim());
-        address.setDistrict(request.district().trim());
-        address.setAddress(request.address().trim());
-        address.setZipCode(request.zipCode().trim());
-        return address;
     }
 
     private Role findRoleById(String id) {
@@ -406,6 +414,7 @@ public class UserService {
                 .gender(toGenderResponse(user.getGender()))
                 .dateOfBirth(user.getDateOfBirth())
                 .age(calculateAge(user.getDateOfBirth()))
+                .canLogin(user.getCanLogin())
                 .permissions(permissions)
                 .build();
     }

@@ -74,6 +74,15 @@ public class UserController {
         return userService.updateUserAccount(id, request, currentUser);
     }
 
+    @PatchMapping("/{id}/permissions")
+    public UserPermissionsResponse updateUserPermissions(
+            @PathVariable String id,
+            @Valid @RequestBody UpdateUserPermissionsRequest request,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+        return userService.updateUserPermissions(id, request, currentUser);
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserById(
             @PathVariable String id,

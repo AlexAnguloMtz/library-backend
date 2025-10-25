@@ -16,11 +16,11 @@ class OtherUserPermissionsRule {
     private static final Map<RoleName, Map<RoleName, Set<String>>> TARGET_USER_PERMISSIONS = Map.of(
             RoleName.ADMIN, Map.of(
                     RoleName.ADMIN, Set.of("read"),
-                    RoleName.LIBRARIAN, Set.of("read", "edit", "delete"),
-                    RoleName.USER, Set.of("read", "edit", "delete")
+                    RoleName.LIBRARIAN, Set.of("read", "edit", "delete", "change-individual-permissions"),
+                    RoleName.USER, Set.of("read", "edit", "delete", "change-individual-permissions")
             ),
             RoleName.LIBRARIAN, Map.of(
-                    RoleName.USER, Set.of("read", "edit", "delete")
+                    RoleName.USER, Set.of("read", "edit", "delete", "change-individual-permissions")
             ),
             RoleName.USER, Map.of()
     );

@@ -33,13 +33,18 @@ public class AuthService {
     public LoginResponse login(LoginForm loginForm) {
         Optional<User> userOptional = userRepository.findByEmailIgnoreCase(loginForm.email());
         if (userOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Correo o contraseña inválidos");
         }
 
         User user = userOptional.get();
 
         if (!passwordEncoder.matches(loginForm.password(), user.getPasswordHash())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Correo o contraseña inválidos");
+        }
+
+        if (!user.getCanLogin()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "Cuenta bloqueada. No tienes permitido iniciar sesión. Contacta a un administrador para más información.");
         }
 
         String accessToken = jwtUtils.accessTokenForUser(user);

@@ -107,6 +107,7 @@ public class DemoUsersSeeder {
         user.setRegistrationDate(Instant.now());
         user.setRole(role);
         user.setGender(CollectionHelpers.randomItem(genders));
+        user.setCanLogin(true);
         user.setDateOfBirth(randomDateOfBirth());
         user.setProfilePictureUrl(profilePicture);
         user.setAddress(userAddressFactory.createUserAddresses(1).getFirst());

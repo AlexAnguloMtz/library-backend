@@ -32,6 +32,10 @@ public class UserAuthorization {
         return permissionsForUser(currentUser, targetUser).contains("delete");
     }
 
+    public boolean canChangeIndividualPermissions(CustomUserDetails currentUser, User targetUser) {
+        return permissionsForUser(currentUser, targetUser).contains("change-individual-permissions");
+    }
+
     public Set<String> permissionsForUser(CustomUserDetails currentUser, User targetUser) {
         boolean isSelf = currentUser.getId().equals(String.valueOf(targetUser.getId()));
         if (isSelf) {
