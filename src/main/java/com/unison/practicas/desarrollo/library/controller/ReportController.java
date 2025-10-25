@@ -5,10 +5,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.unison.practicas.desarrollo.library.dto.book.request.AuthorsPopularityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoriesPopularityRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.AuthorPopularityResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.UsersAcquisitionResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.UsersDemographyResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.*;
 import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.book.Book;
 import com.unison.practicas.desarrollo.library.entity.book.BookCopy;
@@ -171,6 +168,11 @@ public class ReportController {
     @GetMapping("/authors-popularity")
     public List<AuthorPopularityResponse> getAuthorsPopularity(@Valid AuthorsPopularityRequest request) {
         return reportsService.getAuthorsPopularity(request);
+    }
+
+    @GetMapping("/loans-distribution")
+    public List<LoansDistributionResponse> getLoansDistribution() {
+        return reportsService.getLoansDistribution();
     }
 
 }

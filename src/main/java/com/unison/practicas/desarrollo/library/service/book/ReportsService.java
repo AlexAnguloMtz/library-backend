@@ -2,10 +2,7 @@ package com.unison.practicas.desarrollo.library.service.book;
 
 import com.unison.practicas.desarrollo.library.dto.book.request.AuthorsPopularityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoriesPopularityRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.AuthorPopularityResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.UsersAcquisitionResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.UsersDemographyResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +15,14 @@ public class ReportsService {
     private final GetAuthorsPopularity getAuthorsPopularity;
     private final GetUsersAcquisition getUsersAcquisition;
     private final GetUsersDemography getUsersDemography;
+    private final GetLoansDistribution getLoansDistribution;
 
-    public ReportsService(GetBookCategoriesPopularity getBookCategoriesPopularity, GetAuthorsPopularity getAuthorsPopularity, GetUsersAcquisition getUsersAcquisition, GetUsersDemography getUsersDemography) {
+    public ReportsService(GetBookCategoriesPopularity getBookCategoriesPopularity, GetAuthorsPopularity getAuthorsPopularity, GetUsersAcquisition getUsersAcquisition, GetUsersDemography getUsersDemography, GetLoansDistribution getLoansDistribution) {
         this.getBookCategoriesPopularity = getBookCategoriesPopularity;
         this.getAuthorsPopularity = getAuthorsPopularity;
         this.getUsersAcquisition = getUsersAcquisition;
         this.getUsersDemography = getUsersDemography;
+        this.getLoansDistribution = getLoansDistribution;
     }
 
     @PreAuthorize("hasAuthority('reports:read')")
@@ -44,5 +43,10 @@ public class ReportsService {
     @PreAuthorize("hasAuthority('reports:read')")
     public List<UsersDemographyResponse> getUsersDemography() {
         return getUsersDemography.get();
+    }
+
+    @PreAuthorize("hasAuthority('reports:read')")
+    public List<LoansDistributionResponse> getLoansDistribution() {
+        return getLoansDistribution.get();
     }
 }
