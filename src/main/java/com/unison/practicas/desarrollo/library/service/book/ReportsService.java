@@ -5,6 +5,7 @@ import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoriesPo
 import com.unison.practicas.desarrollo.library.dto.book.response.AuthorPopularityResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.UsersAcquisitionResponse;
+import com.unison.practicas.desarrollo.library.dto.book.response.UsersDemographyResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,13 @@ public class ReportsService {
     private final GetBookCategoriesPopularity getBookCategoriesPopularity;
     private final GetAuthorsPopularity getAuthorsPopularity;
     private final GetUsersAcquisition getUsersAcquisition;
+    private final GetUsersDemography getUsersDemography;
 
-    public ReportsService(GetBookCategoriesPopularity getBookCategoriesPopularity, GetAuthorsPopularity getAuthorsPopularity, GetUsersAcquisition getUsersAcquisition) {
+    public ReportsService(GetBookCategoriesPopularity getBookCategoriesPopularity, GetAuthorsPopularity getAuthorsPopularity, GetUsersAcquisition getUsersAcquisition, GetUsersDemography getUsersDemography) {
         this.getBookCategoriesPopularity = getBookCategoriesPopularity;
         this.getAuthorsPopularity = getAuthorsPopularity;
         this.getUsersAcquisition = getUsersAcquisition;
+        this.getUsersDemography = getUsersDemography;
     }
 
     @PreAuthorize("hasAuthority('reports:read')")
@@ -38,4 +41,8 @@ public class ReportsService {
         return getUsersAcquisition.get();
     }
 
+    @PreAuthorize("hasAuthority('reports:read')")
+    public List<UsersDemographyResponse> getUsersDemography() {
+        return getUsersDemography.get();
+    }
 }
