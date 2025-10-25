@@ -1,5 +1,6 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
+import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoriesPopularityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityResponse;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -23,9 +24,10 @@ public class GetBookCategoriesPopularity {
         this.dsl = dsl;
     }
 
-    public List<BookCategoryPopularityResponse> get() {
+    public List<BookCategoryPopularityResponse> get(BookCategoriesPopularityRequest request) {
 
-        var loansPerUser = DSL.select(
+        // 1️⃣ Prestamos por usuario
+        var loansPerUser = dsl.select(
                         BOOK_CATEGORY.NAME.as("category"),
                         DSL.case_()
                                 .when(GENDER.NAME.eq("Masculino"), "Hombres")
@@ -52,53 +54,116 @@ public class GetBookCategoriesPopularity {
                 .groupBy(BOOK_CATEGORY.NAME, GENDER.NAME, APP_USER.DATE_OF_BIRTH, BOOK_LOAN.USER_ID)
                 .asTable("loans_per_user");
 
-        var avgPerGroup = DSL.select(
-                        loansPerUser.field("category"),
-                        loansPerUser.field("gender"),
-                        loansPerUser.field("age_min"),
-                        loansPerUser.field("age_max"),
-                        DSL.avg(loansPerUser.field("loans_per_user", Integer.class))
-                                .as("value")
+        // 2️⃣ Promedio por categoria/genero/ageGroup
+        var avgPerGroup = dsl.select(
+                        loansPerUser.field("category", String.class),
+                        loansPerUser.field("gender", String.class),
+                        loansPerUser.field("age_min", Integer.class),
+                        loansPerUser.field("age_max", Integer.class),
+                        DSL.avg(loansPerUser.field("loans_per_user", Integer.class)).as("value")
                 )
                 .from(loansPerUser)
                 .groupBy(
-                        loansPerUser.field("category"),
-                        loansPerUser.field("gender"),
-                        loansPerUser.field("age_min"),
-                        loansPerUser.field("age_max")
+                        loansPerUser.field("category", String.class),
+                        loansPerUser.field("gender", String.class),
+                        loansPerUser.field("age_min", Integer.class),
+                        loansPerUser.field("age_max", Integer.class)
                 )
                 .asTable("avg_per_group");
 
-        var rankedTop = DSL.select(
-                        avgPerGroup.field("category"),
-                        avgPerGroup.field("gender"),
-                        avgPerGroup.field("age_min"),
-                        avgPerGroup.field("age_max"),
-                        avgPerGroup.field("value"),
+        // 3️⃣ Todos los valores posibles
+        var allCategories = dsl.select(BOOK_CATEGORY.NAME.as("category"))
+                .from(BOOK_CATEGORY)
+                .asTable("all_categories");
+
+        // 🔹 Todos los géneros desde la base de datos, dinámico
+        var allGenders = dsl.select(
+                        DSL.case_()
+                                .when(GENDER.NAME.eq("Masculino"), "Hombres")
+                                .when(GENDER.NAME.eq("Femenino"), "Mujeres")
+                                .otherwise(GENDER.NAME)
+                                .as("gender")
+                )
+                .from(GENDER)
+                .asTable("all_genders");
+
+        // Rangos etarios
+        var allAgeGroups = dsl.select(DSL.val(0).as("age_min"), DSL.val(9).as("age_max"))
+                .unionAll(dsl.select(DSL.val(10), DSL.val(19)))
+                .unionAll(dsl.select(DSL.val(20), DSL.val(29)))
+                .unionAll(dsl.select(DSL.val(30), DSL.val(39)))
+                .unionAll(dsl.select(DSL.val(40), DSL.val(49)))
+                .unionAll(dsl.select(DSL.val(50), DSL.val(59)))
+                .unionAll(dsl.select(DSL.val(60), DSL.val(69)))
+                .unionAll(dsl.select(DSL.val(70), DSL.val(79)))
+                .unionAll(dsl.select(DSL.val(80), DSL.val(89)))
+                .unionAll(dsl.select(DSL.val(90), DSL.val(99)))
+                .asTable("all_age_groups");
+
+        var allCombinations = dsl.select(
+                        allCategories.field("category", String.class),
+                        allGenders.field("gender", String.class),
+                        allAgeGroups.field("age_min", Integer.class),
+                        allAgeGroups.field("age_max", Integer.class)
+                )
+                .from(allCategories)
+                .crossJoin(allGenders)
+                .crossJoin(allAgeGroups)
+                .asTable("all_combinations");
+
+        // 4️⃣ LEFT JOIN con avgPerGroup para llenar ceros
+        var filledAvg = dsl.select(
+                        allCombinations.field("category", String.class),
+                        allCombinations.field("gender", String.class),
+                        allCombinations.field("age_min", Integer.class),
+                        allCombinations.field("age_max", Integer.class),
+                        DSL.coalesce(avgPerGroup.field("value", Double.class), 0.0).as("value")
+                )
+                .from(allCombinations)
+                .leftJoin(avgPerGroup)
+                .on(allCombinations.field("category", String.class).eq(avgPerGroup.field("category", String.class)))
+                .and(allCombinations.field("gender", String.class).eq(avgPerGroup.field("gender", String.class)))
+                .and(allCombinations.field("age_min", Integer.class).eq(avgPerGroup.field("age_min", Integer.class)))
+                .and(allCombinations.field("age_max", Integer.class).eq(avgPerGroup.field("age_max", Integer.class)))
+                .asTable("filled_avg");
+
+        // 5️⃣ RowNumber para top N dentro de cada grupo demográfico
+        var rankedTop = dsl.select(
+                        filledAvg.field("category", String.class),
+                        filledAvg.field("gender", String.class),
+                        filledAvg.field("age_min", Integer.class),
+                        filledAvg.field("age_max", Integer.class),
+                        filledAvg.field("value", Double.class),
                         DSL.rowNumber()
                                 .over(DSL.partitionBy(
-                                        avgPerGroup.field("gender"),
-                                        avgPerGroup.field("age_min"),
-                                        avgPerGroup.field("age_max")
-                                ).orderBy(avgPerGroup.field("value").desc()))
+                                        filledAvg.field("gender", String.class),
+                                        filledAvg.field("age_min", Integer.class),
+                                        filledAvg.field("age_max", Integer.class)
+                                ).orderBy(filledAvg.field("value", Double.class).desc()))
                                 .as("rn")
                 )
-                .from(avgPerGroup)
+                .from(filledAvg)
                 .asTable("ranked_top");
 
-        return dsl.select(
+        // 6️⃣ Aplicar request.limit() si existe
+        var query = dsl.select(
                         rankedTop.field("category", String.class),
                         rankedTop.field("gender", String.class),
                         rankedTop.field("age_min", Integer.class),
                         rankedTop.field("age_max", Integer.class),
                         rankedTop.field("value", Double.class)
                 )
-                .from(rankedTop)
-                .where(DSL.field("rn").le(5))
-                .fetch()
+                .from(rankedTop);
+
+        if (request.limit() != null) {
+            query.where(rankedTop.field("rn", Integer.class).le(request.limit()));
+        }
+
+        // 7️⃣ Ejecutar y mapear
+        return query.fetch()
                 .map(record -> {
                     double value = record.get("value", Double.class);
-                    value = Math.round(value * 100.0) / 100.0; // round for 2 decimals
+                    value = Math.round(value * 100.0) / 100.0; // redondeo a 2 decimales
                     return BookCategoryPopularityResponse.builder()
                             .category(record.get("category", String.class))
                             .gender(record.get("gender", String.class))

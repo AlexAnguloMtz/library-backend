@@ -1,5 +1,6 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
+import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoriesPopularityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -16,8 +17,8 @@ public class ReportsService {
     }
 
     @PreAuthorize("hasAuthority('reports:read')")
-    public List<BookCategoryPopularityResponse> getBookCategoriesPopularity() {
-        return getBookCategoriesPopularity.get();
+    public List<BookCategoryPopularityResponse> getBookCategoriesPopularity(BookCategoriesPopularityRequest request) {
+        return getBookCategoriesPopularity.get(request);
     }
 
 }
