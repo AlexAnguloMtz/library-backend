@@ -3,6 +3,8 @@ package com.unison.practicas.desarrollo.library.service.book;
 import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoriesPopularityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.BookCategoryPopularityResponse;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -58,15 +60,15 @@ public class GetBookCategoriesPopularity {
                 .groupBy(BOOK_CATEGORY.NAME, GENDER.NAME, APP_USER.DATE_OF_BIRTH, BOOK_LOAN.USER_ID)
                 .asTable("loans_per_user");
 
-        // 2️⃣ Agregación según métrica
+        // 2️⃣ Agregación según métrica (limpio con switch)
+        var valueField = aggregateFieldForMetric(metric, loansPerUser);
+
         var aggPerGroup = dsl.select(
                         loansPerUser.field("category", String.class),
                         loansPerUser.field("gender", String.class),
                         loansPerUser.field("age_min", Integer.class),
                         loansPerUser.field("age_max", Integer.class),
-                        metric == Metric.AVERAGE
-                                ? DSL.avg(loansPerUser.field("loans_per_user", Integer.class)).as("value")
-                                : DSL.countDistinct(loansPerUser.field("user_id", Integer.class)).as("value")
+                        valueField.as("value")
                 )
                 .from(loansPerUser)
                 .groupBy(
@@ -174,6 +176,18 @@ public class GetBookCategoriesPopularity {
                 });
     }
 
+    private Field<?> aggregateFieldForMetric(Metric metric, Table<?> loansPerUser) {
+        var loansCount = loansPerUser.field("loans_per_user", Integer.class);
+        var userId = loansPerUser.field("user_id", Integer.class);
+
+        return switch (metric) {
+            case AVERAGE -> DSL.avg(loansCount);
+            case DISTINCT_USERS -> DSL.countDistinct(userId);
+            case FREQUENCY -> DSL.sum(loansCount);
+            case MEDIAN -> DSL.field("percentile_cont(0.5) within group (order by {0})", Double.class, loansCount);
+        };
+    }
+
     private Metric parseMetric(String str) {
         try {
             return Metric.valueOf(str.toUpperCase());
@@ -183,7 +197,9 @@ public class GetBookCategoriesPopularity {
     }
 
     private enum Metric {
+        FREQUENCY,
         AVERAGE,
+        MEDIAN,
         DISTINCT_USERS
     }
 }
