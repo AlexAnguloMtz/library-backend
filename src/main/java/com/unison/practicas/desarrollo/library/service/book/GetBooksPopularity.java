@@ -23,9 +23,11 @@ import static com.unison.practicas.desarrollo.library.jooq.tables.Gender.GENDER;
 public class GetBooksPopularity {
 
     private final DSLContext dsl;
+    private final BookImageService bookImageService;
 
-    public GetBooksPopularity(DSLContext dsl) {
+    public GetBooksPopularity(DSLContext dsl, BookImageService bookImageService) {
         this.dsl = dsl;
+        this.bookImageService = bookImageService;
     }
 
     public List<BookPopularityResponse> get(PopularityRequest request) {
@@ -194,7 +196,7 @@ public class GetBooksPopularity {
                             .bookId(record.get("book_id", Integer.class).toString())
                             .bookIsbn(record.get("book_isbn", String.class))
                             .bookTitle(record.get("book_title", String.class))
-                            .bookImageUrl(record.get("book_image", String.class))
+                            .bookImageUrl(bookImageService.bookImageUrl(record.get("book_image", String.class)))
                             .gender(record.get("gender", String.class))
                             .ageMin(record.get("age_min", Integer.class))
                             .ageMax(record.get("age_max", Integer.class))
