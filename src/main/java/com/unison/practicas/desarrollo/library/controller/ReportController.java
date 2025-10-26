@@ -159,6 +159,11 @@ public class ReportController {
         return reportsService.getUsersDemography();
     }
 
+    @GetMapping("/books-popularity")
+    public List<BookPopularityResponse> getBooksPopularity(@Valid PopularityRequest request) {
+        return reportsService.getBooksPopularity(request);
+    }
+
     @GetMapping("/book-categories-popularity")
     public List<BookCategoryPopularityResponse> getBookCategoryPopularity(@Valid PopularityRequest request) {
         return reportsService.getBookCategoriesPopularity(request);

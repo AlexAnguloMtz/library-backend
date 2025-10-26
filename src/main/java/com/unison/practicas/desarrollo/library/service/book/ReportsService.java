@@ -11,6 +11,7 @@ import java.util.List;
 @Service
 public class ReportsService {
 
+    private final GetBooksPopularity getBooksPopularity;
     private final GetBookCategoriesPopularity getBookCategoriesPopularity;
     private final GetAuthorsPopularity getAuthorsPopularity;
     private final GetPublishersPopularity getPublishersPopularity;
@@ -18,13 +19,19 @@ public class ReportsService {
     private final GetUsersDemography getUsersDemography;
     private final GetLoansDistribution getLoansDistribution;
 
-    public ReportsService(GetBookCategoriesPopularity getBookCategoriesPopularity, GetAuthorsPopularity getAuthorsPopularity, GetPublishersPopularity getPublishersPopularity, GetUsersAcquisition getUsersAcquisition, GetUsersDemography getUsersDemography, GetLoansDistribution getLoansDistribution) {
+    public ReportsService(GetBooksPopularity getBooksPopularity, GetBookCategoriesPopularity getBookCategoriesPopularity, GetAuthorsPopularity getAuthorsPopularity, GetPublishersPopularity getPublishersPopularity, GetUsersAcquisition getUsersAcquisition, GetUsersDemography getUsersDemography, GetLoansDistribution getLoansDistribution) {
+        this.getBooksPopularity = getBooksPopularity;
         this.getBookCategoriesPopularity = getBookCategoriesPopularity;
         this.getAuthorsPopularity = getAuthorsPopularity;
         this.getPublishersPopularity = getPublishersPopularity;
         this.getUsersAcquisition = getUsersAcquisition;
         this.getUsersDemography = getUsersDemography;
         this.getLoansDistribution = getLoansDistribution;
+    }
+
+    @PreAuthorize("hasAuthority('reports:read')")
+    public List<BookPopularityResponse> getBooksPopularity(PopularityRequest request) {
+        return getBooksPopularity.get(request);
     }
 
     @PreAuthorize("hasAuthority('reports:read')")
