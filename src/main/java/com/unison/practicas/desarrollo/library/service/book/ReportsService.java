@@ -2,6 +2,7 @@ package com.unison.practicas.desarrollo.library.service.book;
 
 import com.unison.practicas.desarrollo.library.dto.book.request.PopularityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.*;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -12,13 +13,15 @@ public class ReportsService {
 
     private final GetBookCategoriesPopularity getBookCategoriesPopularity;
     private final GetAuthorsPopularity getAuthorsPopularity;
+    private final GetPublishersPopularity getPublishersPopularity;
     private final GetUsersAcquisition getUsersAcquisition;
     private final GetUsersDemography getUsersDemography;
     private final GetLoansDistribution getLoansDistribution;
 
-    public ReportsService(GetBookCategoriesPopularity getBookCategoriesPopularity, GetAuthorsPopularity getAuthorsPopularity, GetUsersAcquisition getUsersAcquisition, GetUsersDemography getUsersDemography, GetLoansDistribution getLoansDistribution) {
+    public ReportsService(GetBookCategoriesPopularity getBookCategoriesPopularity, GetAuthorsPopularity getAuthorsPopularity, GetPublishersPopularity getPublishersPopularity, GetUsersAcquisition getUsersAcquisition, GetUsersDemography getUsersDemography, GetLoansDistribution getLoansDistribution) {
         this.getBookCategoriesPopularity = getBookCategoriesPopularity;
         this.getAuthorsPopularity = getAuthorsPopularity;
+        this.getPublishersPopularity = getPublishersPopularity;
         this.getUsersAcquisition = getUsersAcquisition;
         this.getUsersDemography = getUsersDemography;
         this.getLoansDistribution = getLoansDistribution;
@@ -35,6 +38,11 @@ public class ReportsService {
     }
 
     @PreAuthorize("hasAuthority('reports:read')")
+    public List<PublisherPopularityResponse> getPublishersPopularity(PopularityRequest request) {
+        return getPublishersPopularity.get(request);
+    }
+
+    @PreAuthorize("hasAuthority('reports:read')")
     public List<UsersAcquisitionResponse> getUsersAcquisition() {
         return getUsersAcquisition.get();
     }
@@ -48,4 +56,5 @@ public class ReportsService {
     public List<LoansDistributionResponse> getLoansDistribution() {
         return getLoansDistribution.get();
     }
+
 }

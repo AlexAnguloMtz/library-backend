@@ -169,6 +169,11 @@ public class ReportController {
         return reportsService.getAuthorsPopularity(request);
     }
 
+    @GetMapping("/publishers-popularity")
+    public List<PublisherPopularityResponse> getPublishersPopularity(@Valid PopularityRequest request) {
+        return reportsService.getPublishersPopularity(request);
+    }
+
     @GetMapping("/loans-distribution")
     public List<LoansDistributionResponse> getLoansDistribution() {
         return reportsService.getLoansDistribution();
