@@ -32,7 +32,6 @@ public class GetBookCategoriesPopularity {
 
         Metric metric = parseMetric(request.metric());
 
-        // 1️⃣ Préstamos por usuario
         var loansPerUser = dsl.select(
                         BOOK_CATEGORY.NAME.as("category"),
                         DSL.case_()
@@ -60,7 +59,6 @@ public class GetBookCategoriesPopularity {
                 .groupBy(BOOK_CATEGORY.NAME, GENDER.NAME, APP_USER.DATE_OF_BIRTH, BOOK_LOAN.USER_ID)
                 .asTable("loans_per_user");
 
-        // 2️⃣ Agregación según métrica (limpio con switch)
         var valueField = aggregateFieldForMetric(metric, loansPerUser);
 
         var aggPerGroup = dsl.select(
@@ -79,7 +77,6 @@ public class GetBookCategoriesPopularity {
                 )
                 .asTable("agg_per_group");
 
-        // 3️⃣ Cross join con todas las combinaciones
         var allCategories = dsl.select(BOOK_CATEGORY.NAME.as("category")).from(BOOK_CATEGORY).asTable("all_categories");
         var allGenders = dsl.select(
                         DSL.case_()
@@ -113,7 +110,6 @@ public class GetBookCategoriesPopularity {
                 .crossJoin(allAgeGroups)
                 .asTable("all_combinations");
 
-        // 4️⃣ Rellenar con 0 si no hay datos
         var filledAgg = dsl.select(
                         allCombinations.field("category", String.class),
                         allCombinations.field("gender", String.class),
@@ -129,7 +125,6 @@ public class GetBookCategoriesPopularity {
                 .and(allCombinations.field("age_max", Integer.class).eq(aggPerGroup.field("age_max", Integer.class)))
                 .asTable("filled_agg");
 
-        // 5️⃣ Ranking top N por grupo demográfico
         var rankedTop = dsl.select(
                         filledAgg.field("category", String.class),
                         filledAgg.field("gender", String.class),
@@ -147,7 +142,6 @@ public class GetBookCategoriesPopularity {
                 .from(filledAgg)
                 .asTable("ranked_top");
 
-        // 6️⃣ Query final
         var query = dsl.select(
                         rankedTop.field("category", String.class),
                         rankedTop.field("gender", String.class),
@@ -161,11 +155,10 @@ public class GetBookCategoriesPopularity {
             query.where(rankedTop.field("rn", Integer.class).le(request.limit()));
         }
 
-        // 7️⃣ Mapear al DTO
         return query.fetch()
                 .map(record -> {
                     double value = record.get("value", Double.class);
-                    value = Math.round(value * 100.0) / 100.0;
+                    value = Math.round(value * 100.0) / 100.0; // Round for two digits
                     return BookCategoryPopularityResponse.builder()
                             .category(record.get("category", String.class))
                             .gender(record.get("gender", String.class))
