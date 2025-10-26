@@ -3,8 +3,7 @@ package com.unison.practicas.desarrollo.library.controller;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import com.unison.practicas.desarrollo.library.dto.book.request.AuthorsPopularityRequest;
-import com.unison.practicas.desarrollo.library.dto.book.request.BookCategoriesPopularityRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.PopularityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.*;
 import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.book.Book;
@@ -161,12 +160,12 @@ public class ReportController {
     }
 
     @GetMapping("/book-categories-popularity")
-    public List<BookCategoryPopularityResponse> getBookCategoryPopularity(@Valid BookCategoriesPopularityRequest request) {
+    public List<BookCategoryPopularityResponse> getBookCategoryPopularity(@Valid PopularityRequest request) {
         return reportsService.getBookCategoriesPopularity(request);
     }
 
     @GetMapping("/authors-popularity")
-    public List<AuthorPopularityResponse> getAuthorsPopularity(@Valid AuthorsPopularityRequest request) {
+    public List<AuthorPopularityResponse> getAuthorsPopularity(@Valid PopularityRequest request) {
         return reportsService.getAuthorsPopularity(request);
     }
 

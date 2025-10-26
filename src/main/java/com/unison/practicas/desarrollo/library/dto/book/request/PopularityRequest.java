@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-public record BookCategoriesPopularityRequest(
+public record PopularityRequest(
 
         @Min(value = 1)
         Integer limit,

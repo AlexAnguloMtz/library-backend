@@ -1,7 +1,8 @@
 package com.unison.practicas.desarrollo.library.service.book;
 
-import com.unison.practicas.desarrollo.library.dto.book.request.AuthorsPopularityRequest;
+import com.unison.practicas.desarrollo.library.dto.book.request.PopularityRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.AuthorPopularityResponse;
+import com.unison.practicas.desarrollo.library.util.PopularityMetric;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Table;
@@ -29,9 +30,9 @@ public class GetAuthorsPopularity {
         this.dsl = dsl;
     }
 
-    public List<AuthorPopularityResponse> get(AuthorsPopularityRequest request) {
+    public List<AuthorPopularityResponse> get(PopularityRequest request) {
 
-        Metric metric = parseMetric(request.metric());
+        PopularityMetric metric = parseMetric(request.metric());
 
         var loansPerUser = dsl.select(
                         AUTHOR.ID.as("author_id"),
@@ -198,7 +199,7 @@ public class GetAuthorsPopularity {
                         .build());
     }
 
-    private Field<?> aggregateFieldForMetric(Metric metric, Table<?> loansPerUser) {
+    private Field<?> aggregateFieldForMetric(PopularityMetric metric, Table<?> loansPerUser) {
         var loansCount = loansPerUser.field("loans_per_user", Integer.class);
         var userId = loansPerUser.field("user_id", Integer.class);
 
@@ -207,21 +208,18 @@ public class GetAuthorsPopularity {
             case DISTINCT_USERS -> DSL.countDistinct(userId);
             case FREQUENCY -> DSL.sum(loansCount);
             case MEDIAN -> DSL.field("percentile_cont(0.5) within group (order by {0})", Double.class, loansCount);
+            case MODE -> DSL.field(
+                    "mode() within group (order by {0})", Integer.class, loansCount
+            );
         };
     }
 
-    private Metric parseMetric(String str) {
+    private PopularityMetric parseMetric(String str) {
         try {
-            return Metric.valueOf(str.toUpperCase());
+            return PopularityMetric.valueOf(str.toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid metric: " + str);
         }
     }
 
-    private enum Metric {
-        FREQUENCY,
-        AVERAGE,
-        MEDIAN,
-        DISTINCT_USERS
-    }
 }
