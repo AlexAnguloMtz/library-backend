@@ -30,7 +30,9 @@ WHERE p.name IN (
     'publishers:update',
     'publishers:delete',
 
-    'reports:read'
+    'reports:read',
+
+    'audit-events:read'
 );
 
 INSERT INTO role_permission (role_id, permission_id)

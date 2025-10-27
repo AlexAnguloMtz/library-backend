@@ -8,7 +8,10 @@ import com.unison.practicas.desarrollo.library.dto.book.request.GetBookCategorie
 import com.unison.practicas.desarrollo.library.dto.book.response.MergeBookCategoriesResponse;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
+import com.unison.practicas.desarrollo.library.entity.audit.AuditEvent;
 import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
+import com.unison.practicas.desarrollo.library.repository.AuditEventRepository;
+import com.unison.practicas.desarrollo.library.repository.AuditEventTypeRepository;
 import com.unison.practicas.desarrollo.library.repository.BookCategoryRepository;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
@@ -18,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,25 +33,37 @@ public class BookCategoryService {
     // Services
     private final GetBookCategories getBookCategories;
     private final ExportBookCategories exportBookCategories;
+    private final AuditEventRepository auditEventRepository;
+    private final AuditEventTypeRepository auditEventTypeRepository;
 
     // Repositories
     private final BookCategoryRepository bookCategoryRepository;
 
-    public BookCategoryService(GetBookCategories getBookCategories, ExportBookCategories exportBookCategories, BookCategoryRepository bookCategoryRepository) {
+    public BookCategoryService(GetBookCategories getBookCategories, ExportBookCategories exportBookCategories, AuditEventRepository auditEventRepository, AuditEventTypeRepository auditEventTypeRepository, BookCategoryRepository bookCategoryRepository) {
         this.getBookCategories = getBookCategories;
         this.exportBookCategories = exportBookCategories;
+        this.auditEventRepository = auditEventRepository;
+        this.auditEventTypeRepository = auditEventTypeRepository;
         this.bookCategoryRepository = bookCategoryRepository;
     }
 
-
     @PreAuthorize("hasAuthority('book-categories:create')")
     @Transactional
-    public BookCategoryResponse createBookCategory(BookCategoryRequest request) {
+    public BookCategoryResponse createBookCategory(BookCategoryRequest request, CustomUserDetails currentUser) {
         if (bookCategoryRepository.existsByNameIgnoreCase(request.name().trim())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category with name '%s' already exists".formatted(request.name().trim()));
         }
         BookCategory bookCategory = mapBookCategory(request, new BookCategory());
-        return toResponse(bookCategoryRepository.save(bookCategory));
+        BookCategory savedCategory = bookCategoryRepository.save(bookCategory);
+
+        var auditEvent = new AuditEvent();
+        auditEvent.setEventType(auditEventTypeRepository.findById("BOOK_CATEGORY_CREATED").get());
+        auditEvent.setResponsible(currentUser.getUser());
+        auditEvent.setOccurredAt(LocalDateTime.now());
+        auditEvent.setResourceId(savedCategory.getId().toString());
+        auditEventRepository.save(auditEvent);
+
+        return toResponse(savedCategory);
     }
 
     @PreAuthorize("hasAuthority('book-categories:update')")

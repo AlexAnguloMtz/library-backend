@@ -25,4 +25,6 @@ INSERT INTO permission (name) VALUES
 ('publishers:update'),
 ('publishers:delete'),
 
-('reports:read');
+('reports:read'),
+
+('audit-events:read');

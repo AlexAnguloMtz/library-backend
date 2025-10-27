@@ -1,0 +1,19 @@
+package com.unison.practicas.desarrollo.library.dto.book.response;
+
+import lombok.Builder;
+
+import java.time.LocalDateTime;
+
+@Builder
+public record AuditEventResponse(
+        String id,
+        String responsibleId,
+        String responsibleFirstName,
+        String responsibleLastName,
+        String responsibleProfilePictureUrl,
+        String eventType,
+        String resourceType,
+        String resourceId,
+        LocalDateTime occurredAt
+) {
+}
