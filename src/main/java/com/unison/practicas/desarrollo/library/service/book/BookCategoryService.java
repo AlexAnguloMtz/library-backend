@@ -8,12 +8,9 @@ import com.unison.practicas.desarrollo.library.dto.book.request.GetBookCategorie
 import com.unison.practicas.desarrollo.library.dto.book.response.MergeBookCategoriesResponse;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
-import com.unison.practicas.desarrollo.library.entity.audit.AuditEvent;
 import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
-import com.unison.practicas.desarrollo.library.entity.book.BookCategoryCreated;
-import com.unison.practicas.desarrollo.library.repository.AuditEventRepository;
-import com.unison.practicas.desarrollo.library.repository.AuditEventTypeRepository;
 import com.unison.practicas.desarrollo.library.repository.BookCategoryRepository;
+import com.unison.practicas.desarrollo.library.util.events.BookCategoryCreated;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
@@ -23,7 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -57,7 +53,10 @@ public class BookCategoryService {
         BookCategory savedCategory = bookCategoryRepository.save(bookCategory);
 
         publisher.publishEvent(
-                new BookCategoryCreated(bookCategory.getId().toString())
+                BookCategoryCreated.builder()
+                        .categoryId(savedCategory.getId())
+                        .categoryName(savedCategory.getName())
+                        .build()
         );
 
         return toResponse(savedCategory);

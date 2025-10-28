@@ -3,12 +3,13 @@ package com.unison.practicas.desarrollo.library.controller;
 import com.unison.practicas.desarrollo.library.dto.book.request.GetAuditEventsRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.AuditEventResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.AuditResourceTypeResponse;
-import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
-import com.unison.practicas.desarrollo.library.service.book.AuditService;
+import com.unison.practicas.desarrollo.library.dto.book.response.FullAuditEventResponse;
+import com.unison.practicas.desarrollo.library.service.event.AuditService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,6 +31,11 @@ public class AuditController {
             @Valid PaginationRequest pagination
     ) {
         return auditService.getAuditEvents(filters, pagination);
+    }
+
+    @GetMapping("/events/{id}")
+    public FullAuditEventResponse getAuditEventById(@PathVariable String id) {
+        return auditService.getAuditEventById(id);
     }
 
     @GetMapping("/resource-types")

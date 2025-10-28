@@ -1,11 +1,10 @@
-package com.unison.practicas.desarrollo.library.service.book;
+package com.unison.practicas.desarrollo.library.service.event;
 
 import com.unison.practicas.desarrollo.library.dto.book.request.GetAuditEventsRequest;
 import com.unison.practicas.desarrollo.library.dto.book.response.AuditEventResponse;
 import com.unison.practicas.desarrollo.library.service.user.ProfilePictureService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
@@ -41,7 +40,6 @@ public class GetAuditEvents {
 
         var baseQuery = dsl.select(
                         AUDIT_EVENT.ID,
-                        AUDIT_EVENT.RESOURCE_ID,
                         AUDIT_EVENT.OCCURRED_AT,
                         APP_USER.ID.as("responsible_id"),
                         APP_USER.FIRST_NAME,
@@ -55,13 +53,6 @@ public class GetAuditEvents {
                 .join(AUDIT_EVENT_TYPE).on(AUDIT_EVENT_TYPE.ID.eq(AUDIT_EVENT.EVENT_TYPE_ID))
                 .join(AUDIT_RESOURCE_TYPE).on(AUDIT_RESOURCE_TYPE.ID.eq(AUDIT_EVENT_TYPE.RESOURCE_TYPE_ID));
 
-        // Fuzzy search por resourceId
-        if (filters.resourceId() != null && !filters.resourceId().isBlank()) {
-            String pattern = "%" + filters.resourceId() + "%";
-            baseQuery.where(AUDIT_EVENT.RESOURCE_ID.likeIgnoreCase(pattern));
-        }
-
-        // Fuzzy search por responsible (nombre, apellido)
         if (filters.responsible() != null && !filters.responsible().isBlank()) {
             String pattern = "%" + filters.responsible() + "%";
             baseQuery.where(
@@ -71,7 +62,6 @@ public class GetAuditEvents {
             );
         }
 
-        // Filtros opcionales por resourceType y eventType exacto
         if (filters.resourceType() != null && !filters.resourceType().isBlank()) {
             baseQuery.where(AUDIT_RESOURCE_TYPE.ID.eq(filters.resourceType()));
         }
@@ -79,10 +69,8 @@ public class GetAuditEvents {
             baseQuery.where(AUDIT_EVENT_TYPE.ID.eq(filters.eventType()));
         }
 
-        // Obtener total items antes de paginar
         int totalItems = baseQuery.fetch().size();
 
-        // Aplicar paginacion
         int offset = pagination.page() * pagination.size();
         var records = baseQuery
                 .orderBy(AUDIT_EVENT.OCCURRED_AT.desc())
@@ -110,7 +98,6 @@ public class GetAuditEvents {
     private AuditEventResponse mapRecordToResponse(Record r) {
         return AuditEventResponse.builder()
                 .id(r.get(AUDIT_EVENT.ID).toString())
-                .resourceId(r.get(AUDIT_EVENT.RESOURCE_ID))
                 .occurredAt(r.get(AUDIT_EVENT.OCCURRED_AT))
                 .responsibleId(r.get("responsible_id", String.class))
                 .responsibleFirstName(r.get(APP_USER.FIRST_NAME))

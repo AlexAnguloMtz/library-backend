@@ -1,0 +1,26 @@
+package com.unison.practicas.desarrollo.library.util;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
+
+@Component
+public class JsonUtils {
+
+    private final ObjectMapper objectMapper;
+
+    public JsonUtils(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    public String toJson(Object object) {
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+}

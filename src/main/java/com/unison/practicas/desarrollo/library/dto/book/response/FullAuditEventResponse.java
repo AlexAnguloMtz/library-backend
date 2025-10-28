@@ -5,7 +5,7 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record AuditEventResponse(
+public record FullAuditEventResponse(
         String id,
         String responsibleId,
         String responsibleFirstName,
