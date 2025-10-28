@@ -14,14 +14,12 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.unison.practicas.desarrollo.library.jooq.tables.AuditEvent.AUDIT_EVENT;
 import static com.unison.practicas.desarrollo.library.jooq.tables.AuditEventType.AUDIT_EVENT_TYPE;
 import static com.unison.practicas.desarrollo.library.jooq.tables.AuditResourceType.AUDIT_RESOURCE_TYPE;
 import static com.unison.practicas.desarrollo.library.jooq.tables.AppUser.APP_USER;
 
-@Slf4j
 @Component
 public class GetAuditEvents {
 
@@ -57,13 +55,10 @@ public class GetAuditEvents {
                 .join(AUDIT_EVENT_TYPE).on(AUDIT_EVENT_TYPE.ID.eq(AUDIT_EVENT.EVENT_TYPE_ID))
                 .join(AUDIT_RESOURCE_TYPE).on(AUDIT_RESOURCE_TYPE.ID.eq(AUDIT_EVENT_TYPE.RESOURCE_TYPE_ID));
 
-        log.debug("Base query constructed: {}", baseQuery);
-
         // Fuzzy search por resourceId
         if (filters.resourceId() != null && !filters.resourceId().isBlank()) {
             String pattern = "%" + filters.resourceId() + "%";
             baseQuery.where(AUDIT_EVENT.RESOURCE_ID.likeIgnoreCase(pattern));
-            log.debug("Applied fuzzy search on resourceId with pattern={}", pattern);
         }
 
         // Fuzzy search por responsible (nombre, apellido)
@@ -74,17 +69,14 @@ public class GetAuditEvents {
                     .or(APP_USER.FIRST_NAME.likeIgnoreCase(pattern))
                     .or(APP_USER.LAST_NAME.likeIgnoreCase(pattern))
             );
-            log.debug("Applied fuzzy search on responsible with pattern={}", pattern);
         }
 
         // Filtros opcionales por resourceType y eventType exacto
         if (filters.resourceType() != null && !filters.resourceType().isBlank()) {
             baseQuery.where(AUDIT_RESOURCE_TYPE.ID.eq(filters.resourceType()));
-            log.debug("Filtered by resourceType={}", filters.resourceType());
         }
         if (filters.eventType() != null && !filters.eventType().isBlank()) {
             baseQuery.where(AUDIT_EVENT_TYPE.ID.eq(filters.eventType()));
-            log.debug("Filtered by eventType={}", filters.eventType());
         }
 
         // Obtener total items antes de paginar
@@ -98,15 +90,13 @@ public class GetAuditEvents {
                 .offset(offset)
                 .fetch();
 
-
         List<AuditEventResponse> items = records.stream()
                 .map(this::mapRecordToResponse)
-                .peek(item -> log.debug("Mapped record to response: {}", item))
-                .collect(Collectors.toList());
+                .toList();
 
         int totalPages = (int) Math.ceil((double) totalItems / pagination.size());
 
-        var response = PaginationResponse.<AuditEventResponse>builder()
+        return PaginationResponse.<AuditEventResponse>builder()
                 .items(items)
                 .page(pagination.page())
                 .size(pagination.size())
@@ -115,8 +105,6 @@ public class GetAuditEvents {
                 .hasPrevious(pagination.page() > 0)
                 .hasNext(pagination.page() < totalPages - 1)
                 .build();
-
-        return response;
     }
 
     private AuditEventResponse mapRecordToResponse(Record r) {
@@ -124,7 +112,7 @@ public class GetAuditEvents {
                 .id(r.get(AUDIT_EVENT.ID).toString())
                 .resourceId(r.get(AUDIT_EVENT.RESOURCE_ID))
                 .occurredAt(r.get(AUDIT_EVENT.OCCURRED_AT))
-                .responsibleId(r.get(APP_USER.ID).toString())
+                .responsibleId(r.get("responsible_id", String.class))
                 .responsibleFirstName(r.get(APP_USER.FIRST_NAME))
                 .responsibleLastName(r.get(APP_USER.LAST_NAME))
                 .responsibleProfilePictureUrl(profilePictureService.profilePictureUrl(r.get(APP_USER.PROFILE_PICTURE_URL)))

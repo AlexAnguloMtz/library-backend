@@ -1,14 +1,14 @@
 package com.unison.practicas.desarrollo.library.util;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 public class StringHelper {
 
     private StringHelper() {}
 
     public static String pascalCaseToSnakeCase(String input) {
-        if (StringUtils.isBlank(input)) {
-            throw new IllegalArgumentException("Input cannot be null or empty");
+        if (!StringUtils.hasText(input)) {
+            return "";
         }
         if (!isPascalCase(input)) {
             throw new IllegalArgumentException("Input is not PascalCase: " + input);
