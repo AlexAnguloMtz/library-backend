@@ -36,11 +36,8 @@ public class BookCategoryController {
     }
 
     @PostMapping
-    public BookCategoryResponse createBookCategory(
-            @Valid @RequestBody BookCategoryRequest request,
-            @AuthenticationPrincipal CustomUserDetails currentUser
-    ) {
-        return bookCategoryService.createBookCategory(request, currentUser);
+    public BookCategoryResponse createBookCategory(@Valid @RequestBody BookCategoryRequest request) {
+        return bookCategoryService.createBookCategory(request);
     }
 
     @PutMapping("/{id}")
