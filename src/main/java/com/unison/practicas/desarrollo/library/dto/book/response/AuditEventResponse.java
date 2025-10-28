@@ -13,6 +13,7 @@ public record AuditEventResponse(
         String responsibleProfilePictureUrl,
         String eventType,
         String resourceType,
+        String eventData,
         LocalDateTime occurredAt
 ) {
 }

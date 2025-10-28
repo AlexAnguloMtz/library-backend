@@ -7,6 +7,7 @@ import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.JSONB;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -29,7 +30,7 @@ public class GetAuditEvents {
     public GetAuditEvents(
             DSLContext dsl,
             ProfilePictureService profilePictureService,
-            @Qualifier("auditTranslationsMessageSource") MessageSource auditMessageSource
+            @Qualifier("auditMessageSource") MessageSource auditMessageSource
     ) {
         this.dsl = dsl;
         this.profilePictureService = profilePictureService;
@@ -41,6 +42,7 @@ public class GetAuditEvents {
         var baseQuery = dsl.select(
                         AUDIT_EVENT.ID,
                         AUDIT_EVENT.OCCURRED_AT,
+                        AUDIT_EVENT.EVENT_DATA,
                         APP_USER.ID.as("responsible_id"),
                         APP_USER.FIRST_NAME,
                         APP_USER.LAST_NAME,
@@ -57,8 +59,8 @@ public class GetAuditEvents {
             String pattern = "%" + filters.responsible() + "%";
             baseQuery.where(
                     DSL.cast(APP_USER.ID, String.class).like(pattern)
-                    .or(APP_USER.FIRST_NAME.likeIgnoreCase(pattern))
-                    .or(APP_USER.LAST_NAME.likeIgnoreCase(pattern))
+                            .or(APP_USER.FIRST_NAME.likeIgnoreCase(pattern))
+                            .or(APP_USER.LAST_NAME.likeIgnoreCase(pattern))
             );
         }
 
@@ -96,6 +98,9 @@ public class GetAuditEvents {
     }
 
     private AuditEventResponse mapRecordToResponse(Record r) {
+        JSONB jsonb = r.get(AUDIT_EVENT.EVENT_DATA);
+        String json = jsonb != null ? jsonb.data() : null;
+
         return AuditEventResponse.builder()
                 .id(r.get(AUDIT_EVENT.ID).toString())
                 .occurredAt(r.get(AUDIT_EVENT.OCCURRED_AT))
@@ -105,6 +110,7 @@ public class GetAuditEvents {
                 .responsibleProfilePictureUrl(profilePictureService.profilePictureUrl(r.get(APP_USER.PROFILE_PICTURE_URL)))
                 .eventType(translate(r.get("event_type", String.class)))
                 .resourceType(translate(r.get("resource_type", String.class)))
+                .eventData(json)
                 .build();
     }
 

@@ -28,13 +28,10 @@ import java.util.stream.Collectors;
 @Service
 public class BookCategoryService {
 
-    // Services
     private final GetBookCategories getBookCategories;
     private final ExportBookCategories exportBookCategories;
-    private final ApplicationEventPublisher publisher;
-
-    // Repositories
     private final BookCategoryRepository bookCategoryRepository;
+    private final ApplicationEventPublisher publisher;
 
     public BookCategoryService(GetBookCategories getBookCategories, ExportBookCategories exportBookCategories, ApplicationEventPublisher publisher, BookCategoryRepository bookCategoryRepository) {
         this.getBookCategories = getBookCategories;
@@ -49,12 +46,14 @@ public class BookCategoryService {
         if (bookCategoryRepository.existsByNameIgnoreCase(request.name().trim())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category with name '%s' already exists".formatted(request.name().trim()));
         }
+
         BookCategory bookCategory = mapBookCategory(request, new BookCategory());
+
         BookCategory savedCategory = bookCategoryRepository.save(bookCategory);
 
         publisher.publishEvent(
                 BookCategoryCreated.builder()
-                        .categoryId(savedCategory.getId())
+                        .categoryId(savedCategory.getId().toString())
                         .categoryName(savedCategory.getName())
                         .build()
         );

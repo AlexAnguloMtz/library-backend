@@ -7,6 +7,7 @@ import com.unison.practicas.desarrollo.library.repository.AuditEventRepository;
 import com.unison.practicas.desarrollo.library.repository.AuditEventTypeRepository;
 import com.unison.practicas.desarrollo.library.util.AuthenticationUtils;
 import com.unison.practicas.desarrollo.library.util.JsonUtils;
+import com.unison.practicas.desarrollo.library.util.StringHelper;
 import com.unison.practicas.desarrollo.library.util.events.AuditEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
@@ -41,7 +42,9 @@ class AuditLogEventHandler {
                 () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED)
         );
 
-        AuditEventType eventType = auditEventTypeRepository.findById(event.getEventTypeId()).orElseThrow(
+        String eventTypeId = StringHelper.pascalCaseToSnakeCase(event.getClass().getSimpleName()).toUpperCase();
+
+        AuditEventType eventType = auditEventTypeRepository.findById(eventTypeId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)
         );
 

@@ -8,6 +8,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Builder
 public final class BookCategoryCreated extends BookCategoryEvent {
-    private final Integer categoryId;
+    private final String categoryId;
     private final String categoryName;
 }

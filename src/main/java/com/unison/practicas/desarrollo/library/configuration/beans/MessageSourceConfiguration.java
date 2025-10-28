@@ -9,9 +9,9 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 public class MessageSourceConfiguration {
 
     @Bean
-    public MessageSource auditTranslationsMessageSource() {
+    public MessageSource auditMessageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
-        messageSource.setBasename("classpath:messages/audit/translations");
+        messageSource.setBasename("classpath:messages/audit/events/events");
         messageSource.setDefaultEncoding("UTF-8");
         messageSource.setFallbackToSystemLocale(false);
         return messageSource;

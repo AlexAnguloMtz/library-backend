@@ -13,6 +13,7 @@ public record FullAuditEventResponse(
         String responsibleProfilePictureUrl,
         String eventType,
         String resourceType,
+        String eventData,
         LocalDateTime occurredAt
 ) {
 }
