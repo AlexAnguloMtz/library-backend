@@ -10,7 +10,9 @@ import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
 import com.unison.practicas.desarrollo.library.repository.BookCategoryRepository;
-import com.unison.practicas.desarrollo.library.util.events.BookCategoryCreated;
+import com.unison.practicas.desarrollo.library.util.event.BookCategoryCreated;
+import com.unison.practicas.desarrollo.library.util.event.BookCategoryDeleted;
+import com.unison.practicas.desarrollo.library.util.event.BookCategoryUpdated;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
@@ -20,9 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +54,7 @@ public class BookCategoryService {
         publisher.publishEvent(
                 BookCategoryCreated.builder()
                         .categoryId(savedCategory.getId().toString())
-                        .categoryName(savedCategory.getName())
+                        .name(savedCategory.getName())
                         .build()
         );
 
@@ -66,6 +66,8 @@ public class BookCategoryService {
     public BookCategoryResponse updateBookCategory(String id, BookCategoryRequest request) {
         BookCategory bookCategoryById = findBookCategoryById(id);
 
+        BookCategoryUpdated.Fields oldValues = toUpdatedFields(bookCategoryById);
+
         Optional<BookCategory> bookCategoryByNameOptional = bookCategoryRepository.findByNameIgnoreCase(request.name().trim());
 
         boolean nameConflict = bookCategoryByNameOptional.isPresent() &&
@@ -75,9 +77,23 @@ public class BookCategoryService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category with name '%s' already exists".formatted(request.name().trim()));
         }
 
-        BookCategory bookCategory = mapBookCategory(request, findBookCategoryById(id));
+        BookCategory updatedBookCategory = mapBookCategory(request, bookCategoryById);
 
-        return toResponse(bookCategoryRepository.save(bookCategory));
+        BookCategory savedBookCategory = bookCategoryRepository.save(updatedBookCategory);
+
+        BookCategoryUpdated.Fields newValues = toUpdatedFields(savedBookCategory);
+
+        if (!newValues.equals(oldValues)) {
+            publisher.publishEvent(
+                    BookCategoryUpdated.builder()
+                            .categoryId(savedBookCategory.getId().toString())
+                            .oldValues(oldValues)
+                            .newValues(newValues)
+                            .build()
+            );
+        }
+
+        return toResponse(savedBookCategory);
     }
 
     @PreAuthorize("hasAuthority('book-categories:delete')")
@@ -89,7 +105,15 @@ public class BookCategoryService {
                     "No puedes borrar una categoria que tiene libros asociados. " +
                     "Intenta combinarla con otra y será eliminada en el proceso.");
         }
+
         bookCategoryRepository.delete(bookCategory);
+
+        publisher.publishEvent(
+                BookCategoryDeleted.builder()
+                        .categoryId(bookCategory.getId().toString())
+                        .name(bookCategory.getName())
+                        .build()
+        );
     }
 
     @PreAuthorize("hasAuthority('book-categories:read')")
@@ -180,6 +204,12 @@ public class BookCategoryService {
     private BookCategory mapBookCategory(BookCategoryRequest request, BookCategory bookCategory) {
         bookCategory.setName(request.name().trim());
         return bookCategory;
+    }
+
+    private BookCategoryUpdated.Fields toUpdatedFields(BookCategory entity) {
+        return BookCategoryUpdated.Fields.builder()
+                .name(entity.getName())
+                .build();
     }
 
 }

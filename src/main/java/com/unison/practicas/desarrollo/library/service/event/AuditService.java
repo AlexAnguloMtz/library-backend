@@ -21,9 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class AuditService {
@@ -104,15 +102,42 @@ public class AuditService {
     private String translateEventData(String eventTypeId, String eventData) {
         Map<String, Object> originalMap = jsonUtils.fromJson(eventData, Map.class);
         Map<String, Object> translatedMap = new LinkedHashMap<>();
-        for (Map.Entry<String, Object> entry : originalMap.entrySet()) {
-            String translatedFieldName = translateEventDataFieldName(eventTypeId, entry.getKey());
-            translatedMap.put(translatedFieldName, entry.getValue());
+
+        Deque<StackFrame> stack = new ArrayDeque<>();
+        stack.push(new StackFrame(originalMap, translatedMap, null));
+
+        while (!stack.isEmpty()) {
+            StackFrame frame = stack.pop();
+
+            for (Map.Entry<String, Object> entry : frame.original.entrySet()) {
+                String fullKey = frame.parentKey == null ? entry.getKey() : frame.parentKey + "." + entry.getKey();
+                String translatedKey = translate(eventTypeId + "." + fullKey);
+                Object value = entry.getValue();
+
+                if (value instanceof Map) {
+                    Map<String, Object> newTranslated = new LinkedHashMap<>();
+                    frame.translated.put(translatedKey, newTranslated);
+                    // Añadir a la pila para procesar el sub-map
+                    stack.push(new StackFrame((Map<String, Object>) value, newTranslated, fullKey));
+                } else {
+                    frame.translated.put(translatedKey, value);
+                }
+            }
         }
+
         return jsonUtils.toJson(translatedMap);
     }
 
-    private String translateEventDataFieldName(String eventTypeId, String fieldName) {
-        return translate("%s.%s".formatted(eventTypeId, fieldName));
+    private static class StackFrame {
+        Map<String, Object> original;
+        Map<String, Object> translated;
+        String parentKey;
+
+        StackFrame(Map<String, Object> original, Map<String, Object> translated, String parentKey) {
+            this.original = original;
+            this.translated = translated;
+            this.parentKey = parentKey;
+        }
     }
 
     private String translate(String text) {

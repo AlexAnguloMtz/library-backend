@@ -8,7 +8,7 @@ import com.unison.practicas.desarrollo.library.repository.AuditEventTypeReposito
 import com.unison.practicas.desarrollo.library.util.AuthenticationUtils;
 import com.unison.practicas.desarrollo.library.util.JsonUtils;
 import com.unison.practicas.desarrollo.library.util.StringHelper;
-import com.unison.practicas.desarrollo.library.util.events.AuditEvent;
+import com.unison.practicas.desarrollo.library.util.event.AuditEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -45,7 +45,8 @@ class AuditLogEventHandler {
         String eventTypeId = StringHelper.pascalCaseToSnakeCase(event.getClass().getSimpleName()).toUpperCase();
 
         AuditEventType eventType = auditEventTypeRepository.findById(eventTypeId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR)
+                () -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Could not find event type with id: %s".formatted(eventTypeId))
         );
 
         var eventEntity = new AuditEventEntity();

@@ -21,8 +21,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ProblemDetail handle(ResponseStatusException ex) {
         ProblemDetail problem = ProblemDetail.forStatus(ex.getStatusCode());
-        problem.setTitle("Error");
-        problem.setDetail(ex.getReason());
+        problem.setTitle("Error desconocido");
+
+        problem.setDetail(HttpStatus.INTERNAL_SERVER_ERROR.equals(ex.getStatusCode())
+                ? "Error desconocido"
+                : ex.getReason()
+        );
+
+
         return problem;
     }
 
