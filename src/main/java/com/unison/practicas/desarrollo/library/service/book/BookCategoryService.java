@@ -142,9 +142,7 @@ public class BookCategoryService {
 
         List<BookCategory> mergedCategories = findBookCategoriesByIds(request.mergedCategoriesIds());
 
-        BookCategoriesMerged event = null; // TODO fix
-
-        int movedBooks = mergedCategories.stream()
+        int booksMoved = mergedCategories.stream()
                 .flatMap(cat -> cat.getBooks().stream())
                 .peek(book -> book.setCategory(targetCategory))
                 .toList()
@@ -159,10 +157,25 @@ public class BookCategoryService {
 
         bookCategoryRepository.deleteAll(mergedCategories);
 
+        publisher.publishEvent(
+                BookCategoriesMerged.builder()
+                        .booksMoved(booksMoved)
+                        .targetCategory(toMergedCategory(targetCategory))
+                        .mergedCategories(mergedCategories.stream().map(this::toMergedCategory).toList())
+                        .build()
+        );
+
         return MergeBookCategoriesResponse.builder()
                 .targetCategory(toResponse(targetCategory))
                 .deletedCategories(mergedCategories.size())
-                .movedBooks(movedBooks)
+                .movedBooks(booksMoved)
+                .build();
+    }
+
+    private BookCategoriesMerged.MergedBookCategory toMergedCategory(BookCategory category) {
+        return BookCategoriesMerged.MergedBookCategory.builder()
+                .categoryId(category.getId().toString())
+                .name(category.getName())
                 .build();
     }
 

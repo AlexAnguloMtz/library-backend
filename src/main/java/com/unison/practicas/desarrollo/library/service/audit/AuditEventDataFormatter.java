@@ -2,12 +2,14 @@ package com.unison.practicas.desarrollo.library.service.audit;
 
 import com.unison.practicas.desarrollo.library.entity.audit.AuditEventEntity;
 import com.unison.practicas.desarrollo.library.util.JsonUtils;
+import com.unison.practicas.desarrollo.library.util.event.BookCategoriesMerged;
 import com.unison.practicas.desarrollo.library.util.event.BookCategoryUpdated;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import static j2html.TagCreator.*;
 
 import java.util.*;
 
@@ -30,49 +32,88 @@ class AuditEventDataFormatter {
         return switch(eventTypeId) {
             case "BOOK_CATEGORY_CREATED", "BOOK_CATEGORY_DELETED" -> formatGeneric(eventTypeId, event.getEventData());
             case "BOOK_CATEGORY_UPDATED" -> format(jsonUtils.fromJson(event.getEventData(), BookCategoryUpdated.class));
+            case "BOOK_CATEGORIES_MERGED" -> format(jsonUtils.fromJson(event.getEventData(), BookCategoriesMerged.class));
             default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Can't format pretty data for event type %s".formatted(eventTypeId));
         };
     }
 
     private String format(BookCategoryUpdated data) {
+        if (data == null) return "";
+
         String categoryId = data.getCategoryId();
         BookCategoryUpdated.Fields oldValues = data.getOldValues();
         BookCategoryUpdated.Fields newValues = data.getNewValues();
 
-        StringBuilder html = new StringBuilder();
+        return p(
+                text("ID de categoría: "),
+                strong(categoryId)
+        )
+                .withStyle("font-size: 0.9em; margin-bottom: 12px;")
+                .render() +
 
-        html.append("""
-        <p style='font-size: 0.9em; margin-bottom: 12px;'>
-            ID de categoría: <strong>""" + categoryId + "</strong>" +
-        "</p>"
-        );
+                table(
+                        thead(
+                                tr(
+                                        th(strong("Dato")),
+                                        th(strong("Antes")),
+                                        th(strong("Después"))
+                                )
+                        ),
+                        tbody(
+                                tr(
+                                        td("Nombre de categoría"),
+                                        td(oldValues != null && oldValues.name() != null ? oldValues.name() : ""),
+                                        td(newValues != null && newValues.name() != null ? newValues.name() : "")
+                                )
+                        )
+                )
+                        .withStyle("border-collapse: collapse; width: 100%; font-size: 0.9em;")
+                        .render();
+    }
 
-        html.append("""
-        <table style='border-collapse: collapse; width: 100%; font-size: 0.9em;'>
-            <thead>
-                <tr>
-                    <th><strong>Dato</strong></th>
-                    <th><strong>Antes</strong></th>
-                    <th><strong>Después</strong></th>
-                </tr>
-            </thead>
-            <tbody>
-    """);
+    private String format(BookCategoriesMerged data) {
+        if (data == null) return "";
 
-        html.append("<tr>")
-                .append("<td>Nombre de categoría</td>")
-                .append("<td>")
-                .append(oldValues != null && oldValues.name() != null ? oldValues.name() : "")
-                .append("</td>")
-                .append("<td>")
-                .append(newValues != null && newValues.name() != null ? newValues.name() : "")
-                .append("</td>")
-                .append("</tr>");
+        var target = data.getTargetCategory();
+        var merged = data.getMergedCategories();
+        var booksMoved = data.getBooksMoved();
 
-        html.append("</tbody></table>");
+        String targetHtml = p(
+                text("Categoría resultante:"),
+                span(target != null ? target.name() : "N/A").withStyle("margin-left: 6px;")
+        ).withStyle("font-size: 0.9em; margin-bottom: 12px;")
+                .render();
 
-        return html.toString();
+        String booksHtml = p(
+                text("Libros movidos:"),
+                span(booksMoved != null ? booksMoved.toString() : "0").withStyle("margin-left: 6px;")
+        ).withStyle("font-size: 0.9em; margin-bottom: 12px;")
+                .render();
+
+        String tableTitle = p(strong("Categorías eliminadas"))
+                .withStyle("font-size: 0.9em; margin-bottom: 6px;")
+                .render();
+
+        String tableHtml = table(
+                thead(
+                        tr(
+                                th(strong("ID de categoría")),
+                                th(strong("Nombre de categoría"))
+                        )
+                ),
+                tbody(
+                        each(merged != null ? merged : List.of(), cat ->
+                                tr(
+                                        td(cat.categoryId()),
+                                        td(cat.name())
+                                )
+                        )
+                )
+        ).withStyle("border-collapse: collapse; width: 100%; font-size: 0.9em;")
+                .render();
+
+        return targetHtml + booksHtml + tableTitle + tableHtml;
     }
 
     private String formatGeneric(String eventTypeId, String data) {
