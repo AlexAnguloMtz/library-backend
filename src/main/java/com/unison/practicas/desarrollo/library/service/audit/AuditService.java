@@ -12,7 +12,6 @@ import com.unison.practicas.desarrollo.library.entity.audit.AuditResourceType;
 import com.unison.practicas.desarrollo.library.repository.AuditEventRepository;
 import com.unison.practicas.desarrollo.library.repository.AuditResourceTypeRepository;
 import com.unison.practicas.desarrollo.library.service.user.ProfilePictureService;
-import com.unison.practicas.desarrollo.library.util.JsonUtils;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,19 +31,19 @@ public class AuditService {
     private final AuditEventRepository auditEventRepository;
     private final MessageSource auditMessageSource;
     private final ProfilePictureService profilePictureService;
-    private final JsonUtils jsonUtils;
+    private final AuditEventDataFormatter eventDataFormatter;
 
-    public AuditService(
+    AuditService(
             GetAuditEvents getAuditEvents,
             AuditResourceTypeRepository auditResourceTypeRepository, AuditEventRepository auditEventRepository,
-            @Qualifier("auditMessageSource") MessageSource auditMessageSource, ProfilePictureService profilePictureService, JsonUtils jsonUtils
+            @Qualifier("auditMessageSource") MessageSource auditMessageSource, ProfilePictureService profilePictureService, AuditEventDataFormatter eventDataFormatter
     ) {
         this.getAuditEvents = getAuditEvents;
         this.auditResourceTypeRepository = auditResourceTypeRepository;
         this.auditEventRepository = auditEventRepository;
         this.auditMessageSource = auditMessageSource;
         this.profilePictureService = profilePictureService;
-        this.jsonUtils = jsonUtils;
+        this.eventDataFormatter = eventDataFormatter;
     }
 
     @PreAuthorize("hasAuthority('audit-events:read')")
@@ -97,81 +96,8 @@ public class AuditService {
                 .eventType(translate(event.getEventType().getId()))
                 .resourceType(translate(event.getEventType().getResourceType().getId()))
                 .eventData(event.getEventData())
-                .eventDataPretty(request.eventDataPretty() ? eventDataPretty(event) : "")
+                .eventDataPretty(request.eventDataPretty() ? eventDataFormatter.format(event) : "")
                 .build();
-    }
-
-    private String eventDataPretty(AuditEventEntity event) {
-        String eventTypeId = event.getEventType().getId();
-        return switch(eventTypeId) {
-            case "BOOK_CATEGORY_CREATED", "BOOK_CATEGORY_DELETED" -> formatSimpleEventData(eventTypeId, event.getEventData());
-            default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Can't format pretty data for event type %s".formatted(eventTypeId));
-        };
-    }
-
-    private String formatSimpleEventData(String eventTypeId, String data) {
-        Map<String, Object> values = jsonUtils.fromJson(data, Map.class);
-        Map<String, Object> translatedValues = translateEventData(eventTypeId, values);
-        List<Map.Entry<String, Object>> entries = new ArrayList<>(translatedValues.entrySet());
-        Collections.reverse(entries);
-
-        var html = new StringBuilder();
-        html.append("<table style='border-collapse: collapse; width: 100%; font-size: 0.9em;'>");
-
-        for (Map.Entry<String, Object> entry : entries) {
-            html.append("<tr>")
-                    .append("<th style='text-align: left; padding: 6px 8px; font-weight: 400;'>")
-                    .append(entry.getKey())
-                    .append("</th>")
-                    .append("<td style='padding: 6px 8px; font-weight: 600;'>")
-                    .append(entry.getValue() != null ? entry.getValue() : "")
-                    .append("</td>")
-                    .append("</tr>");
-        }
-
-        html.append("</table>");
-        return html.toString();
-    }
-
-
-    private Map<String, Object> translateEventData(String eventTypeId, Map<String, Object> eventData) {
-        Map<String, Object> translatedMap = new LinkedHashMap<>();
-
-        Deque<StackFrame> stack = new ArrayDeque<>();
-        stack.push(new StackFrame(eventData, translatedMap, null));
-
-        while (!stack.isEmpty()) {
-            StackFrame frame = stack.pop();
-
-            for (Map.Entry<String, Object> entry : frame.original.entrySet()) {
-                String fullKey = frame.parentKey == null ? entry.getKey() : frame.parentKey + "." + entry.getKey();
-                String translatedKey = translate(eventTypeId + "." + fullKey);
-                Object value = entry.getValue();
-
-                if (value instanceof Map) {
-                    Map<String, Object> newTranslated = new LinkedHashMap<>();
-                    frame.translated.put(translatedKey, newTranslated);
-                    stack.push(new StackFrame((Map<String, Object>) value, newTranslated, fullKey));
-                } else {
-                    frame.translated.put(translatedKey, value);
-                }
-            }
-        }
-
-        return translatedMap;
-    }
-
-    private static class StackFrame {
-        Map<String, Object> original;
-        Map<String, Object> translated;
-        String parentKey;
-
-        StackFrame(Map<String, Object> original, Map<String, Object> translated, String parentKey) {
-            this.original = original;
-            this.translated = translated;
-            this.parentKey = parentKey;
-        }
     }
 
     private String translate(String text) {

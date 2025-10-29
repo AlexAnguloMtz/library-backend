@@ -21,13 +21,13 @@ import static com.unison.practicas.desarrollo.library.jooq.tables.AuditResourceT
 import static com.unison.practicas.desarrollo.library.jooq.tables.AppUser.APP_USER;
 
 @Component
-public class GetAuditEvents {
+class GetAuditEvents {
 
     private final DSLContext dsl;
     private final ProfilePictureService profilePictureService;
     private final MessageSource auditMessageSource;
 
-    public GetAuditEvents(
+    GetAuditEvents(
             DSLContext dsl,
             ProfilePictureService profilePictureService,
             @Qualifier("auditMessageSource") MessageSource auditMessageSource
@@ -37,7 +37,7 @@ public class GetAuditEvents {
         this.auditMessageSource = auditMessageSource;
     }
 
-    public PaginationResponse<AuditEventResponse> get(GetAuditEventsRequest filters, PaginationRequest pagination) {
+    PaginationResponse<AuditEventResponse> get(GetAuditEventsRequest filters, PaginationRequest pagination) {
 
         var baseQuery = dsl.select(
                         AUDIT_EVENT.ID,

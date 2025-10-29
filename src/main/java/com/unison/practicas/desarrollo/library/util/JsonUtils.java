@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -40,7 +39,7 @@ public class JsonUtils {
 
             return mapper.writer(filters).writeValueAsString(object);
         } catch (JsonProcessingException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error serializing object to JSON", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -48,7 +47,7 @@ public class JsonUtils {
         try {
             return objectMapper.readValue(json, clazz);
         } catch (JsonProcessingException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new RuntimeException(e);
         }
     }
 }
