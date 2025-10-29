@@ -1,7 +1,7 @@
-package com.unison.practicas.desarrollo.library.service.event;
+package com.unison.practicas.desarrollo.library.service.audit;
 
-import com.unison.practicas.desarrollo.library.dto.book.request.GetAuditEventsRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.AuditEventResponse;
+import com.unison.practicas.desarrollo.library.dto.audit.request.GetAuditEventsRequest;
+import com.unison.practicas.desarrollo.library.dto.audit.response.AuditEventResponse;
 import com.unison.practicas.desarrollo.library.service.user.ProfilePictureService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;

@@ -7,7 +7,6 @@ import lombok.EqualsAndHashCode;
 @Data
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public final class BookCategoryDeleted extends BookCategoryEvent {
-    private final String categoryId;
-    private final String name;
+public final class BookCategoriesMerged extends BookCategoryEvent {
+
 }

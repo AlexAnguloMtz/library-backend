@@ -1,10 +1,11 @@
 package com.unison.practicas.desarrollo.library.controller;
 
-import com.unison.practicas.desarrollo.library.dto.book.request.GetAuditEventsRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.AuditEventResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.AuditResourceTypeResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.FullAuditEventResponse;
-import com.unison.practicas.desarrollo.library.service.event.AuditService;
+import com.unison.practicas.desarrollo.library.dto.audit.request.GetAuditEventRequest;
+import com.unison.practicas.desarrollo.library.dto.audit.request.GetAuditEventsRequest;
+import com.unison.practicas.desarrollo.library.dto.audit.response.AuditEventResponse;
+import com.unison.practicas.desarrollo.library.dto.audit.response.AuditResourceTypeResponse;
+import com.unison.practicas.desarrollo.library.dto.audit.response.FullAuditEventResponse;
+import com.unison.practicas.desarrollo.library.service.audit.AuditService;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.validation.Valid;
@@ -34,8 +35,11 @@ public class AuditController {
     }
 
     @GetMapping("/events/{id}")
-    public FullAuditEventResponse getAuditEventById(@PathVariable String id) {
-        return auditService.getAuditEventById(id);
+    public FullAuditEventResponse getAuditEventById(
+            @PathVariable String id,
+            @Valid GetAuditEventRequest request
+    ) {
+        return auditService.getAuditEventById(id, request);
     }
 
     @GetMapping("/resource-types")

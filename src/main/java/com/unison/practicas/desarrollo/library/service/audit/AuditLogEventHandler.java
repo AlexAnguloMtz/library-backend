@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.service.event;
+package com.unison.practicas.desarrollo.library.service.audit;
 
 import com.unison.practicas.desarrollo.library.configuration.security.CustomUserDetails;
 import com.unison.practicas.desarrollo.library.entity.audit.AuditEventEntity;

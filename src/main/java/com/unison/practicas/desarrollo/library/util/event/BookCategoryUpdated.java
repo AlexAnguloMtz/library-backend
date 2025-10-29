@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @Builder
 @EqualsAndHashCode(callSuper = true)
-final public class BookCategoryUpdated extends BookCategoryEvent {
+public final class BookCategoryUpdated extends BookCategoryEvent {
 
     @Builder
     public record Fields(

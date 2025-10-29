@@ -1,4 +1,4 @@
-package com.unison.practicas.desarrollo.library.dto.book.request;
+package com.unison.practicas.desarrollo.library.dto.audit.request;
 
 import jakarta.validation.constraints.Size;
 import lombok.Builder;

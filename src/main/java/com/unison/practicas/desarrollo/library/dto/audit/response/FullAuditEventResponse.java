@@ -1,11 +1,11 @@
-package com.unison.practicas.desarrollo.library.dto.book.response;
+package com.unison.practicas.desarrollo.library.dto.audit.response;
 
 import lombok.Builder;
 
 import java.time.LocalDateTime;
 
 @Builder
-public record AuditEventResponse(
+public record FullAuditEventResponse(
         String id,
         String responsibleId,
         String responsibleFirstName,
@@ -14,6 +14,7 @@ public record AuditEventResponse(
         String eventType,
         String resourceType,
         String eventData,
+        String eventDataPretty,
         LocalDateTime occurredAt
 ) {
 }

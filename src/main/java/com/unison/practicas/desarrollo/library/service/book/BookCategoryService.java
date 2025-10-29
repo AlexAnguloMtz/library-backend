@@ -10,6 +10,7 @@ import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
 import com.unison.practicas.desarrollo.library.repository.BookCategoryRepository;
+import com.unison.practicas.desarrollo.library.util.event.BookCategoriesMerged;
 import com.unison.practicas.desarrollo.library.util.event.BookCategoryCreated;
 import com.unison.practicas.desarrollo.library.util.event.BookCategoryDeleted;
 import com.unison.practicas.desarrollo.library.util.event.BookCategoryUpdated;
@@ -140,6 +141,8 @@ public class BookCategoryService {
         BookCategory targetCategory = findBookCategoryById(request.targetCategoryId());
 
         List<BookCategory> mergedCategories = findBookCategoriesByIds(request.mergedCategoriesIds());
+
+        BookCategoriesMerged event = null; // TODO fix
 
         int movedBooks = mergedCategories.stream()
                 .flatMap(cat -> cat.getBooks().stream())

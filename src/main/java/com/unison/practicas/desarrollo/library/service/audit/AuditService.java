@@ -1,9 +1,10 @@
-package com.unison.practicas.desarrollo.library.service.event;
+package com.unison.practicas.desarrollo.library.service.audit;
 
-import com.unison.practicas.desarrollo.library.dto.book.request.GetAuditEventsRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.AuditEventResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.AuditResourceTypeResponse;
-import com.unison.practicas.desarrollo.library.dto.book.response.FullAuditEventResponse;
+import com.unison.practicas.desarrollo.library.dto.audit.request.GetAuditEventRequest;
+import com.unison.practicas.desarrollo.library.dto.audit.request.GetAuditEventsRequest;
+import com.unison.practicas.desarrollo.library.dto.audit.response.AuditEventResponse;
+import com.unison.practicas.desarrollo.library.dto.audit.response.AuditResourceTypeResponse;
+import com.unison.practicas.desarrollo.library.dto.audit.response.FullAuditEventResponse;
 import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
 import com.unison.practicas.desarrollo.library.entity.audit.AuditEventEntity;
 import com.unison.practicas.desarrollo.library.entity.audit.AuditEventType;
@@ -55,11 +56,11 @@ public class AuditService {
     }
 
     @PreAuthorize("hasAuthority('audit-events:read')")
-    public FullAuditEventResponse getAuditEventById(String id) {
+    public FullAuditEventResponse getAuditEventById(String id, GetAuditEventRequest request) {
         AuditEventEntity event = auditEventRepository.findById(Integer.parseInt(id)).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find event with id: %s".formatted(id)));
 
-        return toFullResponse(event);
+        return toFullResponse(event, request);
     }
 
 
@@ -85,7 +86,7 @@ public class AuditService {
                 .build();
     }
 
-    private FullAuditEventResponse toFullResponse(AuditEventEntity event) {
+    private FullAuditEventResponse toFullResponse(AuditEventEntity event, GetAuditEventRequest request) {
         return FullAuditEventResponse.builder()
                 .id(event.getId().toString())
                 .occurredAt(event.getOccurredAt())
@@ -95,16 +96,50 @@ public class AuditService {
                 .responsibleProfilePictureUrl(profilePictureService.profilePictureUrl(event.getResponsible().getProfilePictureUrl().orElse(null)))
                 .eventType(translate(event.getEventType().getId()))
                 .resourceType(translate(event.getEventType().getResourceType().getId()))
-                .eventData(translateEventData(event.getEventType().getId(), event.getEventData()))
+                .eventData(event.getEventData())
+                .eventDataPretty(request.eventDataPretty() ? eventDataPretty(event) : "")
                 .build();
     }
 
-    private String translateEventData(String eventTypeId, String eventData) {
-        Map<String, Object> originalMap = jsonUtils.fromJson(eventData, Map.class);
+    private String eventDataPretty(AuditEventEntity event) {
+        String eventTypeId = event.getEventType().getId();
+        return switch(eventTypeId) {
+            case "BOOK_CATEGORY_CREATED" -> formatSimpleEventData(eventTypeId, event.getEventData());
+            default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Can't format pretty data for event type %s".formatted(eventTypeId));
+        };
+    }
+
+    private String formatSimpleEventData(String eventTypeId, String data) {
+        Map<String, Object> values = jsonUtils.fromJson(data, Map.class);
+        Map<String, Object> translatedValues = translateEventData(eventTypeId, values);
+        List<Map.Entry<String, Object>> entries = new ArrayList<>(translatedValues.entrySet());
+        Collections.reverse(entries);
+
+        var html = new StringBuilder();
+        html.append("<table style='border-collapse: collapse; width: 100%; font-size: 0.9em;'>");
+
+        for (Map.Entry<String, Object> entry : entries) {
+            html.append("<tr>")
+                    .append("<th style='text-align: left; padding: 6px 8px; font-weight: 400;'>")
+                    .append(entry.getKey())
+                    .append("</th>")
+                    .append("<td style='padding: 6px 8px; font-weight: 600;'>")
+                    .append(entry.getValue() != null ? entry.getValue() : "")
+                    .append("</td>")
+                    .append("</tr>");
+        }
+
+        html.append("</table>");
+        return html.toString();
+    }
+
+
+    private Map<String, Object> translateEventData(String eventTypeId, Map<String, Object> eventData) {
         Map<String, Object> translatedMap = new LinkedHashMap<>();
 
         Deque<StackFrame> stack = new ArrayDeque<>();
-        stack.push(new StackFrame(originalMap, translatedMap, null));
+        stack.push(new StackFrame(eventData, translatedMap, null));
 
         while (!stack.isEmpty()) {
             StackFrame frame = stack.pop();
@@ -117,7 +152,6 @@ public class AuditService {
                 if (value instanceof Map) {
                     Map<String, Object> newTranslated = new LinkedHashMap<>();
                     frame.translated.put(translatedKey, newTranslated);
-                    // Añadir a la pila para procesar el sub-map
                     stack.push(new StackFrame((Map<String, Object>) value, newTranslated, fullKey));
                 } else {
                     frame.translated.put(translatedKey, value);
@@ -125,7 +159,7 @@ public class AuditService {
             }
         }
 
-        return jsonUtils.toJson(translatedMap);
+        return translatedMap;
     }
 
     private static class StackFrame {
