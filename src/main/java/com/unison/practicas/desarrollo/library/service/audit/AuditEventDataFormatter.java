@@ -75,27 +75,27 @@ class AuditEventDataFormatter {
     private String format(BookCategoriesMerged data) {
         if (data == null) return "";
 
-        var target = data.getTargetCategory();
-        var merged = data.getMergedCategories();
-        var booksMoved = data.getBooksMoved();
+        BookCategoriesMerged.MergedBookCategory target = data.getTargetCategory();
+        List<BookCategoriesMerged.MergedBookCategory> merged = data.getMergedCategories();
+        Integer booksMoved = data.getBooksMoved();
 
-        String targetHtml = p(
+        var targetHtml = p(
                 text("Categoría resultante:"),
                 span(target != null ? target.name() : "N/A").withStyle("margin-left: 6px;")
         ).withStyle("font-size: 0.9em; margin-bottom: 12px;")
                 .render();
 
-        String booksHtml = p(
+        var booksHtml = p(
                 text("Libros movidos:"),
                 span(booksMoved != null ? booksMoved.toString() : "0").withStyle("margin-left: 6px;")
         ).withStyle("font-size: 0.9em; margin-bottom: 12px;")
                 .render();
 
-        String tableTitle = p(strong("Categorías eliminadas"))
+        var tableTitle = p(strong("Categorías eliminadas"))
                 .withStyle("font-size: 0.9em; margin-bottom: 6px;")
                 .render();
 
-        String tableHtml = table(
+        var tableHtml = table(
                 thead(
                         tr(
                                 th(strong("ID de categoría")),
