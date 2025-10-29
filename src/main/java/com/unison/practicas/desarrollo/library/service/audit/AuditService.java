@@ -104,7 +104,7 @@ public class AuditService {
     private String eventDataPretty(AuditEventEntity event) {
         String eventTypeId = event.getEventType().getId();
         return switch(eventTypeId) {
-            case "BOOK_CATEGORY_CREATED" -> formatSimpleEventData(eventTypeId, event.getEventData());
+            case "BOOK_CATEGORY_CREATED", "BOOK_CATEGORY_DELETED" -> formatSimpleEventData(eventTypeId, event.getEventData());
             default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Can't format pretty data for event type %s".formatted(eventTypeId));
         };
