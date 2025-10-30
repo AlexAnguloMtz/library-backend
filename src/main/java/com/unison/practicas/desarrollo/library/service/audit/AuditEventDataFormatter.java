@@ -2,8 +2,10 @@ package com.unison.practicas.desarrollo.library.service.audit;
 
 import com.unison.practicas.desarrollo.library.entity.audit.AuditEventEntity;
 import com.unison.practicas.desarrollo.library.util.JsonUtils;
+import com.unison.practicas.desarrollo.library.util.event.AuthorUpdated;
 import com.unison.practicas.desarrollo.library.util.event.BookCategoriesMerged;
 import com.unison.practicas.desarrollo.library.util.event.BookCategoryUpdated;
+import com.unison.practicas.desarrollo.library.util.event.PublisherUpdated;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -43,21 +45,108 @@ class AuditEventDataFormatter {
 
             case "BOOK_CATEGORIES_MERGED" -> format(jsonUtils.fromJson(event.getEventData(), BookCategoriesMerged.class));
 
+            case "AUTHOR_UPDATED" -> format(jsonUtils.fromJson(event.getEventData(), AuthorUpdated.class));
+
+            case "PUBLISHER_UPDATED" -> format(jsonUtils.fromJson(event.getEventData(), PublisherUpdated.class));
+
             default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Can't format pretty data for event type %s".formatted(eventTypeId));
         };
     }
 
+    private String format(PublisherUpdated data) {
+        if (data == null) return "";
+
+        String id = data.getPublisherId();
+        PublisherUpdated.Fields oldValues = data.getOldValues();
+        PublisherUpdated.Fields newValues = data.getNewValues();
+
+        return p(
+                text("ID de autor: "),
+                strong(id)
+        )
+                .withStyle("font-size: 0.9em; margin-bottom: 12px;")
+                .render() +
+
+                table(
+                        thead(
+                                tr(
+                                        th(strong("Dato")),
+                                        th(strong("Antes")),
+                                        th(strong("Después"))
+                                )
+                        ),
+                        tbody(
+                                tr(
+                                        td("Nombre"),
+                                        td(oldValues.name() != null ? oldValues.name() : ""),
+                                        td(newValues.name() != null ? newValues.name() : "")
+                                )
+                        )
+                )
+                        .withStyle("border-collapse: collapse; width: 100%; font-size: 0.9em;")
+                        .render();
+    }
+
+    private String format(AuthorUpdated data) {
+        if (data == null) return "";
+
+        String id = data.getAuthorId();
+        AuthorUpdated.Fields oldValues = data.getOldValues();
+        AuthorUpdated.Fields newValues = data.getNewValues();
+
+        return p(
+                text("ID de autor: "),
+                strong(id)
+        )
+                .withStyle("font-size: 0.9em; margin-bottom: 12px;")
+                .render() +
+
+                table(
+                        thead(
+                                tr(
+                                        th(strong("Dato")),
+                                        th(strong("Antes")),
+                                        th(strong("Después"))
+                                )
+                        ),
+                        tbody(
+                                tr(
+                                        td("Nombre"),
+                                        td(oldValues.firstName() != null ? oldValues.firstName() : ""),
+                                        td(newValues.firstName() != null ? newValues.firstName() : "")
+                                ),
+                                tr(
+                                        td("Apellido"),
+                                        td(oldValues.lastName() != null ? oldValues.lastName() : ""),
+                                        td(newValues.lastName() != null ? newValues.lastName() : "")
+                                ),
+                                tr(
+                                        td("Nacionalidad"),
+                                        td(oldValues.nationality() != null ? oldValues.nationality() : ""),
+                                        td(newValues.nationality() != null ? newValues.nationality() : "")
+                                ),
+                                tr(
+                                        td("Fecha de nacimiento"),
+                                        td(oldValues.dateOfBirth() != null ? oldValues.dateOfBirth().toString() : ""),
+                                        td(newValues.dateOfBirth() != null ? newValues.dateOfBirth().toString() : "")
+                                )
+                        )
+                )
+                        .withStyle("border-collapse: collapse; width: 100%; font-size: 0.9em;")
+                        .render();
+    }
+
     private String format(BookCategoryUpdated data) {
         if (data == null) return "";
 
-        String categoryId = data.getCategoryId();
+        String id = data.getCategoryId();
         BookCategoryUpdated.Fields oldValues = data.getOldValues();
         BookCategoryUpdated.Fields newValues = data.getNewValues();
 
         return p(
                 text("ID de categoría: "),
-                strong(categoryId)
+                strong(id)
         )
                 .withStyle("font-size: 0.9em; margin-bottom: 12px;")
                 .render() +

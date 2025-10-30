@@ -15,6 +15,7 @@ import com.unison.practicas.desarrollo.library.repository.AuthorRepository;
 import com.unison.practicas.desarrollo.library.repository.CountryRepository;
 import com.unison.practicas.desarrollo.library.util.event.AuthorCreated;
 import com.unison.practicas.desarrollo.library.util.event.AuthorDeleted;
+import com.unison.practicas.desarrollo.library.util.event.AuthorUpdated;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
@@ -69,8 +70,27 @@ public class AuthorService {
     @Transactional
     @PreAuthorize("hasAuthority('authors:edit')")
     public AuthorSummaryResponse updateAuthor(String id, AuthorRequest request) {
-        Author author = mapAuthor(request, findAuthorById(id));
-        return toResponse(authorRepository.save(author));
+        Author author = findAuthorById(id);
+
+        AuthorUpdated.Fields oldValues = toUpdatedFields(author);
+
+        Author updated = mapAuthor(request, author);
+
+        Author saved = authorRepository.save(updated);
+
+        AuthorUpdated.Fields newValues = toUpdatedFields(saved);
+
+        if (!newValues.equals(oldValues)) {
+            publisher.publishEvent(
+                    AuthorUpdated.builder()
+                            .authorId(saved.getId().toString())
+                            .oldValues(oldValues)
+                            .newValues(newValues)
+                            .build()
+            );
+        }
+
+        return toResponse(saved);
     }
 
     @Transactional
@@ -155,8 +175,8 @@ public class AuthorService {
                 .authorId(author.getId().toString())
                 .firstName(author.getFirstName())
                 .lastName(author.getLastName())
-                .nationality(author.getCountry().getName())
                 .dateOfBirth(author.getDateOfBirth())
+                .nationality(author.getCountry().getName())
                 .build();
     }
 
@@ -165,9 +185,18 @@ public class AuthorService {
                 .authorId(author.getId().toString())
                 .firstName(author.getFirstName())
                 .lastName(author.getLastName())
+                .dateOfBirth(author.getDateOfBirth())
+                .nationality(author.getCountry().getName())
+                .booksCount(author.getBooks().size())
+                .build();
+    }
+
+    private AuthorUpdated.Fields toUpdatedFields(Author author) {
+        return AuthorUpdated.Fields.builder()
+                .firstName(author.getFirstName())
+                .lastName(author.getLastName())
                 .nationality(author.getCountry().getName())
                 .dateOfBirth(author.getDateOfBirth())
-                .booksCount(author.getBooks().size())
                 .build();
     }
 

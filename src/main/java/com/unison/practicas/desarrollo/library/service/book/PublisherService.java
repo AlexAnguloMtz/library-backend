@@ -4,20 +4,18 @@ import com.unison.practicas.desarrollo.library.configuration.security.CustomUser
 import com.unison.practicas.desarrollo.library.dto.book.request.GetPublishersRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.MergePublishersRequest;
 import com.unison.practicas.desarrollo.library.dto.book.request.PublisherRequest;
-import com.unison.practicas.desarrollo.library.dto.book.response.MergeBookCategoriesResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.MergePublishersResponse;
 import com.unison.practicas.desarrollo.library.dto.book.response.PublisherResponse;
 import com.unison.practicas.desarrollo.library.dto.common.ExportRequest;
 import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
-import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
 import com.unison.practicas.desarrollo.library.entity.book.Publisher;
 import com.unison.practicas.desarrollo.library.repository.PublisherRepository;
 import com.unison.practicas.desarrollo.library.util.event.PublisherCreated;
 import com.unison.practicas.desarrollo.library.util.event.PublisherDeleted;
+import com.unison.practicas.desarrollo.library.util.event.PublisherUpdated;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -72,6 +70,8 @@ public class PublisherService {
     public PublisherResponse updatePublisher(String id, PublisherRequest request) {
         Publisher publisherById = findPublisherById(id);
 
+        PublisherUpdated.Fields oldValues = toUpdatedFields(publisherById);
+
         Optional<Publisher> publisherByNameOptional = publisherRepository.findByNameIgnoreCase(request.name().trim());
 
         boolean nameConflict = publisherByNameOptional.isPresent() &&
@@ -81,9 +81,23 @@ public class PublisherService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Publisher with name '%s' already exists".formatted(request.name().trim()));
         }
 
-        Publisher publisher = mapPublisher(request, findPublisherById(id));
+        Publisher updated = mapPublisher(request, findPublisherById(id));
 
-        return toResponse(publisherRepository.save(publisher));
+        Publisher saved = publisherRepository.save(updated);
+
+        PublisherUpdated.Fields newValues = toUpdatedFields(saved);
+
+        if (!newValues.equals(oldValues)) {
+            eventPublisher.publishEvent(
+                PublisherUpdated.builder()
+                        .publisherId(saved.getId().toString())
+                        .oldValues(oldValues)
+                        .newValues(newValues)
+                        .build()
+            );
+        }
+
+        return toResponse(saved);
     }
 
     @PreAuthorize("hasAuthority('publishers:delete')")
@@ -194,6 +208,12 @@ public class PublisherService {
     private PublisherDeleted toDeletionEvent(Publisher publisher) {
         return PublisherDeleted.builder()
                 .publisherId(publisher.getId().toString())
+                .name(publisher.getName())
+                .build();
+    }
+
+    private PublisherUpdated.Fields toUpdatedFields(Publisher publisher) {
+        return PublisherUpdated.Fields.builder()
                 .name(publisher.getName())
                 .build();
     }
