@@ -13,6 +13,7 @@ import com.unison.practicas.desarrollo.library.repository.PublisherRepository;
 import com.unison.practicas.desarrollo.library.util.event.PublisherCreated;
 import com.unison.practicas.desarrollo.library.util.event.PublisherDeleted;
 import com.unison.practicas.desarrollo.library.util.event.PublisherUpdated;
+import com.unison.practicas.desarrollo.library.util.event.PublishersMerged;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -126,32 +128,65 @@ public class PublisherService {
     public MergePublishersResponse merge(MergePublishersRequest request) {
         if (request.mergedPublishersIds().contains(request.targetPublisherId())) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "La editorial resultante no debe estar incluida en las editoriales que serán eliminadas");
+                    HttpStatus.BAD_REQUEST,
+                    "La editorial resultante no debe estar incluida en las editoriales que serán eliminadas"
+            );
         }
 
         Publisher targetPublisher = findPublisherById(request.targetPublisherId());
-
         List<Publisher> mergedPublishers = findPublishersByIds(request.mergedPublishersIds());
 
-        int movedBooks = mergedPublishers.stream()
-                .flatMap(cat -> cat.getBooks().stream())
+        int booksBeforeMerge = targetPublisher.getBooks().size();
+        Map<Integer, Integer> targetPublisherBooksBeforeMerge = mergedPublishers.stream()
+                .collect(Collectors.toMap(
+                        Publisher::getId,
+                        pub -> pub.getBooks().size()
+                ));
+
+        int booksMoved = mergedPublishers.stream()
+                .flatMap(pub -> pub.getBooks().stream())
                 .peek(book -> book.setPublisher(targetPublisher))
                 .toList()
                 .size();
 
-        mergedPublishers.forEach(cat -> {
-            targetPublisher.getBooks().addAll(cat.getBooks());
-            cat.getBooks().clear();
+        mergedPublishers.forEach(pub -> {
+            targetPublisher.getBooks().addAll(pub.getBooks());
+            pub.getBooks().clear();
         });
 
         publisherRepository.save(targetPublisher);
 
         publisherRepository.deleteAll(mergedPublishers);
 
+        List<PublishersMerged.MergedPublisher> mergedPublishersEventData =
+                mergedPublishers.stream()
+                        .map(pub -> PublishersMerged.MergedPublisher.builder()
+                                .publisherId(pub.getId().toString())
+                                .name(pub.getName())
+                                .booksBeforeMerge(targetPublisherBooksBeforeMerge.get(pub.getId()))
+                                .booksAfterMerge(0)
+                                .build()
+                        )
+                        .toList();
+
+        eventPublisher.publishEvent(
+                PublishersMerged.builder()
+                        .targetPublisher(
+                                PublishersMerged.MergedPublisher.builder()
+                                        .publisherId(targetPublisher.getId().toString())
+                                        .name(targetPublisher.getName())
+                                        .booksBeforeMerge(booksBeforeMerge)
+                                        .booksAfterMerge(targetPublisher.getBooks().size())
+                                        .build()
+                        )
+                        .mergedPublishers(mergedPublishersEventData)
+                        .build()
+        );
+
         return MergePublishersResponse.builder()
                 .targetPublisher(toResponse(targetPublisher))
                 .deletedPublishers(mergedPublishers.size())
-                .movedBooks(movedBooks)
+                .movedBooks(booksMoved)
                 .build();
     }
 

@@ -2,10 +2,7 @@ package com.unison.practicas.desarrollo.library.service.audit;
 
 import com.unison.practicas.desarrollo.library.entity.audit.AuditEventEntity;
 import com.unison.practicas.desarrollo.library.util.JsonUtils;
-import com.unison.practicas.desarrollo.library.util.event.AuthorUpdated;
-import com.unison.practicas.desarrollo.library.util.event.BookCategoriesMerged;
-import com.unison.practicas.desarrollo.library.util.event.BookCategoryUpdated;
-import com.unison.practicas.desarrollo.library.util.event.PublisherUpdated;
+import com.unison.practicas.desarrollo.library.util.event.*;
 import j2html.tags.DomContent;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
@@ -49,6 +46,8 @@ class AuditEventDataFormatter {
             case "AUTHOR_UPDATED" -> format(jsonUtils.fromJson(event.getEventData(), AuthorUpdated.class));
 
             case "PUBLISHER_UPDATED" -> format(jsonUtils.fromJson(event.getEventData(), PublisherUpdated.class));
+
+            case "PUBLISHERS_MERGED" -> format(jsonUtils.fromJson(event.getEventData(), PublishersMerged.class));
 
             default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Can't format pretty data for event type %s".formatted(eventTypeId));
@@ -234,6 +233,67 @@ class AuditEventDataFormatter {
         return htmlBuilder.toString();
     }
 
+    private String format(PublishersMerged data) {
+        if (data == null) return "";
+
+        var target = data.getTargetPublisher();
+        var merged = data.getMergedPublishers();
+
+        StringBuilder htmlBuilder = new StringBuilder();
+
+        List<Map<String, Object>> sections = Arrays.asList(
+                new HashMap<>() {{
+                    put("title", "Editorial resultante");
+                    put("items", target != null ? List.of(target) : Collections.emptyList());
+                    put("emptyMessage", "N/A");
+                }},
+                new HashMap<>() {{
+                    put("title", "Editoriales eliminadas (" + (merged != null ? merged.size() : 0) + ")");
+                    put("items", merged != null ? merged : Collections.emptyList());
+                    put("emptyMessage", "No hay editoriales eliminadas");
+                }}
+        );
+
+        sections.forEach(section -> {
+            htmlBuilder.append(b((String) section.get("title")).render());
+
+            // This casting is safe, we just created the maps on this same method
+            @SuppressWarnings("unchecked")
+            List<PublishersMerged.MergedPublisher> items =
+                    (List<PublishersMerged.MergedPublisher>) section.get("items");
+
+            DomContent[] rows;
+            if (items != null && !items.isEmpty()) {
+                rows = items.stream()
+                        .map(it -> tr(
+                                td(it.publisherId() != null ? it.publisherId() : ""),
+                                td(it.name() != null ? it.name() : ""),
+                                td(it.booksBeforeMerge() != null ? it.booksBeforeMerge().toString() : ""),
+                                td(it.booksAfterMerge() != null ? it.booksAfterMerge().toString() : "")
+                        ))
+                        .toArray(DomContent[]::new);
+            } else {
+                rows = new DomContent[] { tr(td((String) section.get("emptyMessage")).attr("colspan", "4")) };
+            }
+
+            htmlBuilder.append(
+                    table(
+                            thead(
+                                    tr(
+                                            th(strong("ID")),
+                                            th(strong("Nombre")),
+                                            th(strong("Libros antes")),
+                                            th(strong("Libros después"))
+                                    )
+                            ),
+                            tbody(rows)
+                    ).withStyle("border-collapse: collapse; width: 100%; font-size: 0.9em; margin-bottom: 16px;")
+                            .render()
+            );
+        });
+
+        return htmlBuilder.toString();
+    }
 
     private String formatGeneric(String eventTypeId, String data) {
         Map<String, Object> values = jsonUtils.fromJson(data, Map.class);

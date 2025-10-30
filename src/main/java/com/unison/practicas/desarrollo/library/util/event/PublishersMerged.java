@@ -12,10 +12,14 @@ import java.util.List;
 public final class PublishersMerged extends PublisherEvent {
 
     @Builder
-    public record MergedPublisher(String categoryId, String name) {}
+    public record MergedPublisher(
+            String publisherId,
+            String name,
+            Integer booksBeforeMerge,
+            Integer booksAfterMerge
+    ) {}
 
     private final MergedPublisher targetPublisher;
     private final List<MergedPublisher> mergedPublishers;
-    private final Integer booksMoved;
 
 }
