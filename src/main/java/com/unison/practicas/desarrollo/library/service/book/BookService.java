@@ -15,6 +15,7 @@ import com.unison.practicas.desarrollo.library.entity.common.Country;
 import com.unison.practicas.desarrollo.library.repository.*;
 import com.unison.practicas.desarrollo.library.util.event.BookCreated;
 import com.unison.practicas.desarrollo.library.util.event.BookDeleted;
+import com.unison.practicas.desarrollo.library.util.event.BookUpdated;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
@@ -110,8 +111,23 @@ public class BookService {
         if (isbnConflict) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "ISBN ya existe: %s".formatted(request.isbn()));
         }
+
+        BookUpdated.Fields oldValues = toUpdatedFields(book);
         Book updatedBook = updatedBook(book, request);
+
         Book savedBook = bookRepository.save(updatedBook);
+        BookUpdated.Fields newValues = toUpdatedFields(savedBook);
+
+        if (!newValues.equals(oldValues)) {
+            BookUpdated event = BookUpdated.builder()
+                    .bookId(savedBook.getId().toString())
+                    .oldValues(oldValues)
+                    .newValues(newValues)
+                    .build();
+
+            publisher.publishEvent(event);
+        }
+
         return toBookDetailsResponse(savedBook);
     }
 
@@ -358,6 +374,32 @@ public class BookService {
                                 .build()
                 ).authors(
                         book.getAuthors().stream().map((it) -> BookDeleted.Author.builder()
+                                .id(it.getId().toString())
+                                .firstName(it.getFirstName())
+                                .lastName(it.getLastName())
+                                .build()
+                        ).toList()
+                )
+                .build();
+    }
+
+    private BookUpdated.Fields toUpdatedFields(Book book) {
+        return BookUpdated.Fields.builder()
+                .title(book.getTitle())
+                .isbn(book.getIsbn())
+                .year(book.getYear())
+                .category(
+                        BookUpdated.Category.builder()
+                                .id(book.getCategory().getId().toString())
+                                .name(book.getCategory().getName())
+                                .build()
+                ).publisher(
+                        BookUpdated.Publisher.builder()
+                                .id(book.getPublisher().getId().toString())
+                                .name(book.getPublisher().getName())
+                                .build()
+                ).authors(
+                        book.getAuthors().stream().map((it) -> BookUpdated.Author.builder()
                                 .id(it.getId().toString())
                                 .firstName(it.getFirstName())
                                 .lastName(it.getLastName())

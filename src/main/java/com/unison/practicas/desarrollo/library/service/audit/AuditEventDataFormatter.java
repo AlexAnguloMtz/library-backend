@@ -54,6 +54,8 @@ class AuditEventDataFormatter {
 
             case "BOOK_DELETED" -> format(jsonUtils.fromJson(event.getEventData(), BookDeleted.class));
 
+            case "BOOK_UPDATED" -> format(jsonUtils.fromJson(event.getEventData(), BookUpdated.class));
+
             default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Can't format pretty data for event type %s".formatted(eventTypeId));
         };
@@ -187,6 +189,107 @@ class AuditEventDataFormatter {
                                 .withStyle("margin-bottom: 8px;"),
 
                         each(authorsHtml, authorDiv -> authorDiv)
+                )
+        ).render();
+    }
+
+    private String format(BookUpdated data) {
+        if (data == null) return "";
+
+        String id = data.getBookId();
+        BookUpdated.Fields oldValues = data.getOldValues();
+        BookUpdated.Fields newValues = data.getNewValues();
+
+        List<DivTag> authorsBefore = oldValues != null && oldValues.authors() != null
+                ? oldValues.authors().stream().map(a ->
+                div(
+                        div(
+                                span("ID").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(a.id()).withStyle("font-weight: bold;")
+                        ),
+                        div(
+                                span("Nombre").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(a.firstName()).withStyle("font-weight: bold;")
+                        ),
+                        div(
+                                span("Apellido").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(a.lastName()).withStyle("font-weight: bold;")
+                        )
+                ).withStyle("font-size: 0.9em; margin-bottom: 6px;")
+        ).toList() : List.of();
+
+        List<DivTag> authorsAfter = newValues != null && newValues.authors() != null
+                ? newValues.authors().stream().map(a ->
+                div(
+                        div(
+                                span("ID").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(a.id()).withStyle("font-weight: bold;")
+                        ),
+                        div(
+                                span("Nombre").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(a.firstName()).withStyle("font-weight: bold;")
+                        ),
+                        div(
+                                span("Apellido").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(a.lastName()).withStyle("font-weight: bold;")
+                        )
+                ).withStyle("font-size: 0.9em; margin-bottom: 6px;")
+        ).toList() : List.of();
+
+        return html(
+                body(
+                        div(
+                                span("ID Libro").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(id).withStyle("font-weight: bold;")
+                        ).withStyle("font-size: 0.9em; margin-bottom: 12px;"),
+
+                        h3("Datos de Libro").withStyle("margin-bottom: 6px;"),
+
+                        table(
+                                thead(
+                                        tr(
+                                                th(strong("Campo")),
+                                                th(strong("Antes")),
+                                                th(strong("Después"))
+                                        )
+                                ),
+                                tbody(
+                                        tr(td("Título"),
+                                                td(oldValues != null && oldValues.title() != null ? oldValues.title() : ""),
+                                                td(newValues != null && newValues.title() != null ? newValues.title() : "")
+                                        ),
+                                        tr(td("ISBN"),
+                                                td(oldValues != null && oldValues.isbn() != null ? oldValues.isbn() : ""),
+                                                td(newValues != null && newValues.isbn() != null ? newValues.isbn() : "")
+                                        ),
+                                        tr(td("Año"),
+                                                td(oldValues != null && oldValues.year() != null ? oldValues.year().toString() : ""),
+                                                td(newValues != null && newValues.year() != null ? newValues.year().toString() : "")
+                                        ),
+                                        tr(td("ID Categoría"),
+                                                td(oldValues != null && oldValues.category() != null ? oldValues.category().id() : ""),
+                                                td(newValues != null && newValues.category() != null ? newValues.category().id() : "")
+                                        ),
+                                        tr(td("Categoría"),
+                                                td(oldValues != null && oldValues.category() != null ? oldValues.category().name() : ""),
+                                                td(newValues != null && newValues.category() != null ? newValues.category().name() : "")
+                                        ),
+                                        tr(td("ID Editorial"),
+                                                td(oldValues != null && oldValues.publisher() != null ? oldValues.publisher().id() : ""),
+                                                td(newValues != null && newValues.publisher() != null ? newValues.publisher().id() : "")
+                                        ),
+                                        tr(td("Editorial"),
+                                                td(oldValues != null && oldValues.publisher() != null ? oldValues.publisher().name() : ""),
+                                                td(newValues != null && newValues.publisher() != null ? newValues.publisher().name() : "")
+                                        )
+                                )
+                        ).withStyle("border-collapse: collapse; width: 100%; font-size: 0.9em; margin-bottom: 12px;"),
+
+                        h3("Autores antes del cambio (" + authorsBefore.size() + ")").withStyle("margin-bottom: 6px;"),
+                        each(authorsBefore, a -> a),
+
+                        h3("Autores después del cambio (" + authorsAfter.size() + ")").withStyle("margin-bottom: 6px;"),
+                        each(authorsAfter, a -> a)
                 )
         ).render();
     }
