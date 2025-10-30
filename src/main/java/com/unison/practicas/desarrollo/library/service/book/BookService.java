@@ -13,10 +13,12 @@ import com.unison.practicas.desarrollo.library.dto.common.OptionResponse;
 import com.unison.practicas.desarrollo.library.entity.book.*;
 import com.unison.practicas.desarrollo.library.entity.common.Country;
 import com.unison.practicas.desarrollo.library.repository.*;
+import com.unison.practicas.desarrollo.library.util.event.BookCreated;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -41,8 +43,9 @@ public class BookService {
     private final BookImageService bookImageService;
     private final ExportBooks exportBooks;
     private final GetBookCopies getBookCopies;
+    private final ApplicationEventPublisher publisher;
 
-    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, PublisherRepository publisherRepository, AuthorRepository authorRepository, BookImageService bookImageService, ExportBooks exportBooks, GetBookCopies getBookCopies) {
+    public BookService(GetBooks getBooks, BookRepository bookRepository, BookCategoryRepository bookCategoryRepository, PublisherRepository publisherRepository, AuthorRepository authorRepository, BookImageService bookImageService, ExportBooks exportBooks, GetBookCopies getBookCopies, ApplicationEventPublisher publisher) {
         this.getBooks = getBooks;
         this.bookRepository = bookRepository;
         this.bookCategoryRepository = bookCategoryRepository;
@@ -51,6 +54,7 @@ public class BookService {
         this.bookImageService = bookImageService;
         this.exportBooks = exportBooks;
         this.getBookCopies = getBookCopies;
+        this.publisher = publisher;
     }
 
     @PreAuthorize("hasAuthority('books:read')")
@@ -85,8 +89,14 @@ public class BookService {
         if (bookRepository.existsByIsbn(request.isbn())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ISBN already exists: %s".formatted(request.isbn()));
         }
+
         Book book = toBook(request);
         Book savedBook = bookRepository.save(book);
+
+        BookCreated event = toCreationEvent(savedBook);
+
+        publisher.publishEvent(event);
+
         return toBookDetailsResponse(savedBook);
     }
 
@@ -296,6 +306,33 @@ public class BookService {
         return CountryResponse.builder()
                 .id(country.getId().toString())
                 .name(country.getNicename())
+                .build();
+    }
+
+    private BookCreated toCreationEvent(Book book) {
+        return BookCreated.builder()
+                .bookId(book.getId().toString())
+                .title(book.getTitle())
+                .isbn(book.getIsbn())
+                .year(book.getYear())
+                .category(
+                        BookCreated.Category.builder()
+                                .id(book.getCategory().getId().toString())
+                                .name(book.getCategory().getName())
+                                .build()
+                ).publisher(
+                        BookCreated.Publisher.builder()
+                                .id(book.getPublisher().getId().toString())
+                                .name(book.getPublisher().getName())
+                                .build()
+                ).authors(
+                        book.getAuthors().stream().map((it) -> BookCreated.Author.builder()
+                                .id(it.getId().toString())
+                                .firstName(it.getFirstName())
+                                .lastName(it.getLastName())
+                                .build()
+                        ).toList()
+                )
                 .build();
     }
 

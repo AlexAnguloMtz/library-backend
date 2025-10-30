@@ -4,6 +4,7 @@ import com.unison.practicas.desarrollo.library.entity.audit.AuditEventEntity;
 import com.unison.practicas.desarrollo.library.util.JsonUtils;
 import com.unison.practicas.desarrollo.library.util.event.*;
 import j2html.tags.DomContent;
+import j2html.tags.specialized.DivTag;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -49,9 +50,77 @@ class AuditEventDataFormatter {
 
             case "PUBLISHERS_MERGED" -> format(jsonUtils.fromJson(event.getEventData(), PublishersMerged.class));
 
+            case "BOOK_CREATED" -> format(jsonUtils.fromJson(event.getEventData(), BookCreated.class));
+
             default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Can't format pretty data for event type %s".formatted(eventTypeId));
         };
+    }
+
+    private String format(BookCreated data) {
+        if (data == null) return "";
+
+        List<DivTag> authorsHtml = data.getAuthors().stream()
+                .map(author -> div(
+                        div(
+                                span("ID Autor").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(author.id()).withStyle("font-weight: bold;")
+                        ),
+                        div(
+                                span("Nombre").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(author.firstName()).withStyle("font-weight: bold;")
+                        ),
+                        div(
+                                span("Apellido").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                strong(author.lastName()).withStyle("font-weight: bold;")
+                        )
+                ).withStyle("margin-bottom: 10px;"))
+                .toList();
+
+        return html(
+                body(
+                        h4("Libro").withStyle("margin-bottom: 8px;"),
+                        div(
+                                div(
+                                        span("ID Libro").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                        strong(data.getBookId()).withStyle("font-weight: bold;")
+                                ),
+                                div(
+                                        span("ISBN").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                        strong(data.getIsbn()).withStyle("font-weight: bold;")
+                                ),
+                                div(
+                                        span("Titulo").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                        strong(data.getTitle()).withStyle("font-weight: bold;")
+                                ),
+                                div(
+                                        span("Año").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                        strong(data.getYear() != null ? data.getYear().toString() : "").withStyle("font-weight: bold;")
+                                ),
+                                div(
+                                        span("ID Categoria").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                        strong(data.getCategory() != null ? data.getCategory().id() : "").withStyle("font-weight: bold;")
+                                ),
+                                div(
+                                        span("Categoria").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                        strong(data.getCategory() != null ? data.getCategory().name() : "").withStyle("font-weight: bold;")
+                                ),
+                                div(
+                                        span("ID Editorial").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                        strong(data.getPublisher() != null ? data.getPublisher().id() : "").withStyle("font-weight: bold;")
+                                ),
+                                div(
+                                        span("Editorial").withStyle("font-weight: lighter; width: 120px; display: inline-block;"),
+                                        strong(data.getPublisher() != null ? data.getPublisher().name() : "").withStyle("font-weight: bold;")
+                                )
+                        ).withStyle("font-size: 0.9em; margin-bottom: 12px;"),
+
+                        h4("Autores (" + (data.getAuthors() != null ? data.getAuthors().size() : 0) + ")")
+                                .withStyle("margin-bottom: 8px;"),
+
+                        each(authorsHtml, authorDiv -> authorDiv)
+                )
+        ).render();
     }
 
     private String format(PublisherUpdated data) {
