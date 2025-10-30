@@ -13,8 +13,12 @@ import com.unison.practicas.desarrollo.library.entity.book.Author;
 import com.unison.practicas.desarrollo.library.entity.common.Country;
 import com.unison.practicas.desarrollo.library.repository.AuthorRepository;
 import com.unison.practicas.desarrollo.library.repository.CountryRepository;
+import com.unison.practicas.desarrollo.library.util.event.AuthorCreated;
+import com.unison.practicas.desarrollo.library.util.event.AuthorDeleted;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
+import jakarta.transaction.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -26,19 +30,18 @@ import java.util.Optional;
 @Service
 public class AuthorService {
 
-    // Services
     private final GetAuthors getAuthors;
     private final ExportAuthors exportAuthors;
-
-    // Repositories
     private final AuthorRepository authorRepository;
     private final CountryRepository countryRepository;
+    private final ApplicationEventPublisher publisher;
 
-    public AuthorService(GetAuthors getAuthors, ExportAuthors exportAuthors, AuthorRepository authorRepository, CountryRepository countryRepository) {
+    public AuthorService(GetAuthors getAuthors, ExportAuthors exportAuthors, AuthorRepository authorRepository, CountryRepository countryRepository, ApplicationEventPublisher publisher) {
         this.getAuthors = getAuthors;
         this.exportAuthors = exportAuthors;
         this.authorRepository = authorRepository;
         this.countryRepository = countryRepository;
+        this.publisher = publisher;
     }
 
     @PreAuthorize("hasAuthority('authors:read')")
@@ -52,24 +55,35 @@ public class AuthorService {
                 .build();
     }
 
+    @Transactional
     @PreAuthorize("hasAuthority('authors:create')")
     public AuthorSummaryResponse createAuthor(AuthorRequest request) {
         Author author = mapAuthor(request, new Author());
-        return toResponse(authorRepository.save(author));
+        Author saved = authorRepository.save(author);
+
+        publisher.publishEvent(toCreationEvent(author));
+
+        return toResponse(saved);
     }
 
+    @Transactional
     @PreAuthorize("hasAuthority('authors:edit')")
     public AuthorSummaryResponse updateAuthor(String id, AuthorRequest request) {
         Author author = mapAuthor(request, findAuthorById(id));
         return toResponse(authorRepository.save(author));
     }
 
+    @Transactional
     @PreAuthorize("hasAuthority('authors:delete')")
     public void deleteAuthorById(String id) {
         Author author = findAuthorById(id);
 
+        AuthorDeleted event = toDeletionEvent(author);
+
         author.getBooks().forEach(book -> book.getAuthors().remove(author));
         author.getBooks().clear();
+
+        publisher.publishEvent(event);
 
         authorRepository.delete(author);
     }
@@ -134,6 +148,27 @@ public class AuthorService {
         author.setDateOfBirth(request.dateOfBirth());
         author.setCountry(findCountryById(request.countryId()));
         return author;
+    }
+
+    private AuthorCreated toCreationEvent(Author author) {
+        return AuthorCreated.builder()
+                .authorId(author.getId().toString())
+                .firstName(author.getFirstName())
+                .lastName(author.getLastName())
+                .nationality(author.getCountry().getName())
+                .dateOfBirth(author.getDateOfBirth())
+                .build();
+    }
+
+    private AuthorDeleted toDeletionEvent(Author author) {
+        return AuthorDeleted.builder()
+                .authorId(author.getId().toString())
+                .firstName(author.getFirstName())
+                .lastName(author.getLastName())
+                .nationality(author.getCountry().getName())
+                .dateOfBirth(author.getDateOfBirth())
+                .booksCount(author.getBooks().size())
+                .build();
     }
 
 }

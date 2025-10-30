@@ -30,9 +30,19 @@ class AuditEventDataFormatter {
     String format(AuditEventEntity event) {
         String eventTypeId = event.getEventType().getId();
         return switch(eventTypeId) {
-            case "BOOK_CATEGORY_CREATED", "BOOK_CATEGORY_DELETED" -> formatGeneric(eventTypeId, event.getEventData());
+            case
+                    "BOOK_CATEGORY_CREATED",
+                    "BOOK_CATEGORY_DELETED",
+                    "AUTHOR_CREATED",
+                    "AUTHOR_DELETED",
+                    "PUBLISHER_CREATED",
+                    "PUBLISHER_DELETED"
+                    -> formatGeneric(eventTypeId, event.getEventData());
+
             case "BOOK_CATEGORY_UPDATED" -> format(jsonUtils.fromJson(event.getEventData(), BookCategoryUpdated.class));
+
             case "BOOK_CATEGORIES_MERGED" -> format(jsonUtils.fromJson(event.getEventData(), BookCategoriesMerged.class));
+
             default -> throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Can't format pretty data for event type %s".formatted(eventTypeId));
         };
@@ -81,13 +91,13 @@ class AuditEventDataFormatter {
 
         var targetHtml = p(
                 text("Categoría resultante:"),
-                span(target != null ? target.name() : "N/A").withStyle("margin-left: 6px;")
+                span(target.name()).withStyle("margin-left: 6px;")
         ).withStyle("font-size: 0.9em; margin-bottom: 12px;")
                 .render();
 
         var booksHtml = p(
                 text("Libros movidos:"),
-                span(booksMoved != null ? booksMoved.toString() : "0").withStyle("margin-left: 6px;")
+                span(booksMoved.toString()).withStyle("margin-left: 6px;")
         ).withStyle("font-size: 0.9em; margin-bottom: 12px;")
                 .render();
 
@@ -140,7 +150,6 @@ class AuditEventDataFormatter {
         return html.toString();
     }
 
-
     private Map<String, Object> translateEventData(String eventTypeId, Map<String, Object> eventData) {
         Map<String, Object> translatedMap = new LinkedHashMap<>();
 
@@ -184,6 +193,5 @@ class AuditEventDataFormatter {
     private String translate(String text) {
         return auditMessageSource.getMessage(text, null, text, null);
     }
-
 
 }

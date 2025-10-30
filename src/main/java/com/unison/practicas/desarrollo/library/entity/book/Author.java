@@ -34,14 +34,9 @@ public class Author {
     public String getReversedFullName() {
         return lastName + ", " + firstName;
     }
-    // Para mostrar correctamente el nombre completo del autor
+
     public String getFullName() {
         return firstName + " " + lastName;
     }
-
-
-
-
-
 
 }

@@ -12,10 +12,13 @@ import com.unison.practicas.desarrollo.library.dto.common.ExportResponse;
 import com.unison.practicas.desarrollo.library.entity.book.BookCategory;
 import com.unison.practicas.desarrollo.library.entity.book.Publisher;
 import com.unison.practicas.desarrollo.library.repository.PublisherRepository;
+import com.unison.practicas.desarrollo.library.util.event.PublisherCreated;
+import com.unison.practicas.desarrollo.library.util.event.PublisherDeleted;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -32,11 +35,13 @@ public class PublisherService {
     private final PublisherRepository publisherRepository;
     private final GetPublishers getPublishers;
     private final ExportPublishers exportPublishers;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public PublisherService(GetPublishers getPublishers, PublisherRepository publisherRepository, ExportPublishers exportPublishers) {
+    public PublisherService(GetPublishers getPublishers, PublisherRepository publisherRepository, ExportPublishers exportPublishers, ApplicationEventPublisher eventPublisher) {
         this.getPublishers = getPublishers;
         this.publisherRepository = publisherRepository;
         this.exportPublishers = exportPublishers;
+        this.eventPublisher = eventPublisher;
     }
 
     @PreAuthorize("hasAuthority('publishers:read')")
@@ -53,8 +58,13 @@ public class PublisherService {
         if (publisherRepository.existsByNameIgnoreCase(request.name().trim())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category with name '%s' already exists".formatted(request.name().trim()));
         }
+
         Publisher publisher = mapPublisher(request, new Publisher());
-        return toResponse(publisherRepository.save(publisher));
+        Publisher saved = publisherRepository.save(publisher);
+
+        eventPublisher.publishEvent(toCreationEvent(saved));
+
+        return toResponse(saved);
     }
 
     @PreAuthorize("hasAuthority('publishers:update')")
@@ -80,12 +90,16 @@ public class PublisherService {
     @Transactional
     public void deletePublisherById(String id) {
         Publisher publisher = findPublisherById(id);
+
         if (!publisher.getBooks().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "No puedes borrar una editorial que tiene libros asociados. " +
                     "Intenta combinarla con otra y será eliminada en el proceso.");
         }
+
         publisherRepository.delete(publisher);
+
+        eventPublisher.publishEvent(toDeletionEvent(publisher));
     }
 
     @PreAuthorize("hasAuthority('publishers:read')")
@@ -168,6 +182,20 @@ public class PublisherService {
         }
 
         return publishers;
+    }
+
+    private PublisherCreated toCreationEvent(Publisher publisher) {
+        return PublisherCreated.builder()
+                .publisherId(publisher.getId().toString())
+                .name(publisher.getName())
+                .build();
+    }
+
+    private PublisherDeleted toDeletionEvent(Publisher publisher) {
+        return PublisherDeleted.builder()
+                .publisherId(publisher.getId().toString())
+                .name(publisher.getName())
+                .build();
     }
 
 }
