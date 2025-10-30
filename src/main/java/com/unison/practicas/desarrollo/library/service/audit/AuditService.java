@@ -31,12 +31,12 @@ public class AuditService {
     private final AuditEventRepository auditEventRepository;
     private final MessageSource auditMessageSource;
     private final ProfilePictureService profilePictureService;
-    private final AuditEventDataFormatter eventDataFormatter;
+    private final AuditEventFormatter eventDataFormatter;
 
     AuditService(
             GetAuditEvents getAuditEvents,
             AuditResourceTypeRepository auditResourceTypeRepository, AuditEventRepository auditEventRepository,
-            @Qualifier("auditMessageSource") MessageSource auditMessageSource, ProfilePictureService profilePictureService, AuditEventDataFormatter eventDataFormatter
+            @Qualifier("auditMessageSource") MessageSource auditMessageSource, ProfilePictureService profilePictureService, AuditEventFormatter eventDataFormatter
     ) {
         this.getAuditEvents = getAuditEvents;
         this.auditResourceTypeRepository = auditResourceTypeRepository;

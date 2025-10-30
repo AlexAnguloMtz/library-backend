@@ -15,12 +15,12 @@ import static j2html.TagCreator.*;
 import java.util.*;
 
 @Component
-class AuditEventDataFormatter {
+class AuditEventFormatter {
 
     private final JsonUtils jsonUtils;
     private final MessageSource auditMessageSource;
 
-    AuditEventDataFormatter(
+    AuditEventFormatter(
             JsonUtils jsonUtils,
             @Qualifier("auditMessageSource") MessageSource auditMessageSource
     ) {
@@ -33,6 +33,7 @@ class AuditEventDataFormatter {
         return switch(eventTypeId) {
             case
                     "USER_REGISTERED",
+                    "USER_LOGGED_IN",
                     "BOOK_CATEGORY_CREATED",
                     "BOOK_CATEGORY_DELETED",
                     "AUTHOR_CREATED",

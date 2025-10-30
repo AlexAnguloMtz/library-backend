@@ -7,6 +7,9 @@ import com.unison.practicas.desarrollo.library.entity.user.User;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.service.user.ProfilePictureService;
 import com.unison.practicas.desarrollo.library.util.JwtUtils;
+import com.unison.practicas.desarrollo.library.util.event.UserLoggedIn;
+import jakarta.transaction.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,14 +25,17 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final ProfilePictureService profilePictureService;
+    private final ApplicationEventPublisher publisher;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils, ProfilePictureService profilePictureService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils, ProfilePictureService profilePictureService, ApplicationEventPublisher publisher) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.profilePictureService = profilePictureService;
+        this.publisher = publisher;
     }
 
+    @Transactional
     public LoginResponse login(LoginForm loginForm) {
         Optional<User> userOptional = userRepository.findByEmailIgnoreCase(loginForm.email());
         if (userOptional.isEmpty()) {
@@ -49,7 +55,13 @@ public class AuthService {
 
         String accessToken = jwtUtils.accessTokenForUser(user);
 
-        return toLoginResponse(user, accessToken);
+        UserLoggedIn event = toLoginEvent(user);
+
+        LoginResponse response = toLoginResponse(user, accessToken);
+
+        publisher.publishEvent(event);
+
+        return response;
     }
 
     private LoginResponse toLoginResponse(User user, String accessToken) {
@@ -61,6 +73,16 @@ public class AuthService {
                 .role(user.getRole().getName())
                 .permissions(user.getPermissions().stream().map(Permission::getName).collect(Collectors.toSet()))
                 .accessToken(accessToken)
+                .build();
+    }
+
+    private UserLoggedIn toLoginEvent(User user) {
+        return UserLoggedIn.builder()
+                .userId(user.getId().toString())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .role(user.getRole().getName())
                 .build();
     }
 
