@@ -16,10 +16,12 @@ import com.unison.practicas.desarrollo.library.repository.RoleRepository;
 import com.unison.practicas.desarrollo.library.repository.StateRepository;
 import com.unison.practicas.desarrollo.library.repository.UserRepository;
 import com.unison.practicas.desarrollo.library.service.user.authorization.UserAuthorization;
+import com.unison.practicas.desarrollo.library.util.event.UserRegistered;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.parameters.P;
@@ -44,6 +46,7 @@ public class UserService {
     private final ProfilePictureService profilePictureService;
     private final UserAuthorization userAuthorization;
     private final GetUserOptions getUserOptions;
+    private final ApplicationEventPublisher publisher;
 
     // Repositories
     private final UserRepository userRepository;
@@ -55,13 +58,14 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final DateTimeFormatter dateTimeFormatter;
 
-    public UserService(PasswordEncoder passwordEncoder, GetUsersPreviews getUsersPreviews, ExportUsers exportUsers, ProfilePictureService profilePictureService, UserAuthorization userAuthorization, GetUserOptions getUserOptions, UserRepository userRepository, RoleRepository roleRepository, StateRepository stateRepository, GenderRepository genderRepository) {
+    public UserService(PasswordEncoder passwordEncoder, GetUsersPreviews getUsersPreviews, ExportUsers exportUsers, ProfilePictureService profilePictureService, UserAuthorization userAuthorization, GetUserOptions getUserOptions, ApplicationEventPublisher publisher, UserRepository userRepository, RoleRepository roleRepository, StateRepository stateRepository, GenderRepository genderRepository) {
         this.passwordEncoder = passwordEncoder;
         this.getUsersPreviews = getUsersPreviews;
         this.exportUsers = exportUsers;
         this.profilePictureService = profilePictureService;
         this.userAuthorization = userAuthorization;
         this.getUserOptions = getUserOptions;
+        this.publisher = publisher;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.stateRepository = stateRepository;
@@ -100,6 +104,7 @@ public class UserService {
     }
 
     @PreAuthorize("hasAuthority('users:delete')")
+    @Transactional
     public void deleteUserById(String id, CustomUserDetails currentUser) {
         User user = findUserById(id);
 
@@ -230,6 +235,10 @@ public class UserService {
         User user = mapUser(request, role);
 
         User savedUser = userRepository.save(user);
+
+        UserRegistered event = toRegistrationEvent(savedUser);
+
+        publisher.publishEvent(event);
 
         Set<String> permissions = userAuthorization.permissionsForUser(currentUser, savedUser);
 
@@ -456,6 +465,7 @@ public class UserService {
         user.setRole(role);
         user.setDateOfBirth(request.personalData().dateOfBirth());
         user.setRegistrationDate(Instant.now());
+        user.setCanLogin(true);
 
         if (request.account().profilePicture() != null) {
             String profilePictureKey = profilePictureService.saveProfilePicture(request.account().profilePicture());
@@ -463,6 +473,18 @@ public class UserService {
         }
 
         return user;
+    }
+
+    private UserRegistered toRegistrationEvent(User user) {
+        return UserRegistered.builder()
+                .userId(user.getId().toString())
+                .role(user.getRole().getName())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .gender(user.getGender().getName())
+                .email(user.getEmail())
+                .phone(user.getPhoneNumber())
+                .build();
     }
 
 }

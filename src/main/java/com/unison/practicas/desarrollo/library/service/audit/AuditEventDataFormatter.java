@@ -32,6 +32,7 @@ class AuditEventDataFormatter {
         String eventTypeId = event.getEventType().getId();
         return switch(eventTypeId) {
             case
+                    "USER_REGISTERED",
                     "BOOK_CATEGORY_CREATED",
                     "BOOK_CATEGORY_DELETED",
                     "AUTHOR_CREATED",
