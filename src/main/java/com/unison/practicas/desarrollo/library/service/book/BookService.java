@@ -14,6 +14,7 @@ import com.unison.practicas.desarrollo.library.entity.book.*;
 import com.unison.practicas.desarrollo.library.entity.common.Country;
 import com.unison.practicas.desarrollo.library.repository.*;
 import com.unison.practicas.desarrollo.library.util.event.BookCreated;
+import com.unison.practicas.desarrollo.library.util.event.BookDeleted;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationRequest;
 import com.unison.practicas.desarrollo.library.util.pagination.PaginationResponse;
 import jakarta.transaction.Transactional;
@@ -123,6 +124,9 @@ public class BookService {
         // The loan system and inventory are not implemented yet.
         Book book = findBookById(id);
         bookRepository.delete(book);
+
+        BookDeleted event = toDeletionEvent(book);
+        publisher.publishEvent(event);
     }
 
     @PreAuthorize("hasAuthority('books:read')")
@@ -327,6 +331,33 @@ public class BookService {
                                 .build()
                 ).authors(
                         book.getAuthors().stream().map((it) -> BookCreated.Author.builder()
+                                .id(it.getId().toString())
+                                .firstName(it.getFirstName())
+                                .lastName(it.getLastName())
+                                .build()
+                        ).toList()
+                )
+                .build();
+    }
+
+    private BookDeleted toDeletionEvent(Book book) {
+        return BookDeleted.builder()
+                .bookId(book.getId().toString())
+                .title(book.getTitle())
+                .isbn(book.getIsbn())
+                .year(book.getYear())
+                .category(
+                        BookDeleted.Category.builder()
+                                .id(book.getCategory().getId().toString())
+                                .name(book.getCategory().getName())
+                                .build()
+                ).publisher(
+                        BookDeleted.Publisher.builder()
+                                .id(book.getPublisher().getId().toString())
+                                .name(book.getPublisher().getName())
+                                .build()
+                ).authors(
+                        book.getAuthors().stream().map((it) -> BookDeleted.Author.builder()
                                 .id(it.getId().toString())
                                 .firstName(it.getFirstName())
                                 .lastName(it.getLastName())
