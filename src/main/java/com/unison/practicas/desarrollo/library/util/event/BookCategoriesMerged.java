@@ -12,10 +12,14 @@ import java.util.List;
 public final class BookCategoriesMerged extends BookCategoryEvent {
 
     @Builder
-    public record MergedBookCategory(String categoryId, String name) {}
+    public record MergedBookCategory(
+            String categoryId,
+            String name,
+            Integer booksBeforeMerge,
+            Integer booksAfterMerge
+    ) {}
 
     private final MergedBookCategory targetCategory;
     private final List<MergedBookCategory> mergedCategories;
-    private final Integer booksMoved;
 
 }

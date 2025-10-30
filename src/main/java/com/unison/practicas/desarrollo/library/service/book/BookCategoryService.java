@@ -135,12 +135,20 @@ public class BookCategoryService {
     public MergeBookCategoriesResponse merge(MergeBookCategoriesRequest request) {
         if (request.mergedCategoriesIds().contains(request.targetCategoryId())) {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "La categoría resultante no debe estar incluida en las categorías que serán eliminadas");
+                    HttpStatus.BAD_REQUEST,
+                    "La categoría resultante no debe estar incluida en las categorías que serán eliminadas"
+            );
         }
 
         BookCategory targetCategory = findBookCategoryById(request.targetCategoryId());
-
         List<BookCategory> mergedCategories = findBookCategoriesByIds(request.mergedCategoriesIds());
+
+        int booksBeforeMerge = targetCategory.getBooks().size();
+        Map<Integer, Integer> targetCategoryBooksBeforeMerge = mergedCategories.stream()
+                .collect(Collectors.toMap(
+                        BookCategory::getId,
+                        cat -> cat.getBooks().size()
+                ));
 
         int booksMoved = mergedCategories.stream()
                 .flatMap(cat -> cat.getBooks().stream())
@@ -157,11 +165,28 @@ public class BookCategoryService {
 
         bookCategoryRepository.deleteAll(mergedCategories);
 
+        List<BookCategoriesMerged.MergedBookCategory> mergedCategoriesEventData =
+                mergedCategories.stream()
+                        .map(cat -> BookCategoriesMerged.MergedBookCategory.builder()
+                                .categoryId(cat.getId().toString())
+                                .name(cat.getName())
+                                .booksBeforeMerge(targetCategoryBooksBeforeMerge.get(cat.getId()))
+                                .booksAfterMerge(0)
+                                .build()
+                        )
+                        .toList();
+
         publisher.publishEvent(
                 BookCategoriesMerged.builder()
-                        .booksMoved(booksMoved)
-                        .targetCategory(toMergedCategory(targetCategory))
-                        .mergedCategories(mergedCategories.stream().map(this::toMergedCategory).toList())
+                        .targetCategory(
+                                BookCategoriesMerged.MergedBookCategory.builder()
+                                        .categoryId(targetCategory.getId().toString())
+                                        .name(targetCategory.getName())
+                                        .booksBeforeMerge(booksBeforeMerge)
+                                        .booksAfterMerge(targetCategory.getBooks().size())
+                                        .build()
+                        )
+                        .mergedCategories(mergedCategoriesEventData)
                         .build()
         );
 

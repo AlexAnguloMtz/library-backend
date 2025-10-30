@@ -6,6 +6,7 @@ import com.unison.practicas.desarrollo.library.util.event.AuthorUpdated;
 import com.unison.practicas.desarrollo.library.util.event.BookCategoriesMerged;
 import com.unison.practicas.desarrollo.library.util.event.BookCategoryUpdated;
 import com.unison.practicas.desarrollo.library.util.event.PublisherUpdated;
+import j2html.tags.DomContent;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -174,46 +175,65 @@ class AuditEventDataFormatter {
     private String format(BookCategoriesMerged data) {
         if (data == null) return "";
 
-        BookCategoriesMerged.MergedBookCategory target = data.getTargetCategory();
-        List<BookCategoriesMerged.MergedBookCategory> merged = data.getMergedCategories();
-        Integer booksMoved = data.getBooksMoved();
+        var target = data.getTargetCategory();
+        var merged = data.getMergedCategories();
 
-        var targetHtml = p(
-                text("Categoría resultante:"),
-                span(target.name()).withStyle("margin-left: 6px;")
-        ).withStyle("font-size: 0.9em; margin-bottom: 12px;")
-                .render();
+        StringBuilder htmlBuilder = new StringBuilder();
 
-        var booksHtml = p(
-                text("Libros movidos:"),
-                span(booksMoved.toString()).withStyle("margin-left: 6px;")
-        ).withStyle("font-size: 0.9em; margin-bottom: 12px;")
-                .render();
+        List<Map<String, Object>> sections = Arrays.asList(
+                new HashMap<>() {{
+                    put("title", "Categoría resultante");
+                    put("items", target != null ? List.of(target) : Collections.emptyList());
+                    put("emptyMessage", "N/A");
+                }},
+                new HashMap<>() {{
+                    put("title", "Categorías eliminadas (" + (merged != null ? merged.size() : 0) + ")");
+                    put("items", merged != null ? merged : Collections.emptyList());
+                    put("emptyMessage", "No hay categorías eliminadas");
+                }}
+        );
 
-        var tableTitle = p(strong("Categorías eliminadas"))
-                .withStyle("font-size: 0.9em; margin-bottom: 6px;")
-                .render();
+        sections.forEach(section -> {
+            htmlBuilder.append(b((String) section.get("title")).render());
 
-        var tableHtml = table(
-                thead(
-                        tr(
-                                th(strong("ID de categoría")),
-                                th(strong("Nombre de categoría"))
-                        )
-                ),
-                tbody(
-                        each(merged != null ? merged : List.of(), cat ->
-                                tr(
-                                        td(cat.categoryId()),
-                                        td(cat.name())
-                                )
-                        )
-                )
-        ).withStyle("border-collapse: collapse; width: 100%; font-size: 0.9em;")
-                .render();
+            // This casting is safe, we just created the maps on this same method
+            @SuppressWarnings("unchecked")
+            List<BookCategoriesMerged.MergedBookCategory> items =
+                    (List<BookCategoriesMerged.MergedBookCategory>) section.get("items");
 
-        return targetHtml + booksHtml + tableTitle + tableHtml;
+            DomContent[] rows;
+            if (items != null && !items.isEmpty()) {
+                rows = items.stream()
+                        .map(cat -> tr(
+                                td(cat.categoryId() != null ? cat.categoryId() : ""),
+                                td(cat.name() != null ? cat.name() : ""),
+                                td(cat.booksBeforeMerge() != null ? cat.booksBeforeMerge().toString() : ""),
+                                td(cat.booksAfterMerge() != null ? cat.booksAfterMerge().toString() : "")
+                        ))
+                        .toArray(DomContent[]::new);
+            } else {
+                rows = new DomContent[] { tr(td((String) section.get("emptyMessage")).attr("colspan", "4")) };
+            }
+
+            htmlBuilder.append(
+                    table(
+                            thead(
+                                    tr(
+                                            th(strong("ID")),
+                                            th(strong("Nombre")),
+                                            th(strong("Libros antes")),
+                                            th(strong("Libros después"))
+                                    )
+                            ),
+                            tbody(rows)
+                    ).withStyle("border-collapse: collapse; width: 100%; font-size: 0.9em; margin-bottom: 16px;")
+                            .render()
+            );
+        });
+
+        return htmlBuilder.toString();
     }
+
 
     private String formatGeneric(String eventTypeId, String data) {
         Map<String, Object> values = jsonUtils.fromJson(data, Map.class);
